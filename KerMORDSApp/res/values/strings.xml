@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, KerMORDSAppActivity!</string>
     <string name="app_name">KerMORDSApp</string>
+    <string name="welcome_str">Welcome to KerMORDS-App</string>
+    <string name="enterURLLabel">Enter the URL where the KerMor models reside:</string>
+    <string name="downloadString">Retrieve list</string>
+    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/kermordsapp</string>
 </resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent" android:id="@+id/mainmenulayout"
+	android:layout_width="fill_parent">
+	<TextView android:enabled="true" android:textColor="#6666FF"
+		android:layout_width="wrap_content" android:id="@+id/textView1"
+		android:layout_height="wrap_content" android:padding="5px" android:text="@string/welcome_str"></TextView>
+	<ImageView android:layout_width="wrap_content" android:src="@drawable/icon"
+		android:layout_height="wrap_content" android:id="@+id/imgLogo"></ImageView>
+	<Button android:text="From Assets" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/btnAssets"></Button>
+	<Button android:id="@+id/btnSDCard" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="From SD-Card"></Button>
+	<ImageButton android:src="@drawable/server_icon"
+		android:layout_width="wrap_content" android:id="@+id/btnDownload"
+		android:layout_height="wrap_content" android:clickable="true"></ImageButton>
+</TableLayout>
