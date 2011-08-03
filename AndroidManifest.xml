@@ -13,6 +13,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="ProbSelectionActivity"></activity>
+        <activity android:name="SimulationActivity"></activity>
+        <activity android:name="SimpleBrowser"></activity>
+        <activity android:name="ShowModelActivity"></activity>
 
     </application>
 </manifest>

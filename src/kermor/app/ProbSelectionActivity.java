@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 import kermor.java.ModelDescriptor;
-import kermor.java.io.ModelManagerException;
+import kermor.java.io.AModelManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -97,7 +97,7 @@ public class ProbSelectionActivity extends Activity {
 			public void handleMessage(Message msg) {
 				pd.dismiss();
 
-				if (items.size() == 0) {
+				if (items == null || items.size() == 0) {
 					showDialog(NO_MODELS_DIALOG_ID);
 				} else {
 
@@ -118,9 +118,13 @@ public class ProbSelectionActivity extends Activity {
 							try {
 								KerMORDSAppActivity.modelmng
 										.setModelDir(i.modeldir);
-							} catch (ModelManagerException me) {
-								Toast.makeText(ProbSelectionActivity.this, "Error setting the model directory "+i.modeldir, Toast.LENGTH_LONG);
-								Log.e("ProbSelectionActivity", "Error setting the model directory "+i.modeldir, me);
+							} catch (AModelManager.ModelManagerException me) {
+								Toast.makeText(ProbSelectionActivity.this,
+										"Error setting the model directory "
+												+ i.modeldir, Toast.LENGTH_LONG);
+								Log.e("ProbSelectionActivity",
+										"Error setting the model directory "
+												+ i.modeldir, me);
 								return;
 							}
 							ProbSelectionActivity.this.startActivityForResult(
@@ -137,7 +141,7 @@ public class ProbSelectionActivity extends Activity {
 
 				try {
 					items = KerMORDSAppActivity.modelmng.getModelDescriptors();
-				} catch (ModelManagerException ex) {
+				} catch (AModelManager.ModelManagerException ex) {
 					Log.e("ProbSelectionActivity",
 							"Failed loading model descriptors", ex);
 				}
@@ -235,12 +239,14 @@ public class ProbSelectionActivity extends Activity {
 
 			ModelDescriptor i = (ModelDescriptor) getItem(position);
 			tv.setText(i.title);
-			iv.setImageDrawable(new BitmapDrawable(i.image));
-			try {
-				i.image.close();
-			} catch (IOException io) {
-				Log.e("ProbSelectionActivity", "Failed closing image stream",
-						io);
+			if (i.image != null) {
+				iv.setImageDrawable(new BitmapDrawable(i.image));
+				try {
+					i.image.close();
+				} catch (IOException io) {
+					Log.e("ProbSelectionActivity",
+							"Failed closing image stream", io);
+				}
 			}
 
 			// Experiments (icons are quite small after moving from res/drawable

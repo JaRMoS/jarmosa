@@ -52,7 +52,7 @@ public class AssetModelManager extends AModelManager {
 	}
 
 	@Override
-	public boolean fileExists(String filename) {
+	public boolean modelFileExists(String filename) {
 		try {
 			for (String f : c.getAssets().list(getModelDir())) {
 				if (filename.equals(f)) return true;

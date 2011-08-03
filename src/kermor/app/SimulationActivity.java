@@ -3,7 +3,13 @@
  */
 package kermor.app;
 
+import java.io.IOException;
+
+import org.apache.commons.math.linear.RealMatrix;
+
+import kermor.java.KerMorException;
 import kermor.java.ReducedModel;
+import kermor.java.io.MathObjectReader.MathReaderException;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -11,6 +17,8 @@ import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
+import android.widget.Toast;
 
 /**
  * @author Ernst
@@ -52,6 +60,17 @@ public class SimulationActivity extends Activity {
 			public void handleMessage(Message msg) {
 				pd.dismiss();
 				KerMORDSAppActivity.modelmng.removeProgressHandler(progressHandler);
+				
+				Toast.makeText(SimulationActivity.this, "Model successfully loaded!", Toast.LENGTH_LONG).show();
+
+//				RealMatrix res = null;
+//				try {
+//					 res = rm.simulate(null);
+//				} catch (KerMorException e) {
+//					Log.e("SimulationActivity","Error simulating.",e);
+//					//finish();
+//				}
+//				Log.d("SimulationActivity", res.toString());
 				// Display stuff!
 			}
 
@@ -61,7 +80,11 @@ public class SimulationActivity extends Activity {
 
 			@Override
 			public void run() {
+				try {
 				rm = ReducedModel.load(KerMORDSAppActivity.modelmng);
+				} catch (Exception e) {
+					Log.e("SimulationActivity","Error loading reduced model.",e);
+				}
 				h.sendEmptyMessage(0);
 			}
 
