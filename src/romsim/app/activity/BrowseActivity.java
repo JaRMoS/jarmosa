@@ -16,7 +16,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package kermor.app;
+package romsim.app.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -25,7 +25,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-public class SimpleBrowser extends Activity {
+public class BrowseActivity extends Activity {
 	private WebView browser;
 	private String url;
 
@@ -35,7 +35,7 @@ public class SimpleBrowser extends Activity {
 		browser = new WebView(this);
 		setContentView(browser);
 
-		url = KerMORDSAppActivity.modelmng.getInfoFileURL();
+		url = MainActivity.modelmng.getInfoFileURL();
 
 		// if info page was not supplied/another error occurs while loading,
 		// redirect user to home site
@@ -43,7 +43,7 @@ public class SimpleBrowser extends Activity {
 			public void onReceivedError(WebView view, int errorCode,
 					String description, String failingUrl) {
 				Toast.makeText(
-						SimpleBrowser.this,
+						BrowseActivity.this,
 						"Sorry, no informational page was supplied with this problem",
 						Toast.LENGTH_LONG).show();
 			}

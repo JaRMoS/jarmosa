@@ -1,12 +1,12 @@
 /**
  * 
  */
-package kermor.app;
+package romsim.app.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import kermor.java.io.AModelManager;
+import rmcommon.io.AModelManager;
 import android.content.Context;
 
 /**
@@ -37,12 +37,12 @@ public class AssetModelManager extends AModelManager {
 	}
 
 	@Override
-	public InputStream getInStream(String filename) throws IOException {
+	public InputStream getInStreamImpl(String filename) throws IOException {
 		return c.getAssets().open(getModelDir() + "/" + filename);
 	}
 
 	@Override
-	public String[] getModelList() throws IOException {
+	public String[] getFolderList() throws IOException {
 		return c.getAssets().list("");
 	}
 

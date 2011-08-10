@@ -16,13 +16,14 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package kermor.app;
+package romsim.app.activity;
 
 import java.io.IOException;
 import java.util.List;
 
-import kermor.java.ModelDescriptor;
-import kermor.java.io.AModelManager;
+import rmcommon.ModelDescriptor;
+import rmcommon.io.AModelManager;
+import romsim.app.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -64,7 +65,7 @@ import android.widget.Toast;
  * folder of models to choose from. (i'll look into that, hell it's fun!)
  * 
  */
-public class ProbSelectionActivity extends Activity {
+public class ModelListActivity extends Activity {
 
 	/**
 	 * Dialog ID for the case of an invalid or nonexistent Source ID
@@ -111,15 +112,15 @@ public class ProbSelectionActivity extends Activity {
 						public void onItemClick(AdapterView<?> av, View view,
 								int position, long id) {
 							Intent intent = new Intent(
-									ProbSelectionActivity.this,
+									ModelListActivity.this,
 									ShowModelActivity.class);
 							ModelDescriptor i = (ModelDescriptor) av
 									.getItemAtPosition(position);
 							try {
-								KerMORDSAppActivity.modelmng
+								MainActivity.modelmng
 										.setModelDir(i.modeldir);
 							} catch (AModelManager.ModelManagerException me) {
-								Toast.makeText(ProbSelectionActivity.this,
+								Toast.makeText(ModelListActivity.this,
 										"Error setting the model directory "
 												+ i.modeldir, Toast.LENGTH_LONG);
 								Log.e("ProbSelectionActivity",
@@ -127,7 +128,7 @@ public class ProbSelectionActivity extends Activity {
 												+ i.modeldir, me);
 								return;
 							}
-							ProbSelectionActivity.this.startActivityForResult(
+							ModelListActivity.this.startActivityForResult(
 									intent, 0);
 						}
 					});
@@ -140,7 +141,7 @@ public class ProbSelectionActivity extends Activity {
 			public void run() {
 
 				try {
-					items = KerMORDSAppActivity.modelmng.getModelDescriptors();
+					items = MainActivity.modelmng.getModelDescriptors();
 				} catch (AModelManager.ModelManagerException ex) {
 					Log.e("ProbSelectionActivity",
 							"Failed loading model descriptors", ex);
@@ -163,7 +164,7 @@ public class ProbSelectionActivity extends Activity {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
-									ProbSelectionActivity.this.finish();
+									ModelListActivity.this.finish();
 								}
 							});
 			return builder.create();
@@ -174,7 +175,7 @@ public class ProbSelectionActivity extends Activity {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
-									ProbSelectionActivity.this.finish();
+									ModelListActivity.this.finish();
 									// dialog.dismiss();
 								}
 							});
@@ -209,6 +210,24 @@ public class ProbSelectionActivity extends Activity {
 	 * ModelDescriptors.
 	 */
 	private class ModelsGridViewAdapter extends BaseAdapter {
+		
+		private BitmapDrawable[] imgs;
+		
+		ModelsGridViewAdapter() {
+			imgs = new BitmapDrawable[items.size()];
+			for(int i=0;i<items.size();i++) {
+				ModelDescriptor md = items.get(i);
+				if (md.image != null) {
+					imgs[i] = new BitmapDrawable(md.image);
+					try {
+						md.image.close();
+					} catch (IOException io) {
+						Log.e("ProbSelectionActivity",
+								"Failed closing image stream", io);
+					}
+				} else imgs[i] = null;
+			}
+		}
 
 		@Override
 		public int getCount() {
@@ -239,14 +258,8 @@ public class ProbSelectionActivity extends Activity {
 
 			ModelDescriptor i = (ModelDescriptor) getItem(position);
 			tv.setText(i.title);
-			if (i.image != null) {
-				iv.setImageDrawable(new BitmapDrawable(i.image));
-				try {
-					i.image.close();
-				} catch (IOException io) {
-					Log.e("ProbSelectionActivity",
-							"Failed closing image stream", io);
-				}
+			if (imgs[position] != null) {
+				iv.setImageDrawable(imgs[position]);
 			}
 
 			// Experiments (icons are quite small after moving from res/drawable

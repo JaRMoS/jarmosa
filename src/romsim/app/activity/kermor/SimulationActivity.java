@@ -1,15 +1,12 @@
 /**
  * 
  */
-package kermor.app;
+package romsim.app.activity.kermor;
 
-import java.io.IOException;
-
-import org.apache.commons.math.linear.RealMatrix;
-
-import kermor.java.KerMorException;
 import kermor.java.ReducedModel;
-import kermor.java.io.MathObjectReader.MathReaderException;
+import romsim.app.ModelManagerProgressHandler;
+import romsim.app.R;
+import romsim.app.activity.MainActivity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -53,13 +50,13 @@ public class SimulationActivity extends Activity {
 				pd.setMessage(msg.getData().getString("file") + "...");
 			}
 		};
-		KerMORDSAppActivity.modelmng.addProgressHandler(progressHandler);
+		MainActivity.modelmng.addMessageHandler(progressHandler);
 		
 		final Handler h = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
 				pd.dismiss();
-				KerMORDSAppActivity.modelmng.removeProgressHandler(progressHandler);
+				MainActivity.modelmng.removeMessageHandler(progressHandler);
 				
 				Toast.makeText(SimulationActivity.this, "Model successfully loaded!", Toast.LENGTH_LONG).show();
 
@@ -81,7 +78,7 @@ public class SimulationActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-				rm = ReducedModel.load(KerMORDSAppActivity.modelmng);
+				rm = ReducedModel.load(MainActivity.modelmng);
 				} catch (Exception e) {
 					Log.e("SimulationActivity","Error loading reduced model.",e);
 				}

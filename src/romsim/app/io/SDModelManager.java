@@ -1,11 +1,11 @@
 /**
  * 
  */
-package kermor.app;
+package romsim.app.io;
 
 import java.io.File;
 
-import kermor.java.io.FileModelManager;
+import rmcommon.io.FileModelManager;
 import android.os.Environment;
 
 /**
@@ -17,7 +17,7 @@ public class SDModelManager extends FileModelManager {
 	/**
 	 * SD-Card sub directory
 	 */
-	private static final String SDrbAppDir = "kermor_models";
+	private static final String SDrbAppDir = "romsim_models";
 
 	/**
 	 * SD Card base directory string

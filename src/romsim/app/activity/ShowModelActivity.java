@@ -16,8 +16,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package kermor.app;
+package romsim.app.activity;
 
+import rb.java.Log;
+import romsim.app.activity.kermor.SimulationActivity;
+import romsim.app.activity.rb.RBActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TabActivity;
@@ -66,14 +69,22 @@ public class ShowModelActivity extends TabActivity {
 		TabHost.TabSpec one = tabHost.newTabSpec("tab 1");
 		label1.setText("About ");
 		one.setIndicator(label1);
-		Intent intentOne = new Intent(ShowModelActivity.this, SimpleBrowser.class);
+		Intent intentOne = new Intent(ShowModelActivity.this, BrowseActivity.class);
 		one.setContent(intentOne);
 		tabHost.addTab(one);
 
 		TabHost.TabSpec two = tabHost.newTabSpec("tab 2");
 		label2.setText("Solve problem");
 		two.setIndicator(label2);
-		Intent intentTwo = new Intent(ShowModelActivity.this, SimulationActivity.class);
+		Intent intentTwo = null;
+		if ("rb".equals(MainActivity.modelmng.getModelType())) {
+			intentTwo = new Intent(ShowModelActivity.this, RBActivity.class);
+		} else if ("kermor".equals(MainActivity.modelmng.getModelType())) {
+			intentTwo = new Intent(ShowModelActivity.this, SimulationActivity.class);
+		} else {
+			Log.e("ShowModelActitity", "Unknown model type: " + MainActivity.modelmng.getModelType());
+			finish();
+		}
 		two.setContent(intentTwo);
 		tabHost.addTab(two);
 

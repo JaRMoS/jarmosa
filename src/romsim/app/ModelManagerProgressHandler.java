@@ -1,9 +1,9 @@
 /**
  * 
  */
-package kermor.app;
+package romsim.app;
 
-import kermor.java.IProgressHandler;
+import rmcommon.IMessageHandler;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,14 +12,13 @@ import android.os.Message;
  * @author Ernst
  *
  */
-public class ModelManagerProgressHandler extends Handler implements IProgressHandler {
+public class ModelManagerProgressHandler extends Handler implements IMessageHandler {
 
 	@Override
-	public void progress(String msg, int perc) {
+	public void sendMessage(String msg) {
 		Message m = obtainMessage();
 		Bundle b = new Bundle();
 		b.putString("file", msg);
-		b.putInt("perc", perc);
 		m.setData(b);
 		sendMessage(m);
 	}
