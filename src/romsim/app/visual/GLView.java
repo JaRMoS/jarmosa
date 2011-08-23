@@ -16,15 +16,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.misc.rb;
+package romsim.app.visual;
 
-import romsim.app.activity.rb.GLObject;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+/**
+ * Changes made by:
+ * @author Daniel Wirtz
+ * @date Aug 23, 2011
+ *
+ */
 public class GLView extends GLSurfaceView {
 	
 	@SuppressWarnings("unused")
@@ -42,6 +47,10 @@ public class GLView extends GLSurfaceView {
 	boolean isSensorCtrl = false;
 	boolean current_paused = true;
 
+	/**
+	 * @param context
+	 * @param _object
+	 */
 	public GLView(Context context, GLObject _object) {
 		super(context);
 		setFocusableInTouchMode(true);
@@ -59,6 +68,9 @@ public class GLView extends GLSurfaceView {
 		setRenderer(_renderer);
 	}
 
+	/**
+	 * @see android.view.View#onTouchEvent(android.view.MotionEvent)
+	 */
 	public boolean onTouchEvent(final MotionEvent event) {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
@@ -112,6 +124,9 @@ public class GLView extends GLSurfaceView {
 		return true;
 	}
 
+	/**
+	 * @see android.view.View#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			switch (keyCode) {
@@ -152,6 +167,9 @@ public class GLView extends GLSurfaceView {
 		return true;
 	}
 
+	/**
+	 * @see android.view.View#onTrackballEvent(android.view.MotionEvent)
+	 */
 	public boolean onTrackballEvent(MotionEvent event) {
 		float TBx = event.getX();
 		float TBy = event.getY();
@@ -172,6 +190,11 @@ public class GLView extends GLSurfaceView {
 		return true;
 	}
 
+	/**
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
 	public void setSensorParam(float x, float y, float z) {
 		if (isSensorCtrl) {
 			_renderer.setPos(false, -x / 1.50f, -y / 1.50f, 0.0f);

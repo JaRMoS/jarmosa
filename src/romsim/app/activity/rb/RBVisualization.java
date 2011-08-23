@@ -21,7 +21,9 @@ package romsim.app.activity.rb;
 import java.util.List;
 
 import rb.java.Parameter;
-import romsim.app.misc.rb.GLView;
+import rb.java.RBContainer;
+import romsim.app.visual.GLObject;
+import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -30,6 +32,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+/**
+ * @author  David J. Knezevic and Phuong Huynh
+ * @date 2010
+ *
+ */
 public class RBVisualization extends Activity {
 	
 	@SuppressWarnings("unused")
@@ -49,38 +56,42 @@ public class RBVisualization extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// _object = new GLObject();
+		RBContainer rb = RBActivity.rb;
 		_object = RBActivity.mRbModel;
 
 		Bundle extras = getIntent().getExtras();
 
+		/*
+		 * Standard case: Normal display.
+		 */
 		if (!extras.getBoolean("isSweep")) {
-			if (!RBActivity.mRbSystem.is_custom_mesh_transform()) {
-				float[][] LT = RBActivity.mRbSystem.get_tranformation_data();
+			if (!rb.mRbSystem.is_custom_mesh_transform()) {
+				float[][] LT = rb.mRbSystem.get_tranformation_data();
 				float[][][] LTfunc_array = new float[1][LT.length][LT[0].length];
 				LTfunc_array[0] = LT;
 				_object.set_LTfunc(LTfunc_array);
 			} else {
 				Parameter[] p = new Parameter[1];
-				p[0] = RBActivity.mRbSystem.current_parameters.clone();
+				p[0] = rb.mRbSystem.current_parameters.clone();
 				_object.mesh_transform_custom(p);
 			}
 
-			float[][][] truth_sol = RBActivity.mRbSystem.get_truth_sol();
+			float[][][] truth_sol = rb.mRbSystem.get_truth_sol();
 
-			if (RBActivity.mRbSystem.isReal)
-				switch (RBActivity.mRbSystem.get_mfield()) {
+			if (rb.mRbSystem.isReal)
+				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
 					_object.set_field_data(truth_sol[0][0]);
 					break;
 				case 2:
-					if (truth_sol[0][0].length == RBActivity.mRbModel.node_num)
+					if (truth_sol[0][0].length == _object.node_num)
 						_object.set_field_data(truth_sol[0][0], truth_sol[1][0]);
 					else
 						_object.set_field_data(truth_sol[0][0],
 								truth_sol[1][0], false);
 					break;
 				case 3:
-					if (truth_sol[0][0].length == RBActivity.mRbModel.node_num)
+					if (truth_sol[0][0].length == _object.node_num)
 						_object.set_field_data(truth_sol[0][0],
 								truth_sol[1][0], truth_sol[2][0]);
 					else
@@ -93,22 +104,25 @@ public class RBVisualization extends Activity {
 					break;
 				}
 			else
-				switch (RBActivity.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
 					_object.set_field_data(truth_sol[0][0], truth_sol[0][1],
 							truth_sol[0][2], false);
 					break;
 				}
 		} else {
-			if (!RBActivity.mRbSystem.is_custom_mesh_transform()) {
+			/*
+			 * Parameter sweep case
+			 */
+			if (!rb.mRbSystem.is_custom_mesh_transform()) {
 				_object.set_LTfunc(_object.vLTfunc);
 			} else {
 				_object.mesh_transform_custom(RBActivity.mSweepParam);
 			}
-			float[][][] truth_sol = RBActivity.mRbSystem.get_sweep_truth_sol();
+			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
-			if (RBActivity.mRbSystem.isReal)
-				switch (RBActivity.mRbSystem.get_mfield()) {
+			if (rb.mRbSystem.isReal)
+				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
 					_object.set_field_data(truth_sol[0][0]);
 					break;
@@ -125,7 +139,7 @@ public class RBVisualization extends Activity {
 					break;
 				}
 			else {
-				switch (RBActivity.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
 					_object.set_field_data(truth_sol[0][0], truth_sol[0][1],
 							truth_sol[0][2], false);

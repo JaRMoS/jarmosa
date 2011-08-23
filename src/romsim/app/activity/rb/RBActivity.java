@@ -20,17 +20,14 @@ package romsim.app.activity.rb;
 
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 
 import rb.java.Const;
-import rb.java.GetPot;
 import rb.java.InconsistentStateException;
 import rb.java.Parameter;
-import rb.java.RBActivityEnums;
-import rb.java.RBSCMSystem;
-import rb.java.RBSystem;
+import rb.java.RBContainer;
+import rb.java.RBEnums;
 import rb.java.TransientRBSystem;
 import rmcommon.io.AModelManager;
 import romsim.app.ModelManagerProgressHandler;
@@ -38,6 +35,7 @@ import romsim.app.R;
 import romsim.app.activity.MainActivity;
 import romsim.app.misc.rb.IndexedButton;
 import romsim.app.misc.rb.IndexedSeekBar;
+import romsim.app.visual.GLObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -62,8 +60,6 @@ import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 import dalvik.system.DexClassLoader;
-
-
 
 /**
  * This is the main Activity class for the app.
@@ -91,37 +87,7 @@ public class RBActivity extends Activity {
 	static final int SELECT_PROBLEM_TYPE = 0;
 
 	// String for log printing
-	private static final String DEBUG_TAG = "RBActivity";
-
-	// Member variables that indicate the RB system and SCM types
-	public RBActivityEnums.SystemTypeEnum mSystemType;
-	public RBActivityEnums.SCMTypeEnum mSCMType;
-
-	/**
-	 * Descriptive member variables for the problem title, variable names, and
-	 * general info.
-	 */
-	public String problemTitle;
-	public String[] paramLabels;
-	public String problemDescription;
-	public String descriptionURL;
-
-	/**
-	 * The RBSystem object
-	 */
-	public static RBSystem mRbSystem;
-
-	/**
-	 * The main RBSCMSystem object
-	 */
-	public RBSCMSystem mRbScmSystem;
-
-	/**
-	 * The second RBSCMSystem object, needed in some time-dependent problems
-	 */
-	public RBSCMSystem mSecondRbScmSystem;
-
-	public static GLObject mRbModel;
+	static final String DEBUG_TAG = "RBActivity";
 
 	/**
 	 * ProgressDialog to display while downloading data.
@@ -157,23 +123,36 @@ public class RBActivity extends Activity {
 	 * current parameter to this before performing a solve.
 	 */
 	public static Parameter mCurrentParamForGUI;
+	
+	/**
+	 * The base parameter for a parameter sweep in one dimension.
+	 */
 	public static Parameter[] mSweepParam;
-
-	/**
-	 * The name of the jar file (containing compiled files in .dex form) that we
-	 * download from the server.
-	 */
-	private String jarFileName = "AffineFunctions.jar";
-
-	/**
-	 * The corresponding dex file we create locally.
-	 */
-	private String dexFileName = "AffineFunctions.dex";
 
 	/**
 	 * The index for the parameter sweep, -1 implies no sweep.
 	 */
 	public static int mSweepIndex;
+	
+	/**
+	 * The name of the jar file (containing compiled files in .dex form) that we
+	 * download from the server.
+	 */
+	protected String jarFileName = "AffineFunctions.jar";
+	/**
+	 * The corresponding dex file we create locally.
+	 */
+	private String dexFileName = "AffineFunctions.dex";
+	
+	/**
+	 * Graphics object - still to be renamed to something better i guess
+	 */
+	public static GLObject mRbModel;
+	
+	/**
+	 * The RB Container with all the system and model data (from JRB)
+	 */
+	public static RBContainer rb;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -181,20 +160,12 @@ public class RBActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.rb_main);
 
-		// Initialize the RB system and SCM types to NONE
-		mSystemType = RBActivityEnums.SystemTypeEnum.NONE;
-		mSCMType = RBActivityEnums.SCMTypeEnum.NONE;
-
-		// Set mRbScmSystem and mRbSystem to null initially
-		mRbSystem = null;
-		mRbScmSystem = null;
 		mRbModel = null;
 
 		mRbModel = new GLObject(); //RBActivity.this
 		mRbModel.allocateBuffer();
-
-		// Set the secondary SCM system to null also
-		mSecondRbScmSystem = null;
+		
+		rb = new RBContainer();
 
 		// initialize sweep index to -1
 		mSweepIndex = -1;
@@ -265,6 +236,9 @@ public class RBActivity extends Activity {
 		new ModelLoader(downloadHandler).start();
 	}
 
+	/**
+	 * @see android.app.Activity#onBackPressed()
+	 */
 	public void onBackPressed() {
 		// need to tell parent activity to close all activities
 		getParent().onBackPressed();
@@ -342,8 +316,8 @@ public class RBActivity extends Activity {
 
 				public void onClick(View view) {
 
-					// mRbModel.nodal_transform(mRbSystem.get_tranformation_data());
-					if (mRbSystem.get_mfield() > 0) {
+					// mRbModel.nodal_transform(rb.mRbSystem.get_tranformation_data());
+					if (rb.mRbSystem.get_mfield() > 0) {
 						// Next create the bundle and initialize it
 						Bundle bundle = new Bundle();
 						/*
@@ -351,16 +325,16 @@ public class RBActivity extends Activity {
 						 * mRbModel.get_node_data());
 						 * bundle.putShortArray("face",
 						 * mRbModel.get_face_data()); bundle.putInt("nField",
-						 * mRbSystem.get_mfield()); bundle.putBoolean("isReal",
-						 * mRbSystem.isReal);
+						 * rb.mRbSystem.get_mfield()); bundle.putBoolean("isReal",
+						 * rb.mRbSystem.isReal);
 						 */
 						/*
-						 * if (mRbSystem.isReal) for (int i = 0;
-						 * i<mRbSystem.get_mfield(); i++)
+						 * if (rb.mRbSystem.isReal) for (int i = 0;
+						 * i<rb.mRbSystem.get_mfield(); i++)
 						 * bundle.putFloatArray("field"+String.valueOf(i),
-						 * mRbSystem.get_truth_sol(i)); else for (int i = 0;
-						 * i<mRbSystem.get_mfield(); i++){ float[][] truth_sol =
-						 * mRbSystem.get_complex_truth_sol(i);
+						 * rb.mRbSystem.get_truth_sol(i)); else for (int i = 0;
+						 * i<rb.mRbSystem.get_mfield(); i++){ float[][] truth_sol =
+						 * rb.mRbSystem.get_complex_truth_sol(i);
 						 * bundle.putFloatArray("field"+String.valueOf(i)+"R",
 						 * truth_sol[0]);
 						 * bundle.putFloatArray("field"+String.valueOf(i)+"I",
@@ -376,17 +350,17 @@ public class RBActivity extends Activity {
 
 			// Create the output string
 			String rb_solve_message = "Online N = " + mOnlineNForGui
-					+ "\n\u00B5 = [ " + mRbSystem.getCurrentParameters()
+					+ "\n\u00B5 = [ " + rb.mRbSystem.getCurrentParameters()
 					+ "]\n\n";
 
 			DecimalFormat twoPlaces = new DecimalFormat("0.###E0");
 
 			// Create a string that shows each output and error bound
-			if (mRbSystem.isReal)
-				for (int i = 0; i < mRbSystem.get_n_outputs(); i++) {
+			if (rb.mRbSystem.isReal)
+				for (int i = 0; i < rb.mRbSystem.get_n_outputs(); i++) {
 
-					double output_i = mRbSystem.RB_outputs[i];
-					double output_bound_i = mRbSystem.RB_output_error_bounds[i];
+					double output_i = rb.mRbSystem.RB_outputs[i];
+					double output_bound_i = rb.mRbSystem.RB_output_error_bounds[i];
 
 					rb_solve_message += "Output " + (i + 1) + ":\n"
 							+ "Value = " + twoPlaces.format(output_i) + "\n"
@@ -394,13 +368,13 @@ public class RBActivity extends Activity {
 							+ twoPlaces.format(output_bound_i) + "\n\n";
 				}
 			else
-				for (int i = 0; i < mRbSystem.get_n_outputs(); i++) {
+				for (int i = 0; i < rb.mRbSystem.get_n_outputs(); i++) {
 
-					double output_i_r = mRbSystem.get_RB_output(i, true);
-					double output_bound_i_r = mRbSystem
+					double output_i_r = rb.mRbSystem.get_RB_output(i, true);
+					double output_bound_i_r = rb.mRbSystem
 							.get_RB_output_error_bound(i, true);
-					double output_i_i = mRbSystem.get_RB_output(i, false);
-					double output_bound_i_i = mRbSystem
+					double output_i_i = rb.mRbSystem.get_RB_output(i, false);
+					double output_bound_i_i = rb.mRbSystem
 							.get_RB_output_error_bound(i, false);
 
 					rb_solve_message += "Output " + (i + 1) + ":\n"
@@ -420,7 +394,7 @@ public class RBActivity extends Activity {
 		case SWEEP_DIALOG_ID:
 
 			try {
-				final String[] paramStrings = new String[mRbSystem
+				final String[] paramStrings = new String[rb.mRbSystem
 						.get_n_params() + 1];
 
 				paramStrings[0] = "No Sweep";
@@ -447,15 +421,15 @@ public class RBActivity extends Activity {
 								// set disabled slider's progress to 0, all
 								// others to old values
 								try {
-									for (int i = 0; i < mRbSystem
+									for (int i = 0; i < rb.mRbSystem
 											.get_n_params(); i++) {
 										mParamBars[i].setEnabled(true);
-										double slopeVal = (100 / (mRbSystem
-												.getParameterMax(i) - mRbSystem
+										double slopeVal = (100 / (rb.mRbSystem
+												.getParameterMax(i) - rb.mRbSystem
 												.getParameterMin(i)));
 										Double progressVal = Double.valueOf((slopeVal * mCurrentParamForGUI
 												.getEntry(i))
-												- (mRbSystem.getParameterMin(i) * slopeVal));
+												- (rb.mRbSystem.getParameterMin(i) * slopeVal));
 										mParamBars[i].setProgress(progressVal
 												.intValue());
 									}
@@ -471,7 +445,7 @@ public class RBActivity extends Activity {
 								// set disabled button to "sweep", all others to
 								// old values
 								try {
-									for (int i = 0; i < mRbSystem
+									for (int i = 0; i < rb.mRbSystem
 											.get_n_params(); i++) {
 										displayParamValue(i,
 												mCurrentParamForGUI.getEntry(i));
@@ -498,9 +472,9 @@ public class RBActivity extends Activity {
 			dialog = new Dialog(this);
 			dialog.setContentView(R.layout.rb_param_dialog);
 			dialog.setTitle("Minimum: "
-					+ mRbSystem.getParameterMin(paramButtonIndex)
+					+ rb.mRbSystem.getParameterMin(paramButtonIndex)
 					+ " Maximum: "
-					+ mRbSystem.getParameterMax(paramButtonIndex));
+					+ rb.mRbSystem.getParameterMax(paramButtonIndex));
 			dialog.setCancelable(false);
 
 			paramInputField = (EditText) dialog
@@ -528,19 +502,19 @@ public class RBActivity extends Activity {
 					} catch (NumberFormatException e) {
 						// if user submits non-double, default value is out of
 						// bounds to trigger toast
-						userParam = mRbSystem.getParameterMin(paramButtonIndex) - 1;
+						userParam = rb.mRbSystem.getParameterMin(paramButtonIndex) - 1;
 					}
 
-					if (userParam <= mRbSystem
+					if (userParam <= rb.mRbSystem
 							.getParameterMax(paramButtonIndex)
-							&& userParam >= mRbSystem
+							&& userParam >= rb.mRbSystem
 									.getParameterMin(paramButtonIndex)) {
 						// update parameter bars
-						double slopeVal = (100 / (mRbSystem
-								.getParameterMax(paramButtonIndex) - mRbSystem
+						double slopeVal = (100 / (rb.mRbSystem
+								.getParameterMax(paramButtonIndex) - rb.mRbSystem
 								.getParameterMin(paramButtonIndex)));
 						Double progressVal = Double.valueOf((slopeVal * userParam)
-								- (mRbSystem.getParameterMin(paramButtonIndex) * slopeVal));
+								- (rb.mRbSystem.getParameterMin(paramButtonIndex) * slopeVal));
 						mParamBars[paramButtonIndex].setProgress(progressVal
 								.intValue());
 
@@ -562,6 +536,75 @@ public class RBActivity extends Activity {
 			dialog = null;
 		}
 		return dialog;
+	}
+	
+	protected void delete_downloaded_files() {
+		deleteFile(Const.parameters_filename);
+		deleteFile(jarFileName);
+		deleteFile(dexFileName);
+	}
+	
+	protected void attach_affine_functions(InputStream in) throws Exception {
+		
+		// Create a local copy of AffineFunctions.jar
+		FileOutputStream f = openFileOutput("AffineFunctions.jar",
+				MODE_WORLD_READABLE);
+	
+		byte[] buffer = new byte[1024];
+		int len1 = 0;
+		while ((len1 = in.read(buffer)) > 0) {
+			f.write(buffer, 0, len1);
+		}
+		in.close();
+	
+		Log.d(DEBUG_TAG, "Finished copying jar file");
+		
+		DexClassLoader cl = new DexClassLoader("/data/data/romsim.app/files/"
+				+ jarFileName, "/data/data/romsim.app/files/", null,
+				ClassLoader.getSystemClassLoader());
+	
+		Log.d(DEBUG_TAG, "Created local dex file");
+	
+		if (rb.mRbSystem != null) {
+			rb.mRbSystem.mAffineFnsClass = cl.loadClass("AffineFunctions");
+			rb.mRbSystem.mTheta = rb.mRbSystem.mAffineFnsClass.newInstance();
+	
+			// Set Q_a, Q_f and n_outputs from the loaded class
+			rb.mRbSystem.read_in_Q_a();
+			Log.d(DEBUG_TAG, "Q_a = " + rb.mRbSystem.get_Q_a());
+	
+			rb.mRbSystem.read_in_Q_f();
+			Log.d(DEBUG_TAG, "Q_f = " + rb.mRbSystem.get_Q_f());
+	
+			rb.mRbSystem.read_in_n_outputs();
+			Log.d(DEBUG_TAG, "n_outputs = " + rb.mRbSystem.get_n_outputs());
+	
+			rb.mRbSystem.read_in_Q_uL();
+	
+			if (rb.mSystemType == RBEnums.SystemTypeEnum.LINEAR_UNSTEADY
+					|| rb.mSystemType == RBEnums.SystemTypeEnum.QN_UNSTEADY) {
+				TransientRBSystem trans_rb = (TransientRBSystem) rb.mRbSystem;
+				trans_rb.read_in_Q_m();
+				Log.d(DEBUG_TAG, "Q_m = " + trans_rb.get_Q_m());
+			}
+		}
+	
+		if (rb.mRbScmSystem != null) {
+			rb.mRbScmSystem.mAffineFnsClass = cl.loadClass("AffineFunctions");
+			rb.mRbScmSystem.mTheta = rb.mRbSystem.mAffineFnsClass.newInstance();
+	
+			// set Q_a
+			rb.mRbScmSystem.read_in_Q_a();
+		}
+		if (rb.mSecondRbScmSystem != null) {
+			rb.mSecondRbScmSystem.mAffineFnsClass = cl
+					.loadClass("AffineFunctions");
+			rb.mSecondRbScmSystem.mTheta = rb.mRbSystem.mAffineFnsClass.newInstance();
+	
+			// set Q_a
+			rb.mSecondRbScmSystem.read_in_Q_a();
+		}
+	
 	}
 
 	/**
@@ -590,12 +633,12 @@ public class RBActivity extends Activity {
 		mCurrentParamForGUI.setEntry(index,
 				Double.parseDouble(current_param_str));
 
-		mParamLabels[index].setText(Html.fromHtml(paramLabels[index]));
+		mParamLabels[index].setText(Html.fromHtml(rb.paramLabels[index]));
 		mParamButtons[index].setText(Html.fromHtml(current_param_str));
 
 		// Set title
 		TextView problemTitleView = (TextView) findViewById(R.id.problemTitle);
-		problemTitleView.setText(problemTitle);
+		problemTitleView.setText(rb.problemTitle);
 	}
 
 	/**
@@ -604,7 +647,7 @@ public class RBActivity extends Activity {
 	private void initializeOnlineNBar() {
 		// Set max/min of online N seekbar
 		SeekBar onlineNSeekBar = (SeekBar) findViewById(R.id.onlineNSeekbar);
-		onlineNSeekBar.setMax(mRbSystem.get_n_basis_functions() - 1);
+		onlineNSeekBar.setMax(rb.mRbSystem.get_n_basis_functions() - 1);
 
 		// Change the progress state so that online N gets initialized
 		// to 1
@@ -627,11 +670,11 @@ public class RBActivity extends Activity {
 			// Clear the paramLayout in case we're doing a new problem
 			paramLayout.removeAllViews();
 
-			mParamLabels = new TextView[mRbSystem.get_n_params()];
-			mParamBars = new SeekBar[mRbSystem.get_n_params()];
-			mParamButtons = new Button[mRbSystem.get_n_params()];
+			mParamLabels = new TextView[rb.mRbSystem.get_n_params()];
+			mParamBars = new SeekBar[rb.mRbSystem.get_n_params()];
+			mParamButtons = new Button[rb.mRbSystem.get_n_params()];
 
-			for (int i = 0; i < mRbSystem.get_n_params(); i++) {
+			for (int i = 0; i < rb.mRbSystem.get_n_params(); i++) {
 				TableRow row = new TableRow(this);
 				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
 						LayoutParams.FILL_PARENT));
@@ -664,9 +707,9 @@ public class RBActivity extends Activity {
 			}
 
 			// Initialize mCurrentParamForGUI to min_parameter
-			mCurrentParamForGUI = new Parameter(mRbSystem.get_n_params());
-			for (int i = 0; i < mRbSystem.get_n_params(); i++) {
-				double min_param = mRbSystem.getParameterMin(i);
+			mCurrentParamForGUI = new Parameter(rb.mRbSystem.get_n_params());
+			for (int i = 0; i < rb.mRbSystem.get_n_params(); i++) {
+				double min_param = rb.mRbSystem.getParameterMin(i);
 
 				mCurrentParamForGUI.setEntry(i, min_param);
 				displayParamValue(i, min_param);
@@ -729,7 +772,7 @@ public class RBActivity extends Activity {
 	// the parameter value buttons
 	private void addParamButtonListeners() throws InconsistentStateException {
 
-		for (int i = 0; i < mRbSystem.get_n_params(); i++) {
+		for (int i = 0; i < rb.mRbSystem.get_n_params(); i++) {
 			mParamButtons[i].setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					paramButtonIndex = ((IndexedButton) v).getIndex();
@@ -744,7 +787,7 @@ public class RBActivity extends Activity {
 	private void addParamBarListeners() throws InconsistentStateException {
 
 		// Add a listener to each SeekBar
-		for (int i = 0; i < mRbSystem.get_n_params(); i++) {
+		for (int i = 0; i < rb.mRbSystem.get_n_params(); i++) {
 			mParamBars[i]
 					.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -755,12 +798,12 @@ public class RBActivity extends Activity {
 								IndexedSeekBar isb = (IndexedSeekBar) seekBar;
 								int index = isb.getIndex();
 
-								if (mRbSystem != null) {
-									double param_range = mRbSystem
+								if (rb.mRbSystem != null) {
+									double param_range = rb.mRbSystem
 											.getParameterMax(index)
-											- mRbSystem.getParameterMin(index);
+											- rb.mRbSystem.getParameterMin(index);
 
-									double current_param = mRbSystem
+									double current_param = rb.mRbSystem
 											.getParameterMin(index)
 											+ param_range
 											* progress
@@ -780,188 +823,6 @@ public class RBActivity extends Activity {
 					});
 		}
 
-	}
-
-	// Private helper function that reads in which type of systems we
-	// need for this problem and sets the member flags appropriately
-	private void read_system_types_from_input_file(AModelManager m)
-			throws IOException {
-
-		//GetPot infile = m.getParamFileGetPot();
-		GetPot infile = new GetPot(m.getInStream(Const.parameters_filename), Const.parameters_filename);
-
-		problemTitle = infile.call("title", "RB Online");
-		int parameter_number = infile.call("n_parameters", 0);
-		paramLabels = new String[parameter_number];
-		for (int n = 0; n < parameter_number; n++) {
-			paramLabels[n] = infile.call("param" + Integer.toString(n)
-					+ "_label", "DEFAULT");
-
-			// If DEFAULT was read in, then replace with a default
-			// mu label
-			if (paramLabels[n] == "DEFAULT") {
-				paramLabels[n] = "\u00B5" + (n + 1);
-			}
-		}
-
-		descriptionURL = infile.call("descriptionURL", "");
-
-		String SystemTypeEnum_in = infile.call("system_type", "NONE");
-		mSystemType = getSystemEnumFromString(SystemTypeEnum_in);
-
-		String SCMTypeEnum_in = infile.call("scm_type", "NONE");
-		mSCMType = getSCMEnumFromString(SCMTypeEnum_in);
-
-		Log.d(DEBUG_TAG, "RB system type = " + mSystemType);
-		Log.d(DEBUG_TAG, "SCM type = " + mSCMType);
-	}
-
-	// Private helper function that reads in which type of systems we
-	// need for this problem and sets the member flags appropriately
-	private void attach_affine_functions(InputStream in) throws Exception {
-
-		// Create a local copy of AffineFunctions.jar
-		FileOutputStream f = openFileOutput("AffineFunctions.jar",
-				MODE_WORLD_READABLE);
-
-		byte[] buffer = new byte[1024];
-		int len1 = 0;
-		while ((len1 = in.read(buffer)) > 0) {
-			f.write(buffer, 0, len1);
-		}
-		in.close();
-
-		Log.d(DEBUG_TAG, "Finished copying jar file");
-		
-		DexClassLoader cl = new DexClassLoader("/data/data/romsim.app/files/"
-				+ jarFileName, "/data/data/romsim.app/files/", null,
-				ClassLoader.getSystemClassLoader());
-
-		Log.d(DEBUG_TAG, "Created local dex file");
-
-		if (mRbSystem != null) {
-			mRbSystem.mAffineFnsClass = cl.loadClass("AffineFunctions");
-			mRbSystem.mTheta = mRbSystem.mAffineFnsClass.newInstance();
-
-			// Set Q_a, Q_f and n_outputs from the loaded class
-			mRbSystem.read_in_Q_a();
-			Log.d(DEBUG_TAG, "Q_a = " + mRbSystem.get_Q_a());
-
-			mRbSystem.read_in_Q_f();
-			Log.d(DEBUG_TAG, "Q_f = " + mRbSystem.get_Q_f());
-
-			mRbSystem.read_in_n_outputs();
-			Log.d(DEBUG_TAG, "n_outputs = " + mRbSystem.get_n_outputs());
-
-			mRbSystem.read_in_Q_uL();
-
-			if (mSystemType == RBActivityEnums.SystemTypeEnum.LINEAR_UNSTEADY
-					|| mSystemType == RBActivityEnums.SystemTypeEnum.QN_UNSTEADY) {
-				TransientRBSystem trans_rb = (TransientRBSystem) mRbSystem;
-				trans_rb.read_in_Q_m();
-				Log.d(DEBUG_TAG, "Q_m = " + trans_rb.get_Q_m());
-			}
-		}
-
-		if (mRbScmSystem != null) {
-			mRbScmSystem.mAffineFnsClass = cl.loadClass("AffineFunctions");
-			mRbScmSystem.mTheta = mRbSystem.mAffineFnsClass.newInstance();
-
-			// set Q_a
-			mRbScmSystem.read_in_Q_a();
-		}
-		if (mSecondRbScmSystem != null) {
-			mSecondRbScmSystem.mAffineFnsClass = cl
-					.loadClass("AffineFunctions");
-			mSecondRbScmSystem.mTheta = mRbSystem.mAffineFnsClass.newInstance();
-
-			// set Q_a
-			mSecondRbScmSystem.read_in_Q_a();
-		}
-
-	}
-
-	// Private helper function that initializes the RB and SCM systems
-	private void initialize_systems(AModelManager m) throws Exception {
-
-		// First, clear all the systems in case we're doing a new (different)
-		// problem
-		mRbScmSystem = null;
-		mSecondRbScmSystem = null;
-		mRbSystem = null;
-
-		// Find out which type of systems we'll be initializing
-		RBActivity.this.read_system_types_from_input_file(m);
-
-		// Initialize the SCM systems
-		if (mSCMType == RBActivityEnums.SCMTypeEnum.COERCIVE_ALPHASIGMA) {
-			mRbScmSystem = RBSCMSystem.buildSCMSystem(RBActivityEnums.SCMTypeEnum.COERCIVE);
-			mSecondRbScmSystem = RBSCMSystem.buildSCMSystem(RBActivityEnums.SCMTypeEnum.COERCIVE);
-		} else if (mSCMType == RBActivityEnums.SCMTypeEnum.COERCIVE
-				|| mSCMType == RBActivityEnums.SCMTypeEnum.QN_TRANSIENT_SCM) {
-			mRbScmSystem = RBSCMSystem.buildSCMSystem(mSCMType);
-		} else if (mSCMType == RBActivityEnums.SCMTypeEnum.COMPLEX_NONCOERCIVE) {
-			mRbScmSystem = RBSCMSystem.buildSCMSystem(mSCMType);
-		} else {
-			mRbScmSystem = null;
-		}
-
-		// Read parameters into SCM systems
-		if (mRbScmSystem != null) {
-			mRbScmSystem.parse_parameters_file(m);
-		}
-		if (mSecondRbScmSystem != null) {
-			mSecondRbScmSystem.parse_parameters_file(m);
-		}
-
-		mRbSystem = RBSystem.buildRBSystem(mSystemType);
-		mRbSystem.setPrimarySCM(mRbScmSystem);
-		if (mSystemType == RBActivityEnums.SystemTypeEnum.LINEAR_UNSTEADY) {
-			TransientRBSystem trans_rb = (TransientRBSystem) mRbSystem;
-			trans_rb.setSecondarySCM(mSecondRbScmSystem);
-		}
-
-		// Read parameters into RB systems
-		if (mRbSystem != null) {
-			mRbSystem.parse_parameters_file(m);
-			/*
-			 * if(mRbSystem.get_mfield() > 0) mRbModel = new
-			 * GLObject(RBActivity.this);
-			 */
-		}
-	}
-
-	// Private helper function to delete the downloaded files (if they exist)
-	private void delete_downloaded_files() {
-		deleteFile(Const.parameters_filename);
-		deleteFile(jarFileName);
-		deleteFile(dexFileName);
-	}
-
-	// Private helper function to return a SystemTypeEnum based on a String
-	private static RBActivityEnums.SystemTypeEnum getSystemEnumFromString(
-			String s) {
-
-		for (RBActivityEnums.SystemTypeEnum type : RBActivityEnums.SystemTypeEnum
-				.values()) {
-			if (type.toString().equals(s)) {
-				return type;
-			}
-		}
-
-		return RBActivityEnums.SystemTypeEnum.NONE;
-	}
-
-	// Private helper function to return a SystemTypeEnum based on a String
-	private static RBActivityEnums.SCMTypeEnum getSCMEnumFromString(String s) {
-
-		for (RBActivityEnums.SCMTypeEnum type : RBActivityEnums.SCMTypeEnum
-				.values()) {
-			if (type.toString().equals(s))
-				return type;
-		}
-
-		return RBActivityEnums.SCMTypeEnum.NONE;
 	}
 
 	final Handler sweepHandler = new Handler() {
@@ -1004,8 +865,8 @@ public class RBActivity extends Activity {
 				// this to be
 				// // problem-specific
 
-				if ((mSystemType == RBActivityEnums.SystemTypeEnum.LINEAR_STEADY)
-						|| (mSystemType == RBActivityEnums.SystemTypeEnum.LINEAR_COMPLEX_STEADY)) {
+				if ((rb.mSystemType == RBEnums.SystemTypeEnum.LINEAR_STEADY)
+						|| (rb.mSystemType == RBEnums.SystemTypeEnum.LINEAR_COMPLEX_STEADY)) {
 					RBActivity.this.initializeParamSweep();
 				}
 			}
@@ -1043,56 +904,23 @@ public class RBActivity extends Activity {
 		public void run() {
 
 			boolean success = true;
-
-			// Note: the local copy of the parameters_filename that has been
-			// created here
-			// if the source was a remote website has moved to
-			// ModelManager.getParamFileGetPot()
-
+			
+//			// Now copy AffineFunctions.jar to data/data/files so that we can
+//			// unpack it
+//			try {
+//				InputStream in = m.getInStream(jarFileName);
+//				attach_affine_functions(in);
+//			} catch (Exception e) {
+//				Log.e(DEBUG_TAG,
+//						"Exception occurred while loading affine functions",e);
+//				success = false;
+//			}
+			
+			// Call the main model loading method
+			success &= rb.loadModel(m);
+			
+			// Load GLObject data
 			try {
-				initialize_systems(m);
-			} catch (InconsistentStateException e) {
-				Log.e(DEBUG_TAG,
-						"Inconsistent state exception occurred when parsing input file: "
-								+ e.getMessage());
-				success = false;
-			} catch (IOException e) {
-				Log.e(DEBUG_TAG,
-						"I/O Exception thrown when accessing "
-								+ Const.parameters_filename + ": "
-								+ e.getMessage());
-				success = false;
-			} catch (Exception e) {
-				Log.e(DEBUG_TAG, "Exception thrown when accessing "
-						+ Const.parameters_filename,e);
-				success = false;
-			}
-
-			// Now copy AffineFunctions.jar to data/data/files so that we can
-			// unpack it
-			try {
-				InputStream in = m.getInStream(jarFileName);
-				attach_affine_functions(in);
-			} catch (Exception e) {
-				Log.e(DEBUG_TAG,
-						"Exception occurred while loading affine functions",e);
-				success = false;
-			}
-
-			// Finally, initialize the RB and SCM systems
-			try {
-				if (mRbSystem != null) {
-					mRbSystem.read_offline_data(m);
-					Log.d(DEBUG_TAG,
-							"Finished reading offline data for RBSystem.");
-				}
-
-				if (mRbScmSystem != null) {
-					mRbScmSystem.read_offline_data(m);
-					Log.d(DEBUG_TAG,
-							"Finished reading offline data for RBSCMSystem.");
-				}
-
 				if (mRbModel != null) {
 					mRbModel.read_offline_data(m);
 					Log.d(DEBUG_TAG,
@@ -1115,36 +943,36 @@ public class RBActivity extends Activity {
 
 	private class SolveThread extends Thread {
 		public void run() {
-			switch (mSystemType) {
+			switch (rb.mSystemType) {
 
 			case LINEAR_STEADY:
 			case LINEAR_COMPLEX_STEADY:
 
 				if (mSweepIndex == -1) {
 
-					mRbSystem.setCurrentParameters(mCurrentParamForGUI);
-					mRbSystem.RB_solve(mOnlineNForGui);
+					rb.mRbSystem.setCurrentParameters(mCurrentParamForGUI);
+					rb.mRbSystem.RB_solve(mOnlineNForGui);
 
 					handler.sendEmptyMessage(0);
 				} else { // We need to perform a sweep
 					int numSweepPts = 10;
 					numSweepPts = Math
-							.round(100000 / (mRbSystem.get_mfield() * mRbSystem
+							.round(100000 / (rb.mRbSystem.get_mfield() * rb.mRbSystem
 									.get_calN()));
-					if (!mRbSystem.isReal)
+					if (!rb.mRbSystem.isReal)
 						numSweepPts /= 3;
 					numSweepPts = numSweepPts > 10 ? 10 : numSweepPts;
 					// numSweepPts = 50;
-					int n_outputs = mRbSystem.get_n_outputs();
+					int n_outputs = rb.mRbSystem.get_n_outputs();
 
 					mSweepParam = new Parameter[numSweepPts];
 
 					double[][][] RB_sweep_sol = null;
-					if (mRbSystem.isReal) {
-						RB_sweep_sol = new double[numSweepPts][1][mRbSystem
+					if (rb.mRbSystem.isReal) {
+						RB_sweep_sol = new double[numSweepPts][1][rb.mRbSystem
 								.get_N()];
 					} else {
-						RB_sweep_sol = new double[numSweepPts][2][mRbSystem
+						RB_sweep_sol = new double[numSweepPts][2][rb.mRbSystem
 								.get_N()];
 						n_outputs *= 2;
 					}
@@ -1155,56 +983,56 @@ public class RBActivity extends Activity {
 					// Create the bundle and initialize it
 					Bundle bundle = new Bundle();
 
-					double sweepParamRange = mRbSystem
+					double sweepParamRange = rb.mRbSystem
 							.getParameterMax(mSweepIndex)
-							- mRbSystem.getParameterMin(mSweepIndex);
+							- rb.mRbSystem.getParameterMin(mSweepIndex);
 					double sweepIncrement = sweepParamRange / (numSweepPts - 1);
 
 					float[][][] vLTfunc = new float[numSweepPts][][];
 
 					for (int i = 0; i < numSweepPts; i++) {
-						double new_param = mRbSystem
+						double new_param = rb.mRbSystem
 								.getParameterMin(mSweepIndex)
 								+ i
 								* sweepIncrement;
 						mCurrentParamForGUI.setEntry(mSweepIndex, new_param);
-						mRbSystem.setCurrentParameters(mCurrentParamForGUI);
+						rb.mRbSystem.setCurrentParameters(mCurrentParamForGUI);
 						mSweepParam[i] = mCurrentParamForGUI.clone();
 						Log.d(DEBUG_TAG, "Set new param " + mCurrentParamForGUI);
-						mRbSystem.RB_solve(mOnlineNForGui);
+						rb.mRbSystem.RB_solve(mOnlineNForGui);
 
-						if (mRbSystem.isReal)
+						if (rb.mRbSystem.isReal)
 							for (int n = 0; n < n_outputs; n++) {
-								sweepOutputs[n][i] = mRbSystem.RB_outputs[n];
-								sweepOutputBounds[n][i] = mRbSystem.RB_output_error_bounds[n];
+								sweepOutputs[n][i] = rb.mRbSystem.RB_outputs[n];
+								sweepOutputBounds[n][i] = rb.mRbSystem.RB_output_error_bounds[n];
 							}
 						else
 							for (int n = 0; n < n_outputs / 2; n++) {
-								sweepOutputs[n][i] = mRbSystem.get_RB_output(n,
+								sweepOutputs[n][i] = rb.mRbSystem.get_RB_output(n,
 										true);
-								sweepOutputs[n + n_outputs / 2][i] = mRbSystem
+								sweepOutputs[n + n_outputs / 2][i] = rb.mRbSystem
 										.get_RB_output(n, false);
-								sweepOutputBounds[n][i] = mRbSystem
+								sweepOutputBounds[n][i] = rb.mRbSystem
 										.get_RB_output_error_bound(n, true);
-								sweepOutputBounds[n + n_outputs / 2][i] = mRbSystem
+								sweepOutputBounds[n + n_outputs / 2][i] = rb.mRbSystem
 										.get_RB_output_error_bound(n, false);
 							}
 
-						if (mRbSystem.get_mfield() > 0) {
-							RB_sweep_sol[i] = mRbSystem.get_RBsolution();
-							vLTfunc[i] = mRbSystem.get_tranformation_data();
+						if (rb.mRbSystem.get_mfield() > 0) {
+							RB_sweep_sol[i] = rb.mRbSystem.get_RBsolution();
+							vLTfunc[i] = rb.mRbSystem.get_tranformation_data();
 						}
 					}
 					mRbModel.vLTfunc = vLTfunc;
-					mRbSystem.set_sweep_sol(RB_sweep_sol);
+					rb.mRbSystem.set_sweep_sol(RB_sweep_sol);
 
 					bundle.putBoolean("isSweep", true);
 					bundle.putString("title", "Online N = " + mOnlineNForGui);
 					bundle.putDouble("dt", sweepIncrement);
 					bundle.putDouble("xMin",
-							mRbSystem.getParameterMin(mSweepIndex));
+							rb.mRbSystem.getParameterMin(mSweepIndex));
 					bundle.putDouble("xMax",
-							mRbSystem.getParameterMax(mSweepIndex));
+							rb.mRbSystem.getParameterMax(mSweepIndex));
 					bundle.putString("xLabel",
 							Integer.toString(mSweepIndex + 1));
 					bundle.putInt("n_time_steps", numSweepPts);
@@ -1228,28 +1056,28 @@ public class RBActivity extends Activity {
 			case QN_UNSTEADY:
 
 				// Perform the solve
-				mRbSystem.setCurrentParameters(mCurrentParamForGUI);
-				mRbSystem.RB_solve(mOnlineNForGui);
+				rb.mRbSystem.setCurrentParameters(mCurrentParamForGUI);
+				rb.mRbSystem.RB_solve(mOnlineNForGui);
 
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
-				bundle.putBoolean("isReal", mRbSystem.isReal);
+				bundle.putBoolean("isReal", rb.mRbSystem.isReal);
 				bundle.putBoolean("isSweep", false);
 				bundle.putString("title", "Online N = " + mOnlineNForGui
 						+ ", parameter = " + mCurrentParamForGUI.toString());
-				bundle.putDouble("dt", mRbSystem.get_dt());
+				bundle.putDouble("dt", rb.mRbSystem.get_dt());
 				bundle.putDouble("xMin", 0);
-				bundle.putDouble("xMax", mRbSystem.get_dt() * mRbSystem.get_K());
+				bundle.putDouble("xMax", rb.mRbSystem.get_dt() * rb.mRbSystem.get_K());
 				bundle.putString("xLabel", "time");
-				bundle.putInt("n_time_steps", mRbSystem.n_plotting_steps); // mRbSystem.get_K()
+				bundle.putInt("n_time_steps", rb.mRbSystem.n_plotting_steps); // rb.mRbSystem.get_K()
 																			// +
 																			// 1
-				bundle.putInt("n_outputs", mRbSystem.get_n_outputs());
-				for (int i = 0; i < mRbSystem.get_n_outputs(); i++) {
+				bundle.putInt("n_outputs", rb.mRbSystem.get_n_outputs());
+				for (int i = 0; i < rb.mRbSystem.get_n_outputs(); i++) {
 					bundle.putDoubleArray("output_data_" + i,
-							mRbSystem.RB_outputs_all_k[i]);
+							rb.mRbSystem.RB_outputs_all_k[i]);
 					bundle.putDoubleArray("output_bound_" + i,
-							mRbSystem.RB_output_error_bounds_all_k[i]);
+							rb.mRbSystem.RB_output_error_bounds_all_k[i]);
 				}
 
 				// Add this bundle to the intent

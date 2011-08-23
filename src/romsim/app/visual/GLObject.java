@@ -16,7 +16,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.activity.rb;
+package romsim.app.visual;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +27,7 @@ import java.nio.ShortBuffer;
 
 import rb.java.Parameter;
 import rmcommon.io.AModelManager;
+import romsim.app.activity.rb.RBActivity;
 import android.util.Log;
 
 public class GLObject extends Object {
@@ -741,7 +742,7 @@ public class GLObject extends Object {
 		vnode = new float[vframe_num * node_num * 3];
 		for (int i = 0; i < vframe_num; i++) {
 			// get current nodal data
-			float[] tmpnode = RBActivity.mRbSystem.mesh_transform(
+			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(
 					mu[i].getArray(), ref_node.clone());
 			Log.d("GLRenderer", mu[i].getEntry(0) + " " + mu[i].getEntry(1));
 			Log.d("GLRenderer", tmpnode[4] + " " + node[4]);

@@ -29,6 +29,7 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import rb.java.RBContainer;
 import romsim.app.R;
 import romsim.app.misc.rb.SingleLabelChart;
 import android.app.Activity;
@@ -1052,9 +1053,10 @@ public class OutputPlotterActivity extends Activity {
 
 			RBActivity.mCurrentParamForGUI.setEntry(RBActivity.mSweepIndex,
 					xcurrent);
-			RBActivity.mRbSystem
+			RBContainer rb = RBActivity.rb;
+			rb.mRbSystem
 					.setCurrentParameters(RBActivity.mCurrentParamForGUI);
-			RBActivity.mRbSystem.RB_solve(RBActivity.mOnlineNForGui);
+			rb.mRbSystem.RB_solve(RBActivity.mOnlineNForGui);
 
 			double[][] new_RB_outputs_all_k = new double[n_outputs][n_time_steps + 1];
 			double[][] new_RB_outputs_LB = new double[n_outputs][n_time_steps + 1];
@@ -1073,10 +1075,10 @@ public class OutputPlotterActivity extends Activity {
 				}
 			}
 
-			if (RBActivity.mRbSystem.isReal)
+			if (rb.mRbSystem.isReal)
 				for (int n = 0; n < n_outputs; n++) {
-					new_RB_outputs_all_k[n][i_max_step] = RBActivity.mRbSystem.RB_outputs[n];
-					double OutputBound = RBActivity.mRbSystem.RB_output_error_bounds[n];
+					new_RB_outputs_all_k[n][i_max_step] = rb.mRbSystem.RB_outputs[n];
+					double OutputBound = rb.mRbSystem.RB_output_error_bounds[n];
 					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
 							- OutputBound;
 					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
@@ -1084,18 +1086,18 @@ public class OutputPlotterActivity extends Activity {
 				}
 			else
 				for (int n = 0; n < n_outputs / 2; n++) {
-					new_RB_outputs_all_k[n][i_max_step] = RBActivity.mRbSystem
+					new_RB_outputs_all_k[n][i_max_step] = rb.mRbSystem
 							.get_RB_output(n, true);
-					double OutputBound = RBActivity.mRbSystem
+					double OutputBound = rb.mRbSystem
 							.get_RB_output_error_bound(n, true);
 					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
 							- OutputBound;
 					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
 							+ OutputBound;
 
-					new_RB_outputs_all_k[n + n_outputs / 2][i_max_step] = RBActivity.mRbSystem
+					new_RB_outputs_all_k[n + n_outputs / 2][i_max_step] = rb.mRbSystem
 							.get_RB_output(n, false);
-					OutputBound = RBActivity.mRbSystem
+					OutputBound = rb.mRbSystem
 							.get_RB_output_error_bound(n, false);
 					new_RB_outputs_LB[n + n_outputs / 2][i_max_step] = new_RB_outputs_all_k[n
 							+ n_outputs / 2][i_max_step]

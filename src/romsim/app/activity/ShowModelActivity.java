@@ -34,13 +34,25 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
+/**
+ * Changes made by:
+ * @author Daniel Wirtz
+ * @date Aug 23, 2011
+ * 
+ * This was the former RBGroupActivity class from rbappmit code.
+ *
+ */
 public class ShowModelActivity extends TabActivity {
 
 	static final int ABOUT_DIALOG_ID = 0;
 	static final int HELP_DIALOG_ID = 1;
 
-	public void onCreate(Bundle savedInstanceState) {
+	/**
+	 * @see android.app.ActivityGroup#onCreate(android.os.Bundle)
+	 */
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		final TabHost tabHost = getTabHost();
@@ -77,12 +89,14 @@ public class ShowModelActivity extends TabActivity {
 		label2.setText("Solve problem");
 		two.setIndicator(label2);
 		Intent intentTwo = null;
-		if ("rb".equals(MainActivity.modelmng.getModelType())) {
+		String mt = MainActivity.modelmng.getModelType();
+		if ("rb".equals(mt) || "rbappmit".equals(mt)) {
 			intentTwo = new Intent(ShowModelActivity.this, RBActivity.class);
-		} else if ("kermor".equals(MainActivity.modelmng.getModelType())) {
+		} else if ("kermor".equals(mt)) {
 			intentTwo = new Intent(ShowModelActivity.this, SimulationActivity.class);
 		} else {
-			Log.e("ShowModelActitity", "Unknown model type: " + MainActivity.modelmng.getModelType());
+			Log.e("ShowModelActitity", "Unknown model type: " + mt);
+			Toast.makeText(this, "Unknown model type: "+ mt, Toast.LENGTH_LONG);
 			finish();
 		}
 		two.setContent(intentTwo);
@@ -93,6 +107,9 @@ public class ShowModelActivity extends TabActivity {
 
 	}
 
+	/**
+	 * @see android.app.Activity#onBackPressed()
+	 */
 	public void onBackPressed() {
 		setResult(0);
 		getLocalActivityManager().removeAllActivities();

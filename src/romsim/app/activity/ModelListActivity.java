@@ -85,6 +85,9 @@ public class ModelListActivity extends Activity {
 	 */
 	private List<ModelDescriptor> items;
 
+	/**
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 

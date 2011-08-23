@@ -18,6 +18,9 @@
 
 package romsim.app.activity;
 
+import rmcommon.io.AModelManager;
+import romsim.app.io.AssetModelManager;
+import romsim.app.io.SDModelManager;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,17 +28,34 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+/**
+ * Changes by:
+ * @author Daniel Wirtz
+ * @date Aug 23, 2011
+ * 
+ * This was the former SimpleBrowserActivity class in rbappmit.
+ *
+ */
 public class BrowseActivity extends Activity {
 	private WebView browser;
 	private String url;
 
-	public void onCreate(Bundle icicle) {
+	/**
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
+	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
 		browser = new WebView(this);
 		setContentView(browser);
 
-		url = MainActivity.modelmng.getInfoFileURL();
+		AModelManager m = MainActivity.modelmng;
+		String file = m.getModelXMLTagValue("infohtml"); 
+		if (m instanceof SDModelManager) {
+			url = "file://" + SDModelManager.SDModelsDir + "/" + m.getModelDir() + "/" + file;
+		} else if (m instanceof AssetModelManager) {
+			url = "file:///android_asset/" + m.getModelDir() + "/" + file;
+		}
 
 		// if info page was not supplied/another error occurs while loading,
 		// redirect user to home site
@@ -60,6 +80,9 @@ public class BrowseActivity extends Activity {
 		Log.d("browser", browser.getUrl());
 	}
 
+	/**
+	 * @see android.app.Activity#onBackPressed()
+	 */
 	public void onBackPressed() {
 		// need to tell parent activity to close all activities
 		getParent().onBackPressed();

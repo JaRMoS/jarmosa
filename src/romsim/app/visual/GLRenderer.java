@@ -16,7 +16,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.misc.rb;
+package romsim.app.visual;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -24,7 +24,6 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import romsim.app.activity.rb.GLObject;
 import romsim.app.activity.rb.RBActivity;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
