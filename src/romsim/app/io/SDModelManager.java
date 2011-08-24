@@ -4,11 +4,13 @@
 package romsim.app.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import rmcommon.io.FileModelManager;
-import romsim.app.activity.MainActivity;
+import romsim.app.Const;
+import android.content.Context;
 import android.os.Environment;
-import dalvik.system.DexClassLoader;
+import android.util.Log;
 
 /**
  * @author Ernst
@@ -32,11 +34,15 @@ public class SDModelManager extends FileModelManager {
 	public static final String SDModelsDir = SDBase + File.separator
 			+ SDrbAppDir;
 
+	private DexHelper dh;
+
 	/**
+	 * @param c 
 	 * 
 	 */
-	public SDModelManager() {
+	public SDModelManager(Context c) {
 		super(SDModelsDir);
+		dh = new DexHelper(c);
 	}
 
 	/**
@@ -46,7 +52,15 @@ public class SDModelManager extends FileModelManager {
 	public ClassLoader getClassLoader() {
 		// return new PathClassLoader(getFullModelPath(),
 		// getClass().getClassLoader());//super.getClassLoader());
-		return new DexClassLoader(getFullModelPath() + "AffineFunctions.jar", MainActivity.AppDataDirectory, null, getClass().getClassLoader());
+		try {
+			return dh.getDexClassLoader(getInStream(Const.DEX_CLASSES_JARFILE));
+		} catch (IOException e) {
+			Log.e("AssetModelManager", "I/O Exception during input stream creation for file "
+					+ Const.DEX_CLASSES_JARFILE + " in model " + getModelDir() + ", loaded from SD card", e);
+			e.printStackTrace();
+			return null;
+		}
+//		return new DexClassLoader(getFullModelPath() + Const.DEX_CLASSES_JARFILE, Const.APP_DATA_DIRECTORY, null, getClass().getClassLoader());
 	}
 
 	/**

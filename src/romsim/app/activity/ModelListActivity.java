@@ -23,6 +23,8 @@ import java.util.List;
 
 import rmcommon.ModelDescriptor;
 import rmcommon.io.AModelManager;
+import rmcommon.io.AModelManager.ModelManagerException;
+import romsim.app.Const;
 import romsim.app.R;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -84,14 +86,25 @@ public class ModelListActivity extends Activity {
 	 * The list items, sources either from assets or sd card.
 	 */
 	private List<ModelDescriptor> items;
+	
+	private AModelManager mng = null;
 
 	/**
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.prob_selection);
+		
+		// Create model manager instance to use
+		try {
+			mng = Const.getModelManager(getApplicationContext(), getIntent());
+		} catch (ModelManagerException e) {
+			Log.e("ModelListActivity", "Creation of ModelManager failed", e);
+			finish();
+			return;
+		}
 
 		final ProgressDialog pd = ProgressDialog.show(this, "",
 				"Loading model list", true);
@@ -117,11 +130,12 @@ public class ModelListActivity extends Activity {
 							Intent intent = new Intent(
 									ModelListActivity.this,
 									ShowModelActivity.class);
+							// Forward extras
+							intent.putExtras(getIntent().getExtras());
 							ModelDescriptor i = (ModelDescriptor) av
 									.getItemAtPosition(position);
 							try {
-								MainActivity.modelmng
-										.setModelDir(i.modeldir);
+								mng.setModelDir(i.modeldir);
 							} catch (AModelManager.ModelManagerException me) {
 								Toast.makeText(ModelListActivity.this,
 										"Error setting the model directory "
@@ -131,6 +145,8 @@ public class ModelListActivity extends Activity {
 												+ i.modeldir, me);
 								return;
 							}
+							intent.putExtra("ModelType", i.type);
+							intent.putExtra(Const.EXTRA_MODELMANAGER_MODELDIR, i.modeldir);
 							ModelListActivity.this.startActivityForResult(
 									intent, 0);
 						}
@@ -144,7 +160,7 @@ public class ModelListActivity extends Activity {
 			public void run() {
 
 				try {
-					items = MainActivity.modelmng.getModelDescriptors();
+					items = mng.getModelDescriptors();
 				} catch (AModelManager.ModelManagerException ex) {
 					Log.e("ProbSelectionActivity",
 							"Failed loading model descriptors", ex);

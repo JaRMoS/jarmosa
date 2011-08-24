@@ -1,7 +1,8 @@
 package romsim.app.activity;
 
-import rmcommon.io.AModelManager;
-import rmcommon.io.WebModelManager;
+import java.lang.reflect.Method;
+
+import romsim.app.Const;
 import romsim.app.R;
 import romsim.app.io.AssetModelManager;
 import romsim.app.io.SDModelManager;
@@ -11,6 +12,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,7 +21,7 @@ import android.widget.ImageButton;
 /**
  * @author Daniel Wirtz
  * @date Aug 23, 2011
- *
+ * 
  */
 public class MainActivity extends Activity {
 
@@ -32,18 +34,11 @@ public class MainActivity extends Activity {
 	 * Dialog ID for the "no sd card access" dialog
 	 */
 	public static final int NO_SD_ID = 2;
-	
-	/**
-	 * The directory where the application may write data to and read from.
-	 * 
-	 * At the moment, this is /data/data/romsim.app/files.
-	 */
-	public static String AppDataDirectory;
 
 	/**
 	 * The ModelManager created for the current MainActivity.
 	 */
-	public static AModelManager modelmng;
+	// public static AModelManager modelmng;
 
 	private Dialog downloadDialog;
 
@@ -53,14 +48,18 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mainpage);
 
-		AppDataDirectory = getApplicationInfo().dataDir+"/files";
+		Const.APP_DATA_DIRECTORY = getApplicationInfo().dataDir + "/files";
+
+//		testwas();
 
 		// Add listener to the Solve button
 		Button btn = (Button) findViewById(R.id.btnAssets);
 		btn.setOnClickListener(new View.OnClickListener(){
 			public void onClick(View view) {
+
 				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
-				modelmng = new AssetModelManager(MainActivity.this);
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "AssetModelManager");
+				// intent.putExtras(getIntent().getExtras());
 				startActivityForResult(intent, 0);
 			}
 		});
@@ -72,8 +71,9 @@ public class MainActivity extends Activity {
 					showDialog(NO_SD_ID);
 					return;
 				}
+
 				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
-				modelmng = new SDModelManager();
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "SDModelManager");
 				startActivityForResult(intent, 0);
 			}
 		});
@@ -83,6 +83,47 @@ public class MainActivity extends Activity {
 				showDialog(DOWNLOAD_DIALOG_ID);
 			}
 		});
+	}
+
+	@SuppressWarnings("unused")
+	private void testwas() {
+		AssetModelManager m = new AssetModelManager(getApplicationContext());
+		try {
+			m.setModelDir("aghdemo");
+
+			ClassLoader cl = m.getClassLoader();
+			 Class<?> c = cl.loadClass("AffineFunctions");
+			c = cl.loadClass("AffineFunctions");
+
+			Object ci = c.newInstance();
+			int a = 0;
+
+			Method meth = c.getMethod("get_n_F_functions");
+			Object res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+			
+			m.setModelDir("demo1");
+			ClassLoader cl2 = m.getClassLoader();
+			
+			c = cl.loadClass("AffineFunctions");
+			ci = c.newInstance();
+			res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+			
+			c = cl2.loadClass("AffineFunctions");
+			meth = c.getMethod("get_n_F_functions");
+			ci = c.newInstance();
+			res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+			
+		} catch (Exception e) {
+			Log.e("testwas", "DOOMED!", e);
+			e.printStackTrace();
+			finish();
+		}
 	}
 
 	@Override
@@ -113,7 +154,10 @@ public class MainActivity extends Activity {
 					String url = urlEntry.getText().toString().trim();
 					// Add forwardslash if not entered
 					if (!url.endsWith("/")) url += "/";
-					modelmng = new WebModelManager(url);
+
+					intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "WebModelManager");
+					intent.putExtra("URL", url);
+
 					startActivityForResult(intent, 0);
 				}
 			});
@@ -145,4 +189,16 @@ public class MainActivity extends Activity {
 		}
 		return dialog;
 	}
+
+	// private void startMMService(String classname, String extra) {
+	// Intent si = new Intent(getApplicationContext(),
+	// ModelManagerService.class);
+	// si.putExtra(ModelManagerService.CLASSNAME_EXTRA, classname);
+	// if (extra != null) {
+	// si.putExtra("URL", extra);
+	// }
+	// if (startService(si) == null) {
+	// Log.e("MainActivity", "Starting the ModelManagerService failed.");
+	// }
+	// }
 }

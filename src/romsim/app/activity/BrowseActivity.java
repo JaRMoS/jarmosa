@@ -19,6 +19,8 @@
 package romsim.app.activity;
 
 import rmcommon.io.AModelManager;
+import rmcommon.io.AModelManager.ModelManagerException;
+import romsim.app.Const;
 import romsim.app.io.AssetModelManager;
 import romsim.app.io.SDModelManager;
 import android.app.Activity;
@@ -30,11 +32,12 @@ import android.widget.Toast;
 
 /**
  * Changes by:
+ * 
  * @author Daniel Wirtz
  * @date Aug 23, 2011
  * 
- * This was the former SimpleBrowserActivity class in rbappmit.
- *
+ *       This was the former SimpleBrowserActivity class in rbappmit.
+ * 
  */
 public class BrowseActivity extends Activity {
 	private WebView browser;
@@ -49,23 +52,29 @@ public class BrowseActivity extends Activity {
 		browser = new WebView(this);
 		setContentView(browser);
 
-		AModelManager m = MainActivity.modelmng;
-		String file = m.getModelXMLTagValue("infohtml"); 
+		// Create model manager instance to use
+		AModelManager m = null;
+		try {
+			m = Const.getModelManager(getApplicationContext(), getIntent());
+		} catch (ModelManagerException e) {
+			Log.e("BrowseActivity", "Creation of ModelManager failed", e);
+			finish();
+			return;
+		}
+
+		String file = m.getModelXMLTagValue("infohtml");
 		if (m instanceof SDModelManager) {
-			url = "file://" + SDModelManager.SDModelsDir + "/" + m.getModelDir() + "/" + file;
+			url = "file://" + SDModelManager.SDModelsDir + "/"
+					+ m.getModelDir() + "/" + file;
 		} else if (m instanceof AssetModelManager) {
 			url = "file:///android_asset/" + m.getModelDir() + "/" + file;
 		}
 
 		// if info page was not supplied/another error occurs while loading,
 		// redirect user to home site
-		browser.setWebViewClient(new WebViewClient() {
-			public void onReceivedError(WebView view, int errorCode,
-					String description, String failingUrl) {
-				Toast.makeText(
-						BrowseActivity.this,
-						"Sorry, no informational page was supplied with this problem",
-						Toast.LENGTH_LONG).show();
+		browser.setWebViewClient(new WebViewClient(){
+			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+				Toast.makeText(BrowseActivity.this, "Sorry, no informational page was supplied with this problem", Toast.LENGTH_LONG).show();
 			}
 		});
 

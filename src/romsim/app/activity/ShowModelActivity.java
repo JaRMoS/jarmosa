@@ -82,6 +82,7 @@ public class ShowModelActivity extends TabActivity {
 		label1.setText("About ");
 		one.setIndicator(label1);
 		Intent intentOne = new Intent(ShowModelActivity.this, BrowseActivity.class);
+		intentOne.putExtras(getIntent().getExtras());
 		one.setContent(intentOne);
 		tabHost.addTab(one);
 
@@ -89,7 +90,9 @@ public class ShowModelActivity extends TabActivity {
 		label2.setText("Solve problem");
 		two.setIndicator(label2);
 		Intent intentTwo = null;
-		String mt = MainActivity.modelmng.getModelType();
+		
+		// Using the intent field "ModelType" here avoids instantiation of a new AModelManager..
+		String mt = getIntent().getStringExtra("ModelType");
 		if ("rb".equals(mt) || "rbappmit".equals(mt)) {
 			intentTwo = new Intent(ShowModelActivity.this, RBActivity.class);
 		} else if ("kermor".equals(mt)) {
@@ -99,12 +102,12 @@ public class ShowModelActivity extends TabActivity {
 			Toast.makeText(this, "Unknown model type: "+ mt, Toast.LENGTH_LONG);
 			finish();
 		}
+		intentTwo.putExtras(getIntent().getExtras());
 		two.setContent(intentTwo);
 		tabHost.addTab(two);
 
 		// set which tab has initial focus
 		tabHost.setCurrentTab(0);
-
 	}
 
 	/**

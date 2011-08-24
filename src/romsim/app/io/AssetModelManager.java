@@ -3,14 +3,11 @@
  */
 package romsim.app.io;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import dalvik.system.DexClassLoader;
-
 import rmcommon.io.AModelManager;
-import romsim.app.activity.MainActivity;
+import romsim.app.Const;
 import android.content.Context;
 import android.util.Log;
 
@@ -27,6 +24,8 @@ public class AssetModelManager extends AModelManager {
 
 	private Context c;
 
+	private DexHelper dh;
+
 	/**
 	 * Creates a new ModelManager.
 	 * 
@@ -36,6 +35,7 @@ public class AssetModelManager extends AModelManager {
 	public AssetModelManager(Context c) {
 		super();
 		this.c = c;
+		dh = new DexHelper(c);
 	}
 
 	/**
@@ -43,27 +43,14 @@ public class AssetModelManager extends AModelManager {
 	 */
 	@Override
 	public ClassLoader getClassLoader() {
-		// Create a local copy for dex optimization needs write access
-		String file = "AffineFunctions.jar";
 		try {
-			FileOutputStream f = c.openFileOutput(file, Context.MODE_WORLD_READABLE);
-
-			byte[] buffer = new byte[1024];
-			int len1 = 0;
-			InputStream in = getInStream(file);
-			while ((len1 = in.read(buffer)) > 0) {
-				f.write(buffer, 0, len1);
-			}
-			in.close();
-			Log.d("AndroidModelClassLoader", "Finished preparing local copy of model's "
-					+ file);
+			return dh.getDexClassLoader(getInStream(Const.DEX_CLASSES_JARFILE));
+		} catch (IOException e) {
+			Log.e("AssetModelManager", "I/O Exception during input stream creationg for file "
+					+ Const.DEX_CLASSES_JARFILE + " in model " + getModelDir() + ", loaded from application assets", e);
+			e.printStackTrace();
+			return null;
 		}
-		catch (IOException e) {
-			Log.e("AssetModelManager", "Failed preparing local copy of model's "
-					+ file + " (" + getModelDir() + ")", e);
-		}
-
-		return new DexClassLoader(MainActivity.AppDataDirectory + "/" + file, MainActivity.AppDataDirectory, null, getClass().getClassLoader());
 		// return new PathClassLoader("/data/data/romsim.app/files/",
 		// super.getClassLoader());
 	}
@@ -87,8 +74,8 @@ public class AssetModelManager extends AModelManager {
 			for (String f : c.getAssets().list(getModelDir())) {
 				if (filename.equals(f)) return true;
 			}
+		} catch (IOException e) {
 		}
-		catch (IOException e) {}
 		return false;
 	}
 
