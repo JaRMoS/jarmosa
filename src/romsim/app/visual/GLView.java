@@ -18,6 +18,7 @@
 
 package romsim.app.visual;
 
+import rmcommon.geometry.GeometryData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
@@ -51,7 +52,7 @@ public class GLView extends GLSurfaceView {
 	 * @param context
 	 * @param _object
 	 */
-	public GLView(Context context, GLObject _object) {
+	public GLView(Context context, GeometryData _object) {
 		super(context);
 		setFocusableInTouchMode(true);
 		_renderer = new GLRenderer(_object);
@@ -144,7 +145,7 @@ public class GLView extends GLSurfaceView {
 				return true;
 			case 82: // KEYCODE_MENU
 				if ((_renderer._object.is2D())
-						|| (_renderer._object.field_num > 0))
+						|| (_renderer._object.fields > 0))
 					_renderer.setcField(_renderer.getcField() + 1);
 				else
 					// enable tilting

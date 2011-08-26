@@ -21,6 +21,6 @@
         <activity android:name=".activity.rb.RBActivity"></activity>
         <activity android:name=".activity.rb.RBVisualization"></activity>
         <activity android:name=".activity.rb.OutputPlotterActivity"></activity>
-		<activity android:name=".visual.GLObject"></activity>
+		<activity android:name="rmcommon.geometry.GLData"></activity>
     </application>
 </manifest>

@@ -22,7 +22,8 @@ import java.util.List;
 
 import rb.java.Parameter;
 import rb.java.RBContainer;
-import romsim.app.visual.GLObject;
+import rmcommon.Log;
+import rmcommon.geometry.GeometryData;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -42,8 +43,8 @@ public class RBVisualization extends Activity {
 	@SuppressWarnings("unused")
 	private static String DEBUG_TAG = "RBVISUALIZATION";
 	
-	private GLView _glView;
-	private GLObject _object;
+	private GLView glView;
+//	private GLObject _object;
 
 	private SensorManager myManager;
 	private List<Sensor> sensors;
@@ -57,10 +58,15 @@ public class RBVisualization extends Activity {
 
 		// _object = new GLObject();
 		RBContainer rb = RBActivity.rb;
-		_object = RBActivity.mRbModel;
+		GeometryData glData = RBActivity.geoData;
 
 		Bundle extras = getIntent().getExtras();
 
+		/*
+		 * NEXT: Set field data to GLObject, which is stored in the RBActivity 
+		 * since it has been filled with geometry data there..
+		 * maybe one should load the geometry data the first time the model should be visualized ..
+		 */
 		/*
 		 * Standard case: Normal display.
 		 */
@@ -69,44 +75,57 @@ public class RBVisualization extends Activity {
 				float[][] LT = rb.mRbSystem.get_tranformation_data();
 				float[][][] LTfunc_array = new float[1][LT.length][LT[0].length];
 				LTfunc_array[0] = LT;
-				_object.set_LTfunc(LTfunc_array);
+				glData.set_LTfunc(LTfunc_array);
 			} else {
 				Parameter[] p = new Parameter[1];
 				p[0] = rb.mRbSystem.current_parameters.clone();
-				_object.mesh_transform_custom(p);
+				mesh_transform_custom(p,glData);
 			}
 
 			float[][][] truth_sol = rb.mRbSystem.get_truth_sol();
 
+			/*
+			 * System has real data, so only [*][0][*] is used 
+			 */
 			if (rb.mRbSystem.isReal)
+				/*
+				 * Check which solution field is to display.
+				 */
 				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
-					_object.set_field_data(truth_sol[0][0]);
+					glData.set_field_data(truth_sol[0][0]);
 					break;
 				case 2:
-					if (truth_sol[0][0].length == _object.node_num)
-						_object.set_field_data(truth_sol[0][0], truth_sol[1][0]);
+					if (truth_sol[0][0].length == glData.nodes)
+						glData.set_field_data(truth_sol[0][0], truth_sol[1][0]);
 					else
-						_object.set_field_data(truth_sol[0][0],
+						glData.set_field_data(truth_sol[0][0],
 								truth_sol[1][0], false);
 					break;
 				case 3:
-					if (truth_sol[0][0].length == _object.node_num)
-						_object.set_field_data(truth_sol[0][0],
+					if (truth_sol[0][0].length == glData.nodes)
+						glData.set_field_data(truth_sol[0][0],
 								truth_sol[1][0], truth_sol[2][0]);
 					else
-						_object.set_field_data(truth_sol[0][0],
+						glData.set_field_data(truth_sol[0][0],
 								truth_sol[1][0], truth_sol[2][0], false);
 					break;
 				case 4:
-					_object.set_field_data(truth_sol[0][0], truth_sol[1][0],
+					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
 							truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
+			/*
+			 * System has complex data, so [*][0][*] and [*][1][*] are 
+			 */
 			else
 				switch (rb.mRbSystem.get_mfield()) {
+				/*
+				 * Seems to be the only case: one field variable, but complex.
+				 * but why three fields?
+				 */
 				case 1:
-					_object.set_field_data(truth_sol[0][0], truth_sol[0][1],
+					glData.set_field_data(truth_sol[0][0], truth_sol[0][1],
 							truth_sol[0][2], false);
 					break;
 				}
@@ -115,33 +134,33 @@ public class RBVisualization extends Activity {
 			 * Parameter sweep case
 			 */
 			if (!rb.mRbSystem.is_custom_mesh_transform()) {
-				_object.set_LTfunc(_object.vLTfunc);
+				glData.set_LTfunc(glData.vLTfunc);
 			} else {
-				_object.mesh_transform_custom(RBActivity.mSweepParam);
+				mesh_transform_custom(RBActivity.mSweepParam, glData);
 			}
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
 			if (rb.mRbSystem.isReal)
 				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
-					_object.set_field_data(truth_sol[0][0]);
+					glData.set_field_data(truth_sol[0][0]);
 					break;
 				case 2:
-					_object.set_field_data(truth_sol[0][0], truth_sol[1][0]);
+					glData.set_field_data(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
-					_object.set_field_data(truth_sol[0][0], truth_sol[1][0],
+					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
 							truth_sol[2][0]);
 					break;
 				case 4:
-					_object.set_field_data(truth_sol[0][0], truth_sol[1][0],
+					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
 							truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
 			else {
 				switch (rb.mRbSystem.get_mfield()) {
 				case 1:
-					_object.set_field_data(truth_sol[0][0], truth_sol[0][1],
+					glData.set_field_data(truth_sol[0][0], truth_sol[0][1],
 							truth_sol[0][2], false);
 					break;
 				}
@@ -155,14 +174,36 @@ public class RBVisualization extends Activity {
 			accSensor = sensors.get(0);
 		}
 
-		_glView = new GLView(this, _object);
-		setContentView(_glView);
+		glView = new GLView(this, glData);
+		setContentView(glView);
+	}
+	
+	public void mesh_transform_custom(Parameter[] mu, GeometryData data) {
+		data.vframe_num = mu.length;
+		if (data.vframe_num == 1)
+			data.isgeoani = false;
+		else
+			data.isgeoani = true;
+		data.vnode = new float[data.vframe_num * data.nodes * 3];
+		for (int i = 0; i < data.vframe_num; i++) {
+			// get current nodal data
+			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(
+					mu[i].getArray(), data.reference_node.clone());
+			Log.d("GLRenderer", mu[i].getEntry(0) + " " + mu[i].getEntry(1));
+			Log.d("GLRenderer", tmpnode[4] + " " + data.node[4]);
+			data.node = tmpnode.clone();
+			// copy current nodal data into animation list
+			for (int j = 0; j < data.nodes; j++)
+				for (int k = 0; k < 3; k++) {
+					data.vnode[i * data.nodes * 3 + j * 3 + k] = tmpnode[j * 3 + k];
+				}
+		}
 	}
 
 	private final SensorEventListener mySensorListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent event) {
 			// send data
-			_glView.setSensorParam(event.values[0], event.values[1],
+			glView.setSensorParam(event.values[0], event.values[1],
 					event.values[2]);
 			// update (commented out since not used)
 			/*oldX = event.values[0];

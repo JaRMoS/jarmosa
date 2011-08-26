@@ -18,7 +18,7 @@
 
 package romsim.app.activity;
 
-import rb.java.Log;
+import rmcommon.Log;
 import romsim.app.activity.kermor.SimulationActivity;
 import romsim.app.activity.rb.RBActivity;
 import android.app.AlertDialog;

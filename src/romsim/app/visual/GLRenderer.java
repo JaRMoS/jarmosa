@@ -24,6 +24,7 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import rmcommon.geometry.GeometryData;
 import romsim.app.activity.rb.RBActivity;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -33,7 +34,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	@SuppressWarnings("unused")
 	private static final String LOG_TAG = GLRenderer.class.getSimpleName();
 
-	GLObject _object;
+	GeometryData _object;
 
 	// Camera control
 	private Camera camera;
@@ -41,11 +42,31 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private ShortBuffer _shortBuffer;
 	private FloatBuffer _floatBuffer;
 
+	/**
+	 * Offset for the node data in float buffer
+	 */
 	private int _vertex_off = 0;
+	
+	/**
+	 * Offset for the faces data in short buffer
+	 */
 	private int _index_off = 0;
+	
+	/**
+	 * Offset for the wireframe (edges) data in float buffer
+	 */
 	private int _indexwf_off = 0;
+	
+	/**
+	 * Offset in the float buffer for the normal data
+	 */
 	private int _normal_off = 0;
+	
+	/**
+	 * Offset for the color data in the float buffer
+	 */
 	private int[] _color_off;
+	
 	private int _anivertex_off = 0;
 
 	private float _width = 480f;
@@ -80,17 +101,22 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
-	/*
-	 * public GLRenderer(){ _object = new GLObject(); }
+	/**
+	 * Creates a new OpenGL renderer using the GLObject as geometry/field value data source
+	 * @param globj
 	 */
-	public GLRenderer(GLObject _input_object) {
-		_object = _input_object;
+	public GLRenderer(GeometryData globj) {
+		_object = globj;
 	}
 
-	// @Override
+	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
+		/*
+		 * Calls internal rendering preparations involving data from the GLObject 
+		 */
 		initRendering();
+		
 		camera = new Camera();
 		// set initial position away from the model in the y-direction
 		// looking toward the center of the model (0,0,0) horizontally
@@ -132,45 +158,63 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
 	}
 
-	// @Override
+	@Override
 	public void onSurfaceChanged(GL10 gl, int w, int h) {
 		gl.glViewport(0, 0, w, h);
 	}
 
+	/**
+	 * Initializes the rendering process (Vertex, face, color and normal openGL buffers)
+	 * 
+	 * Fills the short/float buffers and records the offsets for certain parts.
+	 * 
+	 */
 	private void initRendering() {
 		int short_count = 0;
 		int float_count = 0;
 
-		_shortBuffer = RBActivity.mRbModel._shortBuffer;
+		/*
+		 * Clear the buffers
+		 */
+		_shortBuffer = RBActivity.geoData._shortBuffer;
 		_shortBuffer.clear();
-		// _shortBuffer.position(0);
-		_floatBuffer = RBActivity.mRbModel._floatBuffer;
+		_floatBuffer = RBActivity.geoData._floatBuffer;
 		_floatBuffer.clear();
-		// _floatBuffer.position(0);
 
-		// Init vertex, face, color and normal openGL buffers
-
+		/*
+		 * Node float buffer
+		 */
 		_vertex_off = float_count;
 		_floatBuffer.put(_object.node);
 		float_count += _object.node.length;
 		Log.d("GLRenderer", "float_count (vertex) = " + float_count + "/"
 				+ _floatBuffer.capacity());
 
+		/*
+		 * Faces buffer
+		 */
 		_index_off = short_count;
 		_shortBuffer.put(_object.face);
 		short_count += _object.face.length;
 		Log.d("GLRenderer", "short_count (index) = " + short_count + "/"
 				+ _shortBuffer.capacity());
 
+		/*
+		 * Edges buffer
+		 */
 		_indexwf_off = short_count;
 		_shortBuffer.put(_object.face_wf);
 		short_count += _object.face_wf.length;
 		Log.d("GLRenderer", "short_count (indexwf) = " + short_count + "/"
 				+ _shortBuffer.capacity());
 
-		// animation color buffer has (frame_num) the time of data
-		_color_off = new int[_object.field_num];
-		for (int i = 0; i < _object.field_num; i++) {
+		/*
+		 * Colors for each solution field.
+		 * 
+		 * Animation color buffer has (frame_num) the time of data 
+		 */
+		_color_off = new int[_object.fields];
+		for (int i = 0; i < _object.fields; i++) {
 			_color_off[i] = float_count;
 			_floatBuffer.put(_object.ucolor[i]);
 			float_count += _object.ucolor[i].length;
@@ -214,7 +258,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 	// set the current rendering field
 	public void setcField(int cField) {
-		if (cField > (_object.field_num - 1))
+		if (cField > (_object.fields - 1))
 			cField = 0;
 		current_field = cField;
 	}
@@ -322,16 +366,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, _floatBuffer);
 		} else {
 			_floatBuffer.position(_anivertex_off + current_frame
-					* (_object.node_num * 3));
+					* (_object.nodes * 3));
 			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, _floatBuffer);
 		}
 
 		// specify the color data for the current frame
 		_floatBuffer.position(_color_off[current_field] + current_frame
-				* (_object.node_num * 4));
+				* (_object.nodes * 4));
 		gl.glColorPointer(4, GL10.GL_FLOAT, 0, _floatBuffer);
 		_shortBuffer.position(_index_off);
-		gl.glDrawElements(GL10.GL_TRIANGLES, _object.face_num * 3,
+		gl.glDrawElements(GL10.GL_TRIANGLES, _object.faces * 3,
 				GL10.GL_UNSIGNED_SHORT, _shortBuffer);
 
 		// Draw the wireframe for a n field object
@@ -339,7 +383,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// Draw the wireframe mesh
 			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
 			_shortBuffer.position(_indexwf_off);
-			gl.glDrawElements(GL10.GL_LINES, _object.face_num * 6,
+			gl.glDrawElements(GL10.GL_LINES, _object.faces * 6,
 					GL10.GL_UNSIGNED_SHORT, _shortBuffer);
 		}
 
