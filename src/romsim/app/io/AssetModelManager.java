@@ -72,7 +72,7 @@ public class AssetModelManager extends AModelManager {
 	public boolean modelFileExists(String filename) {
 		try {
 			for (String f : c.getAssets().list(getModelDir())) {
-				if (filename.equals(f)) return true;
+				if (f.equals(filename)) return true;
 			}
 		} catch (IOException e) {
 		}

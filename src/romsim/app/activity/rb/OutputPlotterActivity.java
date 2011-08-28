@@ -967,12 +967,12 @@ public class OutputPlotterActivity extends Activity {
 
 			String message = "Online N = " + RBActivity.mOnlineNForGui + "\n\n"
 					+ "Parameters: \n\n";
-			for (int i = 0; i < RBActivity.mCurrentParamForGUI.getNEntries(); i++) {
+			for (int i = 0; i < RBActivity.mCurrentParamForGUI.length; i++) {
 				if (isSweep && Integer.parseInt(xLabel) == (i + 1))
 					message = message + (i + 1) + ": " + "Sweep\n";
 				else
 					message = message + (i + 1) + ": "
-							+ RBActivity.mCurrentParamForGUI.getEntry(i) + "\n";
+							+ RBActivity.mCurrentParamForGUI[i] + "\n";
 			}
 			message = message + "\nChange values?";
 			infoBuilder.setMessage(message);
@@ -1051,11 +1051,9 @@ public class OutputPlotterActivity extends Activity {
 				}
 			}
 
-			RBActivity.mCurrentParamForGUI.setEntry(RBActivity.mSweepIndex,
-					xcurrent);
+			RBActivity.mCurrentParamForGUI[RBActivity.mSweepIndex] = xcurrent;
 			RBContainer rb = RBActivity.rb;
-			rb.mRbSystem
-					.setCurrentParameters(RBActivity.mCurrentParamForGUI);
+			rb.mRbSystem.getParams().setCurrent(RBActivity.mCurrentParamForGUI);
 			rb.mRbSystem.RB_solve(RBActivity.mOnlineNForGui);
 
 			double[][] new_RB_outputs_all_k = new double[n_outputs][n_time_steps + 1];

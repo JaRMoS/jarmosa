@@ -20,7 +20,6 @@ package romsim.app.activity.rb;
 
 import java.util.List;
 
-import rb.java.Parameter;
 import rb.java.RBContainer;
 import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
@@ -77,9 +76,9 @@ public class RBVisualization extends Activity {
 				LTfunc_array[0] = LT;
 				glData.set_LTfunc(LTfunc_array);
 			} else {
-				Parameter[] p = new Parameter[1];
-				p[0] = rb.mRbSystem.current_parameters.clone();
-				mesh_transform_custom(p,glData);
+				double[][] p = new double[1][];
+				p[0] = rb.mRbSystem.getParams().getCurrent().clone();
+				mesh_transform_custom(p, glData);
 			}
 
 			float[][][] truth_sol = rb.mRbSystem.get_truth_sol();
@@ -91,7 +90,7 @@ public class RBVisualization extends Activity {
 				/*
 				 * Check which solution field is to display.
 				 */
-				switch (rb.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
 					glData.set_field_data(truth_sol[0][0]);
 					break;
@@ -119,7 +118,7 @@ public class RBVisualization extends Activity {
 			 * System has complex data, so [*][0][*] and [*][1][*] are 
 			 */
 			else
-				switch (rb.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.getNumFields()) {
 				/*
 				 * Seems to be the only case: one field variable, but complex.
 				 * but why three fields?
@@ -141,7 +140,7 @@ public class RBVisualization extends Activity {
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
 			if (rb.mRbSystem.isReal)
-				switch (rb.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
 					glData.set_field_data(truth_sol[0][0]);
 					break;
@@ -158,7 +157,7 @@ public class RBVisualization extends Activity {
 					break;
 				}
 			else {
-				switch (rb.mRbSystem.get_mfield()) {
+				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
 					glData.set_field_data(truth_sol[0][0], truth_sol[0][1],
 							truth_sol[0][2], false);
@@ -178,7 +177,11 @@ public class RBVisualization extends Activity {
 		setContentView(glView);
 	}
 	
-	public void mesh_transform_custom(Parameter[] mu, GeometryData data) {
+	/**
+	 * @param mu
+	 * @param data
+	 */
+	public void mesh_transform_custom(double[][] mu, GeometryData data) {
 		data.vframe_num = mu.length;
 		if (data.vframe_num == 1)
 			data.isgeoani = false;
@@ -188,8 +191,8 @@ public class RBVisualization extends Activity {
 		for (int i = 0; i < data.vframe_num; i++) {
 			// get current nodal data
 			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(
-					mu[i].getArray(), data.reference_node.clone());
-			Log.d("GLRenderer", mu[i].getEntry(0) + " " + mu[i].getEntry(1));
+					mu[i], data.reference_node.clone());
+			Log.d("GLRenderer", mu[i][0] + " " + mu[i][1]);
 			Log.d("GLRenderer", tmpnode[4] + " " + data.node[4]);
 			data.node = tmpnode.clone();
 			// copy current nodal data into animation list

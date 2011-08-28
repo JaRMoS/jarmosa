@@ -33,6 +33,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -70,179 +71,29 @@ import android.widget.Toast;
 public class ModelListActivity extends Activity {
 
 	/**
-	 * Dialog ID for the case of an invalid or nonexistent Source ID
-	 */
-	public static final int NOSRC_DIALOG_ID = 1;
-
-	/**
-	 * Dialog ID for the dialog that tells the user there are no models for the
-	 * selected source.
-	 */
-	public static final int NO_MODELS_DIALOG_ID = 2;
-
-	private GridView gridView;
-
-	/**
-	 * The list items, sources either from assets or sd card.
-	 */
-	private List<ModelDescriptor> items;
-	
-	private AModelManager mng = null;
-
-	/**
-	 * @see android.app.Activity#onCreate(android.os.Bundle)
-	 */
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		setContentView(R.layout.prob_selection);
-		
-		// Create model manager instance to use
-		try {
-			mng = Const.getModelManager(getApplicationContext(), getIntent());
-		} catch (ModelManagerException e) {
-			Log.e("ModelListActivity", "Creation of ModelManager failed", e);
-			finish();
-			return;
-		}
-
-		final ProgressDialog pd = ProgressDialog.show(this, "",
-				"Loading model list", true);
-
-		final Handler h = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				pd.dismiss();
-
-				if (items == null || items.size() == 0) {
-					showDialog(NO_MODELS_DIALOG_ID);
-				} else {
-
-					gridView = (GridView) findViewById(R.id.gridview);
-
-					gridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-					gridView.setAdapter(new ModelsGridViewAdapter());
-
-					gridView.setOnItemClickListener(new GridView.OnItemClickListener() {
-
-						public void onItemClick(AdapterView<?> av, View view,
-								int position, long id) {
-							Intent intent = new Intent(
-									ModelListActivity.this,
-									ShowModelActivity.class);
-							// Forward extras
-							intent.putExtras(getIntent().getExtras());
-							ModelDescriptor i = (ModelDescriptor) av
-									.getItemAtPosition(position);
-							try {
-								mng.setModelDir(i.modeldir);
-							} catch (AModelManager.ModelManagerException me) {
-								Toast.makeText(ModelListActivity.this,
-										"Error setting the model directory "
-												+ i.modeldir, Toast.LENGTH_LONG);
-								Log.e("ProbSelectionActivity",
-										"Error setting the model directory "
-												+ i.modeldir, me);
-								return;
-							}
-							intent.putExtra("ModelType", i.type);
-							intent.putExtra(Const.EXTRA_MODELMANAGER_MODELDIR, i.modeldir);
-							ModelListActivity.this.startActivityForResult(
-									intent, 0);
-						}
-					});
-				}
-			}
-		};
-		(new Thread() {
-
-			@Override
-			public void run() {
-
-				try {
-					items = mng.getModelDescriptors();
-				} catch (AModelManager.ModelManagerException ex) {
-					Log.e("ProbSelectionActivity",
-							"Failed loading model descriptors", ex);
-				}
-
-				h.sendEmptyMessage(0);
-			}
-
-		}).start();
-	}
-
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		// Invalid Source is given. Close this activity.
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		if (id == NOSRC_DIALOG_ID) {
-			builder.setMessage("Invalid model source given, parsing failed.")
-					.setCancelable(false)
-					.setNeutralButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									ModelListActivity.this.finish();
-								}
-							});
-			return builder.create();
-		} else if (id == NO_MODELS_DIALOG_ID) {
-			builder.setMessage("No models found.")
-					.setCancelable(false)
-					.setNeutralButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									ModelListActivity.this.finish();
-									// dialog.dismiss();
-								}
-							});
-		}
-		return builder.create();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode < 0)
-			finish();
-	}
-
-	/**
-	 * Helper method that takes a list of folders and a source which creates the
-	 * ModelDescriptors using the ModelManager class.
-	 * 
-	 * Parses the corresponding "model.xml" file which is (so far) of the
-	 * structure
-	 * {@literal <rbappmodel title="SomeTitle" image="someimage.png"/>} The
-	 * title and image attributes are used for the GridView.
-	 * 
-	 * @param folders
-	 *            The model folder names
-	 * @param src
-	 *            The Source - See ModelManager SRC_ constants.
-	 * @return The ModelDescriptors for each model
-	 */
-
-	/**
 	 * Populates the gridview using the Activities "items" List of
 	 * ModelDescriptors.
 	 */
 	private class ModelsGridViewAdapter extends BaseAdapter {
 		
-		private BitmapDrawable[] imgs;
+		private Drawable[] imgs;
 		
 		ModelsGridViewAdapter() {
 			imgs = new BitmapDrawable[items.size()];
 			for(int i=0;i<items.size();i++) {
 				ModelDescriptor md = items.get(i);
 				if (md.image != null) {
-					imgs[i] = new BitmapDrawable(md.image);
+					imgs[i] = new BitmapDrawable(getResources(), md.image);
 					try {
 						md.image.close();
 					} catch (IOException io) {
 						Log.e("ProbSelectionActivity",
 								"Failed closing image stream", io);
+					}
+					// Take red cross if image cannot be read
+					if (((BitmapDrawable) imgs[i]).getBitmap() == null) {
+						Log.w("ROMSim:ModelListActivity", "Could not read image file for model "+md.title+" in folder "+md.modeldir);
+						imgs[i] = getResources().getDrawable(R.drawable.notfound);
 					}
 				} else imgs[i] = null;
 			}
@@ -299,6 +150,163 @@ public class ModelListActivity extends Activity {
 			v.setPadding(2, 4, 2, 8);
 			return v;
 		}
+	}
+
+	/**
+	 * Dialog ID for the dialog that tells the user there are no models for the
+	 * selected source.
+	 */
+	public static final int NO_MODELS_DIALOG_ID = 2;
+
+	/**
+	 * Dialog ID for the case of an invalid or nonexistent Source ID
+	 */
+	public static final int NOSRC_DIALOG_ID = 1;
+
+	private GridView gridView;
+	
+	/**
+	 * The list items, sources either from assets or sd card.
+	 */
+	private List<ModelDescriptor> items;
+	private ModelsGridViewAdapter mgva = null;
+
+	private AModelManager mng = null;
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode < 0)
+			finish();
+	}
+
+	/**
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		setContentView(R.layout.prob_selection);
+		
+		// Create model manager instance to use
+		try {
+			mng = Const.getModelManager(getApplicationContext(), getIntent());
+		} catch (ModelManagerException e) {
+			Log.e("ModelListActivity", "Creation of ModelManager failed", e);
+			finish();
+			return;
+		}
+
+		final ProgressDialog pd = ProgressDialog.show(this, "",
+				"Loading model list", true);
+
+		final Handler h = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				pd.dismiss();
+
+				if (items == null || items.size() == 0) {
+					showDialog(NO_MODELS_DIALOG_ID);
+				} else {
+
+					gridView = (GridView) findViewById(R.id.gridview);
+
+					gridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+					gridView.setAdapter(mgva);
+
+					gridView.setOnItemClickListener(new GridView.OnItemClickListener() {
+
+						public void onItemClick(AdapterView<?> av, View view,
+								int position, long id) {
+							Intent intent = new Intent(
+									ModelListActivity.this,
+									ShowModelActivity.class);
+							// Forward extras
+							intent.putExtras(getIntent().getExtras());
+							ModelDescriptor i = (ModelDescriptor) av
+									.getItemAtPosition(position);
+							try {
+								mng.setModelDir(i.modeldir);
+							} catch (AModelManager.ModelManagerException me) {
+								Toast.makeText(ModelListActivity.this,
+										"Error setting the model directory "
+												+ i.modeldir, Toast.LENGTH_LONG);
+								Log.e("ProbSelectionActivity",
+										"Error setting the model directory "
+												+ i.modeldir, me);
+								return;
+							}
+							intent.putExtra("ModelType", i.type);
+							intent.putExtra(Const.EXTRA_MODELMANAGER_MODELDIR, i.modeldir);
+							ModelListActivity.this.startActivityForResult(
+									intent, 0);
+						}
+					});
+				}
+			}
+		};
+		(new Thread() {
+
+			@Override
+			public void run() {
+
+				try {
+					items = mng.getModelDescriptors();
+					mgva = new ModelsGridViewAdapter();
+				} catch (AModelManager.ModelManagerException ex) {
+					Log.e("ProbSelectionActivity",
+							"Failed loading model descriptors", ex);
+				}
+
+				h.sendEmptyMessage(0);
+			}
+
+		}).start();
+	}
+
+	/**
+	 * Helper method that takes a list of folders and a source which creates the
+	 * ModelDescriptors using the ModelManager class.
+	 * 
+	 * Parses the corresponding "model.xml" file which is (so far) of the
+	 * structure
+	 * {@literal <rbappmodel title="SomeTitle" image="someimage.png"/>} The
+	 * title and image attributes are used for the GridView.
+	 * 
+	 * @param folders
+	 *            The model folder names
+	 * @param src
+	 *            The Source - See ModelManager SRC_ constants.
+	 * @return The ModelDescriptors for each model
+	 */
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		// Invalid Source is given. Close this activity.
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		if (id == NOSRC_DIALOG_ID) {
+			builder.setMessage("Invalid model source given, parsing failed.")
+					.setCancelable(false)
+					.setNeutralButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									ModelListActivity.this.finish();
+								}
+							});
+			return builder.create();
+		} else if (id == NO_MODELS_DIALOG_ID) {
+			builder.setMessage("No models found.")
+					.setCancelable(false)
+					.setNeutralButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									ModelListActivity.this.finish();
+									// dialog.dismiss();
+								}
+							});
+		}
+		return builder.create();
 	}
 
 }
