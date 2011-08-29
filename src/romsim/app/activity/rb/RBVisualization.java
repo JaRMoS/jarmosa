@@ -23,6 +23,7 @@ import java.util.List;
 import rb.java.RBContainer;
 import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
+import rmcommon.visual.ColorGenerator;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -33,39 +34,30 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 
 /**
- * @author  David J. Knezevic and Phuong Huynh
+ * @author David J. Knezevic and Phuong Huynh
  * @date 2010
- *
+ * 
  */
 public class RBVisualization extends Activity {
-	
+
 	@SuppressWarnings("unused")
 	private static String DEBUG_TAG = "RBVISUALIZATION";
-	
+
 	private GLView glView;
-//	private GLObject _object;
 
 	private SensorManager myManager;
 	private List<Sensor> sensors;
 	private Sensor accSensor;
 
-	//private float oldX, oldY, oldZ = 0f;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// _object = new GLObject();
 		RBContainer rb = RBActivity.rb;
-		GeometryData glData = RBActivity.geoData;
+		GeometryData glData = rb.mRbSystem.getGeometry();
 
 		Bundle extras = getIntent().getExtras();
 
-		/*
-		 * NEXT: Set field data to GLObject, which is stored in the RBActivity 
-		 * since it has been filled with geometry data there..
-		 * maybe one should load the geometry data the first time the model should be visualized ..
-		 */
 		/*
 		 * Standard case: Normal display.
 		 */
@@ -81,41 +73,42 @@ public class RBVisualization extends Activity {
 				mesh_transform_custom(p, glData);
 			}
 
-			float[][][] truth_sol = rb.mRbSystem.get_truth_sol();
+			float[][][] truth_sol = rb.mRbSystem.getFullSolution();
 
 			/*
-			 * System has real data, so only [*][0][*] is used 
+			 * System has real data, so only [*][0][*] is used
 			 */
 			if (rb.mRbSystem.isReal)
 				/*
 				 * Check which solution field is to display.
 				 */
 				switch (rb.mRbSystem.getNumFields()) {
+				// One field variable
 				case 1:
-					glData.set_field_data(truth_sol[0][0]);
+					glData.set1FieldData(truth_sol[0][0]);
 					break;
+				// Two field variables
 				case 2:
 					if (truth_sol[0][0].length == glData.nodes)
-						glData.set_field_data(truth_sol[0][0], truth_sol[1][0]);
+						// The solution data is node displacement data in x and
+						// y directions
+						glData.set2FieldDeformationData(truth_sol[0][0], truth_sol[1][0]);
 					else
-						glData.set_field_data(truth_sol[0][0],
-								truth_sol[1][0], false);
+						// The solution data are normal field values
+						glData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
 					if (truth_sol[0][0].length == glData.nodes)
-						glData.set_field_data(truth_sol[0][0],
-								truth_sol[1][0], truth_sol[2][0]);
+						glData.set3FieldDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					else
-						glData.set_field_data(truth_sol[0][0],
-								truth_sol[1][0], truth_sol[2][0], false);
+						glData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					break;
 				case 4:
-					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
-							truth_sol[2][0], truth_sol[3][0]);
+					glData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
 			/*
-			 * System has complex data, so [*][0][*] and [*][1][*] are 
+			 * System has complex data, so [*][0][*] and [*][1][*] are
 			 */
 			else
 				switch (rb.mRbSystem.getNumFields()) {
@@ -124,8 +117,7 @@ public class RBVisualization extends Activity {
 				 * but why three fields?
 				 */
 				case 1:
-					glData.set_field_data(truth_sol[0][0], truth_sol[0][1],
-							truth_sol[0][2], false);
+					glData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 		} else {
@@ -139,32 +131,34 @@ public class RBVisualization extends Activity {
 			}
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
-			if (rb.mRbSystem.isReal)
+			if (rb.mRbSystem.isReal) {
 				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
-					glData.set_field_data(truth_sol[0][0]);
+					glData.set1FieldData(truth_sol[0][0]);
 					break;
 				case 2:
-					glData.set_field_data(truth_sol[0][0], truth_sol[1][0]);
+					glData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
-					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
-							truth_sol[2][0]);
+					glData.set3FieldDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					break;
 				case 4:
-					glData.set_field_data(truth_sol[0][0], truth_sol[1][0],
-							truth_sol[2][0], truth_sol[3][0]);
+					glData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
-			else {
+			} else {
 				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
-					glData.set_field_data(truth_sol[0][0], truth_sol[0][1],
-							truth_sol[0][2], false);
+					glData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 			}
 		}
+		
+		/*
+		 * Add colors to the data!
+		 */
+		glData.computeColorData(RBActivity.cg);
 
 		// Set Sensor + Manager
 		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -176,7 +170,7 @@ public class RBVisualization extends Activity {
 		glView = new GLView(this, glData);
 		setContentView(glView);
 	}
-	
+
 	/**
 	 * @param mu
 	 * @param data
@@ -190,28 +184,28 @@ public class RBVisualization extends Activity {
 		data.vnode = new float[data.vframe_num * data.nodes * 3];
 		for (int i = 0; i < data.vframe_num; i++) {
 			// get current nodal data
-			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(
-					mu[i], data.reference_node.clone());
+			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(mu[i], data.reference_node.clone());
 			Log.d("GLRenderer", mu[i][0] + " " + mu[i][1]);
 			Log.d("GLRenderer", tmpnode[4] + " " + data.node[4]);
 			data.node = tmpnode.clone();
 			// copy current nodal data into animation list
 			for (int j = 0; j < data.nodes; j++)
 				for (int k = 0; k < 3; k++) {
-					data.vnode[i * data.nodes * 3 + j * 3 + k] = tmpnode[j * 3 + k];
+					data.vnode[i * data.nodes * 3 + j * 3 + k] = tmpnode[j * 3
+							+ k];
 				}
 		}
 	}
 
-	private final SensorEventListener mySensorListener = new SensorEventListener() {
+	private final SensorEventListener mySensorListener = new SensorEventListener(){
 		public void onSensorChanged(SensorEvent event) {
 			// send data
-			glView.setSensorParam(event.values[0], event.values[1],
-					event.values[2]);
+			glView.setSensorParam(event.values[0], event.values[1], event.values[2]);
 			// update (commented out since not used)
-			/*oldX = event.values[0];
-			oldY = event.values[1];
-			oldZ = event.values[2];*/
+			/*
+			 * oldX = event.values[0]; oldY = event.values[1]; oldZ =
+			 * event.values[2];
+			 */
 		}
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -221,8 +215,7 @@ public class RBVisualization extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		myManager.registerListener(mySensorListener, accSensor,
-				SensorManager.SENSOR_DELAY_GAME);
+		myManager.registerListener(mySensorListener, accSensor, SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	@Override

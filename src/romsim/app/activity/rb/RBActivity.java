@@ -27,9 +27,11 @@ import rb.java.RBContainer;
 import rb.java.SystemType;
 import rb.java.TransientRBSystem;
 import rmcommon.Parameters;
+import rmcommon.geometry.DiscretizationType;
 import rmcommon.geometry.GeometryData;
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
+import rmcommon.visual.ColorGenerator;
 import romsim.app.ModelManagerProgressHandler;
 import romsim.app.R;
 import romsim.app.misc.rb.IndexedButton;
@@ -144,14 +146,14 @@ public class RBActivity extends Activity {
 	private String dexFileName = "AffineFunctions.dex";
 
 	/**
-	 * Graphics object - still to be renamed to something better i guess
-	 */
-	public static GeometryData geoData;
-
-	/**
 	 * The RB Container with all the system and model data (from JRB)
 	 */
 	public static RBContainer rb;
+	
+	/**
+	 * The color generator used to color the field values
+	 */
+	public static ColorGenerator cg;
 
 	private AModelManager mng;
 
@@ -170,10 +172,8 @@ public class RBActivity extends Activity {
 			return;
 		}
 
-		geoData = new GeometryData(); // RBActivity.this
-		geoData.allocateBuffer();
-
 		rb = new RBContainer();
+		cg = new ColorGenerator();
 
 		// initialize sweep index to -1
 		mSweepIndex = -1;
@@ -781,9 +781,6 @@ public class RBActivity extends Activity {
 			// Call the main model loading method
 			success &= rb.loadModel(m);
 
-			// Load geometry data (if loading successful so far)
-			if (success) success &= geoData.loadModelGeometry(m);
-
 			Message msg = mHandler.obtainMessage();
 			Bundle b = new Bundle();
 			b.putBoolean("loadsuccess", success);
@@ -809,7 +806,7 @@ public class RBActivity extends Activity {
 					handler.sendEmptyMessage(0);
 				} else { // We need to perform a sweep
 					int numSweepPts = 10;
-					numSweepPts = Math.round(100000 / (rb.mRbSystem.getNumFields() * rb.mRbSystem.get_calN()));
+					numSweepPts = Math.round(100000 / (rb.mRbSystem.getNumFields() * rb.mRbSystem.getGeometry().nodes));
 					if (!rb.mRbSystem.isReal) numSweepPts /= 3;
 					numSweepPts = numSweepPts > 10 ? 10 : numSweepPts;
 					// numSweepPts = 50;
@@ -864,7 +861,7 @@ public class RBActivity extends Activity {
 							vLTfunc[i] = rb.mRbSystem.get_tranformation_data();
 						}
 					}
-					geoData.vLTfunc = vLTfunc;
+					rb.mRbSystem.getGeometry().vLTfunc = vLTfunc;
 					rb.mRbSystem.set_sweep_sol(RB_sweep_sol);
 
 					bundle.putBoolean("isSweep", true);
@@ -899,15 +896,13 @@ public class RBActivity extends Activity {
 				bundle.putBoolean("isReal", rb.mRbSystem.isReal);
 				bundle.putBoolean("isSweep", false);
 				bundle.putString("title", "Online N = " + mOnlineNForGui
-						+ ", parameter = " + mCurrentParamForGUI.toString());
+						+ ", parameter = " + Arrays.toString(mCurrentParamForGUI));
 				bundle.putDouble("dt", ((TransientRBSystem) rb.mRbSystem).get_dt());
 				bundle.putDouble("xMin", 0);
 				bundle.putDouble("xMax", ((TransientRBSystem) rb.mRbSystem).get_dt()
 						* rb.mRbSystem.get_K());
 				bundle.putString("xLabel", "time");
-				bundle.putInt("n_time_steps", rb.mRbSystem.n_plotting_steps); // rb.mRbSystem.get_K()
-																				// +
-																				// 1
+				bundle.putInt("n_time_steps", ((TransientRBSystem)rb.mRbSystem).n_plotting_steps);
 				bundle.putInt("n_outputs", rb.mRbSystem.getNumOutputs());
 				for (int i = 0; i < rb.mRbSystem.getNumOutputs(); i++) {
 					bundle.putDoubleArray("output_data_" + i, rb.mRbSystem.RB_outputs_all_k[i]);

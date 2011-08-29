@@ -50,12 +50,12 @@ public class GLView extends GLSurfaceView {
 
 	/**
 	 * @param context
-	 * @param _object
+	 * @param geoData
 	 */
-	public GLView(Context context, GeometryData _object) {
+	public GLView(Context context, GeometryData geoData) {
 		super(context);
 		setFocusableInTouchMode(true);
-		_renderer = new GLRenderer(_object);
+		_renderer = new GLRenderer(geoData);
 
 		Configuration c = getResources().getConfiguration();
 		if (c.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -144,8 +144,8 @@ public class GLView extends GLSurfaceView {
 				_renderer.increase_ndframe(-1f);
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((_renderer._object.is2D())
-						|| (_renderer._object.fields > 0))
+				if ((_renderer.fGeoData.is2D())
+						|| (_renderer.fGeoData.fields > 0))
 					_renderer.setcField(_renderer.getcField() + 1);
 				else
 					// enable tilting
@@ -158,7 +158,7 @@ public class GLView extends GLSurfaceView {
 				return true;
 			case 84: // KEYCODE_SEARCH
 				_renderer.ispaused = !_renderer.ispaused;
-				if (!_renderer._object.is2D())
+				if (!_renderer.fGeoData.is2D())
 					_renderer.isFrontFace = !_renderer.isFrontFace;
 				return true;
 			default:
@@ -182,7 +182,7 @@ public class GLView extends GLSurfaceView {
 				_renderer.zoomout(); // and zoom out if not
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			_renderer.zoomreset(); // reset to original status when users push
+			_renderer.resetZoom(); // reset to original status when users push
 									// the "pearl"
 			_renderer.setPos(true, 0.0f, 0.0f, 0.0f);
 			_renderer.ispaused = false;
