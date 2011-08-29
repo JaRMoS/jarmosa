@@ -19,6 +19,7 @@
 package romsim.app.activity.rb;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 import rb.java.Const;
 import rb.java.InconsistentStateException;
@@ -338,7 +339,7 @@ public class RBActivity extends Activity {
 
 			// Create the output string
 			String rb_solve_message = "Online N = " + mOnlineNForGui
-					+ "\n\u00B5 = [ " + rb.mRbSystem.getParams().getCurrent()
+					+ "\n\u00B5 = [ " + Arrays.toString(rb.mRbSystem.getParams().getCurrent())
 					+ "]\n\n";
 
 			DecimalFormat twoPlaces = new DecimalFormat("0.###E0");
