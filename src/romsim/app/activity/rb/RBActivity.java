@@ -608,10 +608,12 @@ public class RBActivity extends Activity {
 			for (int i = 0; i < np; i++) {
 				displayParamValue(i, mCurrentParamForGUI[i]);
 
-				// Also set param bars to zero to match min_param
-				mParamBars[i].setProgress(0);
+				// Also set param bars to match current param
+				int prog = (int)Math.round(100 * mCurrentParamForGUI[i] / (p.getMaxValue(i)-p.getMinValue(i)));
+				mParamBars[i].setProgress(prog);
 			}
 		} catch (Exception e) {
+			Log.e("RBActivity", "Failed init param bars", e);
 			e.printStackTrace();
 		}
 
