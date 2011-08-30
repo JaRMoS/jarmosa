@@ -897,10 +897,10 @@ public class RBActivity extends Activity {
 				bundle.putBoolean("isSweep", false);
 				bundle.putString("title", "Online N = " + mOnlineNForGui
 						+ ", parameter = " + Arrays.toString(mCurrentParamForGUI));
-				bundle.putDouble("dt", ((TransientRBSystem) rb.mRbSystem).get_dt());
+				bundle.putDouble("dt", ((TransientRBSystem) rb.mRbSystem).getdt());
 				bundle.putDouble("xMin", 0);
-				bundle.putDouble("xMax", ((TransientRBSystem) rb.mRbSystem).get_dt()
-						* rb.mRbSystem.get_K());
+				bundle.putDouble("xMax", ((TransientRBSystem) rb.mRbSystem).getdt()
+						* rb.mRbSystem.getTotalTimesteps());
 				bundle.putString("xLabel", "time");
 				bundle.putInt("n_time_steps", ((TransientRBSystem)rb.mRbSystem).n_plotting_steps);
 				bundle.putInt("n_outputs", rb.mRbSystem.getNumOutputs());
