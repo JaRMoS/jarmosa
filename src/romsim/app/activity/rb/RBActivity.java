@@ -22,13 +22,10 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import rb.java.Const;
-import rb.java.InconsistentStateException;
 import rb.java.RBContainer;
 import rb.java.SystemType;
 import rb.java.TransientRBSystem;
 import rmcommon.Parameters;
-import rmcommon.geometry.DiscretizationType;
-import rmcommon.geometry.GeometryData;
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
 import rmcommon.visual.ColorGenerator;

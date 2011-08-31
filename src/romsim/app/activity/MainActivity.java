@@ -22,6 +22,10 @@ import android.widget.ImageButton;
  * @author Daniel Wirtz
  * @date Aug 23, 2011
  * 
+ * TODO: Check out-of-memory errors
+ * TODO: New orientation causes model to be re-loaded in RBActivity
+ * TODO: model list as single list with descriptions
+ * TODO: fix visualization black moments for rb models
  */
 public class MainActivity extends Activity {
 

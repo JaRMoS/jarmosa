@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import romsim.app.Const;
-import dalvik.system.DexClassLoader;
 import android.content.Context;
 import android.util.Log;
+import dalvik.system.DexClassLoader;
 
 /**
  * @author Daniel Wirtz

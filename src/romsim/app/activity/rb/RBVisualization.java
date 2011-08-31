@@ -23,7 +23,6 @@ import java.util.List;
 import rb.java.RBContainer;
 import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
-import rmcommon.visual.ColorGenerator;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -39,9 +38,6 @@ import android.os.Bundle;
  * 
  */
 public class RBVisualization extends Activity {
-
-	@SuppressWarnings("unused")
-	private static String DEBUG_TAG = "RBVISUALIZATION";
 
 	private GLView glView;
 
@@ -129,6 +125,7 @@ public class RBVisualization extends Activity {
 			} else {
 				mesh_transform_custom(RBActivity.mSweepParam, glData);
 			}
+			
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
 			if (rb.mRbSystem.isReal) {

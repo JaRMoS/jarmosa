@@ -71,12 +71,15 @@ public class AssetModelManager extends AModelManager {
 	@Override
 	public boolean modelFileExists(String filename) {
 		try {
-			for (String f : c.getAssets().list(getModelDir())) {
-				if (f.equals(filename)) return true;
-			}
+			// Faster that way
+			getInStreamImpl(filename).close();
+//			for (String f : c.getAssets().list(getModelDir())) {
+//				if (f.equals(filename)) return true;
+//			}
 		} catch (IOException e) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 }
