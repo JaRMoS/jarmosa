@@ -19,6 +19,7 @@
 package romsim.app.activity;
 
 import rmcommon.Log;
+import rmcommon.ModelType;
 import romsim.app.activity.kermor.SimulationActivity;
 import romsim.app.activity.rb.RBActivity;
 import android.app.AlertDialog;
@@ -92,15 +93,16 @@ public class ShowModelActivity extends TabActivity {
 		Intent intentTwo = null;
 		
 		// Using the intent field "ModelType" here avoids instantiation of a new AModelManager..
-		String mt = getIntent().getStringExtra("ModelType");
-		if ("rb".equals(mt) || "rbappmit".equals(mt)) {
+		ModelType mt = (ModelType)getIntent().getSerializableExtra("ModelType");
+		if (mt == ModelType.JRB || mt == ModelType.rbappmit) {
 			intentTwo = new Intent(ShowModelActivity.this, RBActivity.class);
-		} else if ("kermor".equals(mt)) {
+		} else if (mt == ModelType.JKerMor) {
 			intentTwo = new Intent(ShowModelActivity.this, SimulationActivity.class);
 		} else {
 			Log.e("ShowModelActitity", "Unknown model type: " + mt);
-			Toast.makeText(this, "Unknown model type: "+ mt, Toast.LENGTH_LONG);
+			Toast.makeText(this, "Unknown model type: "+ mt, Toast.LENGTH_LONG).show();
 			finish();
+			return;
 		}
 		intentTwo.putExtras(getIntent().getExtras());
 		two.setContent(intentTwo);

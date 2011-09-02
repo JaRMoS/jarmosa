@@ -50,17 +50,14 @@ public class SDModelManager extends FileModelManager {
 	 */
 	@Override
 	public ClassLoader getClassLoader() {
-		// return new PathClassLoader(getFullModelPath(),
-		// getClass().getClassLoader());//super.getClassLoader());
 		try {
 			return dh.getDexClassLoader(getInStream(Const.DEX_CLASSES_JARFILE));
 		} catch (IOException e) {
-			Log.e("AssetModelManager", "I/O Exception during input stream creation for file "
-					+ Const.DEX_CLASSES_JARFILE + " in model " + getModelDir() + ", loaded from SD card", e);
+			Log.e("SDModelManager", "I/O Exception during input stream creation for file "
+					+ Const.DEX_CLASSES_JARFILE + " in model " + getModelDir() + ", loading from SD card", e);
 			e.printStackTrace();
 			return null;
 		}
-//		return new DexClassLoader(getFullModelPath() + Const.DEX_CLASSES_JARFILE, Const.APP_DATA_DIRECTORY, null, getClass().getClassLoader());
 	}
 
 	/**

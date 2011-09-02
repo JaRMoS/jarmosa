@@ -2,16 +2,34 @@
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent" android:id="@+id/mainmenulayout"
 	android:layout_width="fill_parent">
-	<TextView android:enabled="true" android:textColor="#6666FF"
-		android:layout_width="wrap_content" android:id="@+id/textView1"
-		android:layout_height="wrap_content" android:padding="5px" android:text="@string/welcome_str"></TextView>
-	<ImageView android:layout_width="wrap_content" android:src="@drawable/icon"
+	<TextView android:enabled="true" android:textColor="@color/white"
+		android:textSize="17sp" android:layout_width="fill_parent" android:id="@+id/textView1"
+		android:layout_height="wrap_content" android:padding="5px"
+		android:text="@string/welcome_str" android:gravity="center"></TextView>
+	<ImageView android:layout_width="wrap_content" android:src="@android:drawable/sym_def_app_icon"
 		android:layout_height="wrap_content" android:id="@+id/imgLogo"></ImageView>
-	<Button android:text="From Assets" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:id="@+id/btnAssets"></Button>
-	<Button android:id="@+id/btnSDCard" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:text="From SD-Card"></Button>
-	<ImageButton android:src="@drawable/server_icon"
-		android:layout_width="wrap_content" android:id="@+id/btnDownload"
-		android:layout_height="wrap_content" android:clickable="true"></ImageButton>
+	<TextView android:enabled="true" android:textColor="@color/white"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:padding="7px" android:textSize="14sp"
+		android:text="ROMSim (Reduced Order Model Simulation) enables simulation and result visualization for models from JRB, JKerMor and rbappmit."
+		android:gravity="center"></TextView>
+	<TextView android:enabled="true" android:textColor="@color/white"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:padding="7px" android:textSize="17sp" android:text="Select models source:"
+		android:gravity="center"></TextView>
+	<Button android:text="Android Assets" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:id="@+id/btnAssets"
+		android:textSize="18sp" android:drawableRight="@drawable/emo_im_cool"
+		android:gravity="left|center_vertical">
+	</Button>
+	<Button android:id="@+id/btnSDCard" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="Local SD-Card"
+		android:drawableRight="@android:drawable/ic_menu_save"
+		android:textSize="18sp" android:gravity="left|center_vertical">
+	</Button>
+	<Button android:id="@+id/btnDownload" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="Web location"
+		android:drawableRight="@drawable/server_icon" android:textSize="18sp"
+		android:gravity="left|center_vertical">
+	</Button>
 </TableLayout>

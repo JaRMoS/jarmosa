@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/griditem" android:orientation="vertical"
-	android:layout_weight="1">
+	android:orientation="vertical">
 
-	<ImageView android:id="@+id/icon" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:scaleType="centerInside" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
-	<TextView android:id="@+id/label" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:textSize="16sp"
-		android:gravity="center" android:textColor="@color/white" />
+		<ImageView android:id="@+id/gve_icon" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:scaleType="centerInside"
+			android:padding="1sp" android:layout_gravity="top"/>
 
+		<TableLayout android:id="@+id/tableLayout1"
+			android:layout_width="wrap_content" android:layout_height="wrap_content">
+			<TextView android:id="@+id/gve_title" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:textSize="18sp"
+				android:gravity="left" android:textColor="@color/white"/>
+			<TextView android:id="@+id/gve_modeltype"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:textSize="14sp" android:gravity="left" android:textColor="@color/white" />
+			<TextView android:id="@+id/gve_date" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:textSize="14sp"
+				android:gravity="left" android:textColor="@color/white" />
+			<TextView android:id="@+id/gve_description"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:textSize="14sp" android:gravity="fill_vertical"
+				android:textColor="@color/white"/>
+		</TableLayout>
+	</LinearLayout>
+
+	<!-- <View android:layout_height="2dip" android:background="@color/grey" 
+		android:layout_width="match_parent" /> -->
 </LinearLayout>

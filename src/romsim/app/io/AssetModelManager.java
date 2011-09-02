@@ -5,6 +5,7 @@ package romsim.app.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import rmcommon.io.AModelManager;
 import romsim.app.Const;
@@ -80,6 +81,11 @@ public class AssetModelManager extends AModelManager {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public URI getModelURI() {
+		return URI.create("file:///android_asset/" + getModelDir());
 	}
 
 }

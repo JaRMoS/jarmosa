@@ -28,6 +28,8 @@ import rb.java.TransientRBSystem;
 import rmcommon.Parameters;
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
+import rmcommon.io.CachingModelManager;
+import rmcommon.io.WebModelManager;
 import rmcommon.visual.ColorGenerator;
 import romsim.app.ModelManagerProgressHandler;
 import romsim.app.R;
@@ -146,7 +148,7 @@ public class RBActivity extends Activity {
 	 * The RB Container with all the system and model data (from JRB)
 	 */
 	public static RBContainer rb;
-	
+
 	/**
 	 * The color generator used to color the field values
 	 */
@@ -162,7 +164,8 @@ public class RBActivity extends Activity {
 
 		// Create model manager instance to use
 		try {
-			mng = romsim.app.Const.getModelManager(getApplicationContext(), getIntent());
+			mng = romsim.app.Const.getModelManager(getApplicationContext(),
+					getIntent());
 		} catch (ModelManagerException e) {
 			Log.e("RBActivity", "Creation of ModelManager failed", e);
 			finish();
@@ -177,7 +180,7 @@ public class RBActivity extends Activity {
 
 		// Add listener to the Solve button
 		Button solveButton = (Button) findViewById(R.id.solveButton);
-		solveButton.setOnClickListener(new View.OnClickListener(){
+		solveButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				pd = ProgressDialog.show(RBActivity.this, "", "Solving...");
 				SolveThread st = new SolveThread();
@@ -188,20 +191,23 @@ public class RBActivity extends Activity {
 
 		// Attach a listener to onlineNSeekBar
 		SeekBar onlineNSeekBar = (SeekBar) findViewById(R.id.onlineNSeekbar);
-		onlineNSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+		onlineNSeekBar
+				.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				mOnlineNForGui = (progress + 1);
-				TextView currentOnlineNView = (TextView) findViewById(R.id.currentOnlineN);
-				currentOnlineNView.setText("Online N =  " + mOnlineNForGui);
-			}
+					public void onProgressChanged(SeekBar seekBar,
+							int progress, boolean fromUser) {
+						mOnlineNForGui = (progress + 1);
+						TextView currentOnlineNView = (TextView) findViewById(R.id.currentOnlineN);
+						currentOnlineNView.setText("Online N =  "
+								+ mOnlineNForGui);
+					}
 
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
 
-			public void onStopTrackingTouch(SeekBar seekBar) {
-			}
-		});
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
 
 		// Now, call the ListActivity to select problem
 		// Intent intent = new Intent(RBActivity.this,
@@ -209,7 +215,7 @@ public class RBActivity extends Activity {
 		// RBActivity.this.startActivityForResult(intent, SELECT_PROBLEM_TYPE);
 
 		AModelManager m = mng;
-		m.addMessageHandler(new ModelManagerProgressHandler(){
+		m.addMessageHandler(new ModelManagerProgressHandler() {
 
 			/**
 			 * @see android.os.Handler#handleMessage(android.os.Message)
@@ -222,16 +228,23 @@ public class RBActivity extends Activity {
 		});
 
 		Log.d("DEBUG_TAG", "Loading model " + m.getModelDir());
-		String title = "Loading " + m.getModelDir() + "...";
+		String op = "Loading";
+		if (m instanceof CachingModelManager) {
+			op = "Caching";
+		} else if (m instanceof WebModelManager) {
+			op = "Downloading";
+		}
+		String title = op + " " + m.getModelDir() + "...";
 
-		pd = ProgressDialog.show(RBActivity.this, title, "", true, true, new OnCancelListener(){
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				delete_downloaded_files();
-				setResult(0);
-				finish();
-			}
-		});
+		pd = ProgressDialog.show(RBActivity.this, title, "", true, true,
+				new OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						delete_downloaded_files();
+						setResult(0);
+						finish();
+					}
+				});
 		// Start the model loading
 		new ModelLoader(downloadHandler).start();
 	}
@@ -261,22 +274,23 @@ public class RBActivity extends Activity {
 		Dialog dialog;
 		AlertDialog.Builder builder;
 
-		final Parameters p = rb.mRbSystem.getParams();
-		final int np = p.getNumParams();
-
 		switch (id) {
 
 		case DOWNLOAD_FAILED_DIALOG_ID: {
 
 			String title = "Failed loading the model.";
-			Log.d(DEBUG_TAG, "Error loading model, modeldir: "
-					+ mng.getModelDir());
+			Log.d(DEBUG_TAG,
+					"Error loading model, modeldir: " + mng.getModelDir());
 			builder = new AlertDialog.Builder(this);
-			builder.setMessage(title).setCancelable(false).setNeutralButton("OK", new DialogInterface.OnClickListener(){
-				public void onClick(DialogInterface dialog, int id) {
-					RBActivity.this.finish();
-				}
-			});
+			builder.setMessage(title)
+					.setCancelable(false)
+					.setNeutralButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									RBActivity.this.finish();
+								}
+							});
 			dialog = builder.create();
 		}
 			break;
@@ -289,7 +303,7 @@ public class RBActivity extends Activity {
 			dialog.setCancelable(false);
 
 			Button okButton = (Button) dialog.findViewById(R.id.okButton);
-			okButton.setOnClickListener(new View.OnClickListener(){
+			okButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 					dismissDialog(RB_SOLVE_DIALOG_ID);
@@ -298,8 +312,9 @@ public class RBActivity extends Activity {
 
 			});
 
-			Button visButton = (Button) dialog.findViewById(R.id.steadyVisButton);
-			visButton.setOnClickListener(new View.OnClickListener(){
+			Button visButton = (Button) dialog
+					.findViewById(R.id.steadyVisButton);
+			visButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 
@@ -327,7 +342,8 @@ public class RBActivity extends Activity {
 						 * bundle.putFloatArray("field"+String.valueOf(i)+"I",
 						 * truth_sol[1]); }
 						 */
-						Intent intent = new Intent(RBActivity.this, RBVisualization.class);
+						Intent intent = new Intent(RBActivity.this,
+								RBVisualization.class);
 						intent.putExtras(bundle);
 						RBActivity.this.startActivity(intent);
 					}
@@ -336,7 +352,8 @@ public class RBActivity extends Activity {
 
 			// Create the output string
 			String rb_solve_message = "Online N = " + mOnlineNForGui
-					+ "\n\u00B5 = [ " + Arrays.toString(rb.mRbSystem.getParams().getCurrent())
+					+ "\n\u00B5 = [ "
+					+ Arrays.toString(rb.mRbSystem.getParams().getCurrent())
 					+ "]\n\n";
 
 			DecimalFormat twoPlaces = new DecimalFormat("0.###E0");
@@ -357,9 +374,11 @@ public class RBActivity extends Activity {
 				for (int i = 0; i < rb.mRbSystem.getNumOutputs(); i++) {
 
 					double output_i_r = rb.mRbSystem.get_RB_output(i, true);
-					double output_bound_i_r = rb.mRbSystem.get_RB_output_error_bound(i, true);
+					double output_bound_i_r = rb.mRbSystem
+							.get_RB_output_error_bound(i, true);
 					double output_i_i = rb.mRbSystem.get_RB_output(i, false);
-					double output_bound_i_i = rb.mRbSystem.get_RB_output_error_bound(i, false);
+					double output_bound_i_i = rb.mRbSystem
+							.get_RB_output_error_bound(i, false);
 
 					rb_solve_message += "Output " + (i + 1) + ":\n"
 							+ "Value = " + twoPlaces.format(output_i_r) + " + "
@@ -369,13 +388,15 @@ public class RBActivity extends Activity {
 							+ twoPlaces.format(output_bound_i_i) + "i\n\n";
 				}
 
-			TextView outputView = (TextView) dialog.findViewById(R.id.rb_solve_output);
+			TextView outputView = (TextView) dialog
+					.findViewById(R.id.rb_solve_output);
 			outputView.setText(rb_solve_message);
 
 			break;
 
-		case SWEEP_DIALOG_ID:
-
+		case SWEEP_DIALOG_ID: {
+			final Parameters p = rb.mRbSystem.getParams();
+			final int np = p.getNumParams();
 			try {
 				final String[] paramStrings = new String[np + 1];
 
@@ -388,65 +409,76 @@ public class RBActivity extends Activity {
 
 				builder = new AlertDialog.Builder(RBActivity.this);
 				builder.setTitle("Pick sweep parameter");
-				builder.setItems(paramStrings, new DialogInterface.OnClickListener(){
-					public void onClick(DialogInterface dialog, int item) {
-						// Show a Toast for the selected item
-						Toast.makeText(getApplicationContext(), paramStrings[item], Toast.LENGTH_SHORT).show();
-						// Send a message that indicates which parameter
-						// was chosen
-						sweepHandler.sendEmptyMessage(item - 1);
+				builder.setItems(paramStrings,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int item) {
+								// Show a Toast for the selected item
+								Toast.makeText(getApplicationContext(),
+										paramStrings[item], Toast.LENGTH_SHORT)
+										.show();
+								// Send a message that indicates which parameter
+								// was chosen
+								sweepHandler.sendEmptyMessage(item - 1);
 
-						// disable selected slider, enable all others
-						// set disabled slider's progress to 0, all
-						// others to old values
-						try {
-							for (int i = 0; i < np; i++) {
-								mParamBars[i].setEnabled(true);
-								double slopeVal = (100 / (p.getMaxValue(i) - p.getMinValue(i)));
-								Double progressVal = Double.valueOf((slopeVal * mCurrentParamForGUI[i])
-										- (p.getMinValue(i) * slopeVal));
-								mParamBars[i].setProgress(progressVal.intValue());
-							}
-						} catch (Exception e) {
-						}
-						if (item >= 1) {
-							mParamBars[item - 1].setProgress(0);
-							mParamBars[item - 1].setEnabled(false);
-						}
+								// disable selected slider, enable all others
+								// set disabled slider's progress to 0, all
+								// others to old values
+								try {
+									for (int i = 0; i < np; i++) {
+										mParamBars[i].setEnabled(true);
+										double slopeVal = (100 / (p
+												.getMaxValue(i) - p
+												.getMinValue(i)));
+										Double progressVal = Double
+												.valueOf((slopeVal * mCurrentParamForGUI[i])
+														- (p.getMinValue(i) * slopeVal));
+										mParamBars[i].setProgress(progressVal
+												.intValue());
+									}
+								} catch (Exception e) {
+								}
+								if (item >= 1) {
+									mParamBars[item - 1].setProgress(0);
+									mParamBars[item - 1].setEnabled(false);
+								}
 
-						// disable selected parameter button, enable all
-						// others
-						// set disabled button to "sweep", all others to
-						// old values
-						try {
-							for (int i = 0; i < np; i++) {
-								displayParamValue(i, mCurrentParamForGUI[i]);
-								mParamButtons[i].setEnabled(true);
+								// disable selected parameter button, enable all
+								// others
+								// set disabled button to "sweep", all others to
+								// old values
+								try {
+									for (int i = 0; i < np; i++) {
+										displayParamValue(i,
+												mCurrentParamForGUI[i]);
+										mParamButtons[i].setEnabled(true);
+									}
+								} catch (Exception e) {
+								}
+								if (item >= 1) {
+									mParamButtons[item - 1].setText("Sweep");
+									mParamButtons[item - 1].setEnabled(false);
+								}
 							}
-						} catch (Exception e) {
-						}
-						if (item >= 1) {
-							mParamButtons[item - 1].setText("Sweep");
-							mParamButtons[item - 1].setEnabled(false);
-						}
-					}
-				});
+						});
 				dialog = builder.create();
 			} catch (Exception e) {
-				Log.e(DEBUG_TAG, "Exception thrown during creation of Sweep dialog");
+				Log.e(DEBUG_TAG,
+						"Exception thrown during creation of Sweep dialog");
 				dialog = null;
 			}
-
 			break;
+		}
 
-		case PARAM_DIALOG_ID:
+		case PARAM_DIALOG_ID: {
+			final Parameters p = rb.mRbSystem.getParams();
 			dialog = new Dialog(this);
 			dialog.setContentView(R.layout.rb_param_dialog);
 			dialog.setTitle("Minimum: " + p.getMinValue(paramButtonIndex)
 					+ " Maximum: " + p.getMaxValue(paramButtonIndex));
 			dialog.setCancelable(false);
 
-			paramInputField = (EditText) dialog.findViewById(R.id.param_input_textview);
+			paramInputField = (EditText) dialog
+					.findViewById(R.id.param_input_textview);
 
 			// field should accept signed doubles only
 			paramInputField.setInputType(InputType.TYPE_CLASS_NUMBER
@@ -455,13 +487,15 @@ public class RBActivity extends Activity {
 
 			// user-submitted parameter value will be handled when the ok button
 			// is pressed
-			Button okButton2 = (Button) dialog.findViewById(R.id.param_okButton);
-			okButton2.setOnClickListener(new View.OnClickListener(){
+			Button okButton2 = (Button) dialog
+					.findViewById(R.id.param_okButton);
+			okButton2.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 					// determine if value in input field is within acceptable
 					// range
-					String userParamString = paramInputField.getText().toString();
+					String userParamString = paramInputField.getText()
+							.toString();
 					double userParam;
 					try {
 						userParam = Double.parseDouble(userParamString);
@@ -474,15 +508,20 @@ public class RBActivity extends Activity {
 					if (userParam <= p.getMaxValue(paramButtonIndex)
 							&& userParam >= p.getMinValue(paramButtonIndex)) {
 						// update parameter bars
-						double slopeVal = (100 / (p.getMaxValue(paramButtonIndex) - p.getMinValue(paramButtonIndex)));
-						Double progressVal = Double.valueOf((slopeVal * userParam)
-								- (p.getMinValue(paramButtonIndex) * slopeVal));
-						mParamBars[paramButtonIndex].setProgress(progressVal.intValue());
+						double slopeVal = (100 / (p
+								.getMaxValue(paramButtonIndex) - p
+								.getMinValue(paramButtonIndex)));
+						Double progressVal = Double
+								.valueOf((slopeVal * userParam)
+										- (p.getMinValue(paramButtonIndex) * slopeVal));
+						mParamBars[paramButtonIndex].setProgress(progressVal
+								.intValue());
 
 						// call displayParamValue to update parameter value
 						displayParamValue(paramButtonIndex, userParam);
 					} else {
-						Toast.makeText(getApplicationContext(), "Invalid Value", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(),
+								"Invalid Value", Toast.LENGTH_SHORT).show();
 					}
 
 					dismissDialog(PARAM_DIALOG_ID);
@@ -490,8 +529,8 @@ public class RBActivity extends Activity {
 				}
 
 			});
-
 			break;
+		}
 		default:
 			dialog = null;
 		}
@@ -529,7 +568,8 @@ public class RBActivity extends Activity {
 		// shows
 		mCurrentParamForGUI[index] = Double.parseDouble(current_param_str);
 
-		mParamLabels[index].setText(Html.fromHtml(rb.mRbSystem.getParams().getLabel(index)));
+		mParamLabels[index].setText(Html.fromHtml(rb.mRbSystem.getParams()
+				.getLabel(index)));
 		mParamButtons[index].setText(Html.fromHtml(current_param_str));
 
 		// Set title
@@ -575,19 +615,23 @@ public class RBActivity extends Activity {
 
 			for (int i = 0; i < np; i++) {
 				TableRow row = new TableRow(this);
-				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+						LayoutParams.FILL_PARENT));
 
 				// First add the text label
 				mParamLabels[i] = new TextView(this);
 				mParamLabels[i].setTextSize(15); // Size is in scaled pixels
-				mParamLabels[i].setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+				mParamLabels[i].setLayoutParams(new TableRow.LayoutParams(
+						TableRow.LayoutParams.WRAP_CONTENT,
+						TableRow.LayoutParams.WRAP_CONTENT));
 				mParamLabels[i].setPadding(0, 0, 4, 0);
 				row.addView(mParamLabels[i]);
 
 				// Next add the SeekBar
 				mParamBars[i] = new IndexedSeekBar(this);
 				((IndexedSeekBar) mParamBars[i]).setIndex(i);
-				mParamBars[i].setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+				mParamBars[i].setLayoutParams(new LayoutParams(
+						LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 				mParamBars[i].setPadding(10, 10, 10, 0); // Set 10px padding on
 				// left and right
 				row.addView(mParamBars[i]);
@@ -597,7 +641,8 @@ public class RBActivity extends Activity {
 				((IndexedButton) mParamButtons[i]).setIndex(i);
 				row.addView(mParamButtons[i]);
 
-				paramLayout.addView(row, new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+				paramLayout.addView(row, new TableLayout.LayoutParams(
+						LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 			}
 
 			// Initialize mCurrentParamForGUI to min_parameter
@@ -606,7 +651,8 @@ public class RBActivity extends Activity {
 				displayParamValue(i, mCurrentParamForGUI[i]);
 
 				// Also set param bars to match current param
-				int prog = (int)Math.round(100 * mCurrentParamForGUI[i] / (p.getMaxValue(i)-p.getMinValue(i)));
+				int prog = (int) Math.round(100 * mCurrentParamForGUI[i]
+						/ (p.getMaxValue(i) - p.getMinValue(i)));
 				mParamBars[i].setProgress(prog);
 			}
 		} catch (Exception e) {
@@ -632,7 +678,7 @@ public class RBActivity extends Activity {
 			Button sweepButton = new Button(this);
 			sweepButton.setText("\u00B5 Sweep");
 			sweepButton.setTextSize(22);
-			sweepButton.setOnClickListener(new View.OnClickListener(){
+			sweepButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 
@@ -642,7 +688,8 @@ public class RBActivity extends Activity {
 				}
 			});
 
-			sweepLayout.addView(sweepButton, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			sweepLayout.addView(sweepButton, new LinearLayout.LayoutParams(
+					LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -654,7 +701,7 @@ public class RBActivity extends Activity {
 	// the parameter value buttons
 	private void addParamButtonListeners() {
 		for (int i = 0; i < rb.mRbSystem.getParams().getNumParams(); i++) {
-			mParamButtons[i].setOnClickListener(new View.OnClickListener(){
+			mParamButtons[i].setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					paramButtonIndex = ((IndexedButton) v).getIndex();
 					showDialog(PARAM_DIALOG_ID);
@@ -669,38 +716,41 @@ public class RBActivity extends Activity {
 		final Parameters p = rb.mRbSystem.getParams();
 		// Add a listener to each SeekBar
 		for (int i = 0; i < p.getNumParams(); i++) {
-			mParamBars[i].setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+			mParamBars[i]
+					.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						public void onProgressChanged(SeekBar seekBar,
+								int progress, boolean fromUser) {
 
-					if (fromUser) {
-						IndexedSeekBar isb = (IndexedSeekBar) seekBar;
-						int index = isb.getIndex();
+							if (fromUser) {
+								IndexedSeekBar isb = (IndexedSeekBar) seekBar;
+								int index = isb.getIndex();
 
-						if (rb.mRbSystem != null) {
-							double param_range = p.getMaxValue(index)
-									- p.getMinValue(index);
+								if (rb.mRbSystem != null) {
+									double param_range = p.getMaxValue(index)
+											- p.getMinValue(index);
 
-							double current_param = p.getMinValue(index)
-									+ param_range * progress / seekBar.getMax();
+									double current_param = p.getMinValue(index)
+											+ param_range * progress
+											/ seekBar.getMax();
 
-							displayParamValue(index, current_param);
+									displayParamValue(index, current_param);
+								}
+
+							}
 						}
 
-					}
-				}
+						public void onStartTrackingTouch(SeekBar seekBar) {
+						}
 
-				public void onStartTrackingTouch(SeekBar seekBar) {
-				}
-
-				public void onStopTrackingTouch(SeekBar seekBar) {
-				}
-			});
+						public void onStopTrackingTouch(SeekBar seekBar) {
+						}
+					});
 		}
 
 	}
 
-	final Handler sweepHandler = new Handler(){
+	final Handler sweepHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			mSweepIndex = msg.what;
 			Log.d(DEBUG_TAG, "Sweep index set to " + mSweepIndex);
@@ -710,12 +760,13 @@ public class RBActivity extends Activity {
 	// Define the Handler that receives messages from the thread and updates the
 	// progress
 	// handler is a final member object of the RBActivity class
-	final Handler downloadHandler = new Handler(){
+	final Handler downloadHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			pd.dismiss();
 
 			// Now check if there was a problem or not
-			boolean downloadSuccessful = msg.getData().getBoolean("loadsuccess");
+			boolean downloadSuccessful = msg.getData()
+					.getBoolean("loadsuccess");
 			Log.d(DEBUG_TAG, "Model loading successful = " + downloadSuccessful
 					+ ", model dir: " + mng.getModelDir());
 
@@ -780,6 +831,11 @@ public class RBActivity extends Activity {
 			// Call the main model loading method
 			success &= rb.loadModel(m);
 
+			// Clean up if the model fails to load
+			if (!success && m instanceof CachingModelManager) {
+				((CachingModelManager) m).deleteCachedFiles();
+			}
+
 			Message msg = mHandler.obtainMessage();
 			Bundle b = new Bundle();
 			b.putBoolean("loadsuccess", success);
@@ -791,7 +847,7 @@ public class RBActivity extends Activity {
 	private class SolveThread extends Thread {
 		public void run() {
 			Parameters p = rb.mRbSystem.getParams();
-			
+
 			switch (rb.getSystemType()) {
 
 			case LINEAR_STEADY:
@@ -805,8 +861,11 @@ public class RBActivity extends Activity {
 					handler.sendEmptyMessage(0);
 				} else { // We need to perform a sweep
 					int numSweepPts = 10;
-					numSweepPts = Math.round(100000 / (rb.mRbSystem.getNumFields() * rb.mRbSystem.getGeometry().nodes));
-					if (!rb.mRbSystem.isReal) numSweepPts /= 3;
+					numSweepPts = Math
+							.round(100000 / (rb.mRbSystem.getNumFields() * rb.mRbSystem
+									.getGeometry().nodes));
+					if (!rb.mRbSystem.isReal)
+						numSweepPts /= 3;
 					numSweepPts = numSweepPts > 10 ? 10 : numSweepPts;
 					// numSweepPts = 50;
 					int n_outputs = rb.mRbSystem.getNumOutputs();
@@ -815,9 +874,11 @@ public class RBActivity extends Activity {
 
 					double[][][] RB_sweep_sol = null;
 					if (rb.mRbSystem.isReal) {
-						RB_sweep_sol = new double[numSweepPts][1][rb.mRbSystem.get_N()];
+						RB_sweep_sol = new double[numSweepPts][1][rb.mRbSystem
+								.get_N()];
 					} else {
-						RB_sweep_sol = new double[numSweepPts][2][rb.mRbSystem.get_N()];
+						RB_sweep_sol = new double[numSweepPts][2][rb.mRbSystem
+								.get_N()];
 						n_outputs *= 2;
 					}
 
@@ -834,8 +895,8 @@ public class RBActivity extends Activity {
 					float[][][] vLTfunc = new float[numSweepPts][][];
 
 					for (int i = 0; i < numSweepPts; i++) {
-						double new_param = p.getMinValue(mSweepIndex)
-								+ i * sweepIncrement;
+						double new_param = p.getMinValue(mSweepIndex) + i
+								* sweepIncrement;
 						mCurrentParamForGUI[mSweepIndex] = new_param;
 						p.setCurrent(mCurrentParamForGUI);
 						mSweepParam[i] = mCurrentParamForGUI.clone();
@@ -849,10 +910,14 @@ public class RBActivity extends Activity {
 							}
 						else
 							for (int n = 0; n < n_outputs / 2; n++) {
-								sweepOutputs[n][i] = rb.mRbSystem.get_RB_output(n, true);
-								sweepOutputs[n + n_outputs / 2][i] = rb.mRbSystem.get_RB_output(n, false);
-								sweepOutputBounds[n][i] = rb.mRbSystem.get_RB_output_error_bound(n, true);
-								sweepOutputBounds[n + n_outputs / 2][i] = rb.mRbSystem.get_RB_output_error_bound(n, false);
+								sweepOutputs[n][i] = rb.mRbSystem
+										.get_RB_output(n, true);
+								sweepOutputs[n + n_outputs / 2][i] = rb.mRbSystem
+										.get_RB_output(n, false);
+								sweepOutputBounds[n][i] = rb.mRbSystem
+										.get_RB_output_error_bound(n, true);
+								sweepOutputBounds[n + n_outputs / 2][i] = rb.mRbSystem
+										.get_RB_output_error_bound(n, false);
 							}
 
 						if (rb.mRbSystem.getNumFields() > 0) {
@@ -868,16 +933,20 @@ public class RBActivity extends Activity {
 					bundle.putDouble("dt", sweepIncrement);
 					bundle.putDouble("xMin", p.getMinValue(mSweepIndex));
 					bundle.putDouble("xMax", p.getMaxValue(mSweepIndex));
-					bundle.putString("xLabel", Integer.toString(mSweepIndex + 1));
+					bundle.putString("xLabel",
+							Integer.toString(mSweepIndex + 1));
 					bundle.putInt("n_time_steps", numSweepPts);
 					bundle.putInt("n_outputs", n_outputs);
 					for (int i = 0; i < n_outputs; i++) {
-						bundle.putDoubleArray("output_data_" + i, sweepOutputs[i]);
-						bundle.putDoubleArray("output_bound_" + i, sweepOutputBounds[i]);
+						bundle.putDoubleArray("output_data_" + i,
+								sweepOutputs[i]);
+						bundle.putDoubleArray("output_bound_" + i,
+								sweepOutputBounds[i]);
 					}
 
 					// Add this bundle to the intent and plot
-					Intent intent = new Intent(RBActivity.this, OutputPlotterActivity.class);
+					Intent intent = new Intent(RBActivity.this,
+							OutputPlotterActivity.class);
 					intent.putExtras(bundle);
 					RBActivity.this.startActivity(intent);
 				}
@@ -894,22 +963,29 @@ public class RBActivity extends Activity {
 				Bundle bundle = new Bundle();
 				bundle.putBoolean("isReal", rb.mRbSystem.isReal);
 				bundle.putBoolean("isSweep", false);
-				bundle.putString("title", "Online N = " + mOnlineNForGui
-						+ ", parameter = " + Arrays.toString(mCurrentParamForGUI));
-				bundle.putDouble("dt", ((TransientRBSystem) rb.mRbSystem).getdt());
+				bundle.putString("title",
+						"Online N = " + mOnlineNForGui + ", parameter = "
+								+ Arrays.toString(mCurrentParamForGUI));
+				bundle.putDouble("dt",
+						((TransientRBSystem) rb.mRbSystem).getdt());
 				bundle.putDouble("xMin", 0);
-				bundle.putDouble("xMax", ((TransientRBSystem) rb.mRbSystem).getdt()
-						* rb.mRbSystem.getTotalTimesteps());
+				bundle.putDouble("xMax",
+						((TransientRBSystem) rb.mRbSystem).getdt()
+								* rb.mRbSystem.getTotalTimesteps());
 				bundle.putString("xLabel", "time");
-				bundle.putInt("n_time_steps", ((TransientRBSystem)rb.mRbSystem).n_plotting_steps);
+				bundle.putInt("n_time_steps",
+						((TransientRBSystem) rb.mRbSystem).n_plotting_steps);
 				bundle.putInt("n_outputs", rb.mRbSystem.getNumOutputs());
 				for (int i = 0; i < rb.mRbSystem.getNumOutputs(); i++) {
-					bundle.putDoubleArray("output_data_" + i, rb.mRbSystem.RB_outputs_all_k[i]);
-					bundle.putDoubleArray("output_bound_" + i, rb.mRbSystem.RB_output_error_bounds_all_k[i]);
+					bundle.putDoubleArray("output_data_" + i,
+							rb.mRbSystem.RB_outputs_all_k[i]);
+					bundle.putDoubleArray("output_bound_" + i,
+							rb.mRbSystem.RB_output_error_bounds_all_k[i]);
 				}
 
 				// Add this bundle to the intent
-				Intent intent = new Intent(RBActivity.this, OutputPlotterActivity.class);
+				Intent intent = new Intent(RBActivity.this,
+						OutputPlotterActivity.class);
 				intent.putExtras(bundle);
 				RBActivity.this.startActivity(intent);
 
@@ -921,10 +997,11 @@ public class RBActivity extends Activity {
 			handler.sendEmptyMessage(-1);
 		}
 
-		private Handler handler = new Handler(){
+		private Handler handler = new Handler() {
 			public void handleMessage(Message msg) {
 				pd.dismiss();
-				if (msg.what == 0) showDialog(RB_SOLVE_DIALOG_ID);
+				if (msg.what == 0)
+					showDialog(RB_SOLVE_DIALOG_ID);
 			}
 		};
 

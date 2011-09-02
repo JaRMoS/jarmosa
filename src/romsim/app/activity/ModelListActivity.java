@@ -19,11 +19,13 @@
 package romsim.app.activity;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import rmcommon.ModelDescriptor;
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
+import rmcommon.io.FileModelManager;
 import romsim.app.Const;
 import romsim.app.R;
 import android.app.Activity;
@@ -38,10 +40,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -75,12 +81,12 @@ public class ModelListActivity extends Activity {
 	 * ModelDescriptors.
 	 */
 	private class ModelsGridViewAdapter extends BaseAdapter {
-		
+
 		private Drawable[] imgs;
-		
+
 		ModelsGridViewAdapter() {
 			imgs = new BitmapDrawable[items.size()];
-			for(int i=0;i<items.size();i++) {
+			for (int i = 0; i < items.size(); i++) {
 				ModelDescriptor md = items.get(i);
 				if (md.image != null) {
 					imgs[i] = new BitmapDrawable(getResources(), md.image);
@@ -92,10 +98,15 @@ public class ModelListActivity extends Activity {
 					}
 					// Take red cross if image cannot be read
 					if (((BitmapDrawable) imgs[i]).getBitmap() == null) {
-						Log.w("ROMSim:ModelListActivity", "Could not read image file for model "+md.title+" in folder "+md.modeldir);
-						imgs[i] = getResources().getDrawable(R.drawable.notfound);
+						Log.w("ROMSim:ModelListActivity",
+								"Could not read image file for model "
+										+ md.title + " in folder "
+										+ md.modeldir);
+						imgs[i] = getResources().getDrawable(
+								R.drawable.notfound);
 					}
-				} else imgs[i] = null;
+				} else
+					imgs[i] = null;
 			}
 		}
 
@@ -123,31 +134,26 @@ public class ModelListActivity extends Activity {
 
 			v = li.inflate(R.layout.grid_item, null);
 
-			TextView tv = (TextView) v.findViewById(R.id.label);
-			ImageView iv = (ImageView) v.findViewById(R.id.icon);
+			TextView title = (TextView) v.findViewById(R.id.gve_title);
+			TextView date = (TextView) v.findViewById(R.id.gve_date);
+			TextView mtype = (TextView) v.findViewById(R.id.gve_modeltype);
+			TextView descr = (TextView) v.findViewById(R.id.gve_description);
+			ImageView iv = (ImageView) v.findViewById(R.id.gve_icon);
 
 			ModelDescriptor i = (ModelDescriptor) getItem(position);
-			tv.setText(i.title);
+			title.setText(i.title);
+			date.setText("Created: "
+					+ SimpleDateFormat.getDateInstance().format(i.created));
+			mtype.setText("Model type: " + i.type.toString());
+			descr.setText(i.shortDescription == null ? "" : i.shortDescription);
 			if (imgs[position] != null) {
 				iv.setImageDrawable(imgs[position]);
 			}
+			// Scale images to uniform size (max height/width)
+			iv.setLayoutParams(new LinearLayout.LayoutParams(gridView
+					.getWidth() / 4, gridView.getHeight() / 5));
 
-			// Experiments (icons are quite small after moving from res/drawable
-			// to model folders
-			// int h = 2*gridView.getHeight()/getCount();
-			// Display display = getWindowManager().getDefaultDisplay();
-			// int width = display.getWidth();
-			// int h = display.getHeight() / 4;
-
-			// necessary for uniform size of icons
-			int h = gridView.getHeight() / 6;
-			iv.setLayoutParams(new LinearLayout.LayoutParams(
-					GridView.LayoutParams.FILL_PARENT, h));
 			Log.d("adapter", "getview called pos: " + position);
-
-			v.setLayoutParams(new GridView.LayoutParams((int) (gridView
-					.getWidth() / 2.5), (int) (gridView.getHeight() / 3.5)));
-			v.setPadding(2, 4, 2, 8);
 			return v;
 		}
 	}
@@ -164,7 +170,7 @@ public class ModelListActivity extends Activity {
 	public static final int NOSRC_DIALOG_ID = 1;
 
 	private GridView gridView;
-	
+
 	/**
 	 * The list items, sources either from assets or sd card.
 	 */
@@ -186,7 +192,7 @@ public class ModelListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.prob_selection);
-		
+
 		// Create model manager instance to use
 		try {
 			mng = Const.getModelManager(getApplicationContext(), getIntent());
@@ -212,13 +218,16 @@ public class ModelListActivity extends Activity {
 
 					gridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
 					gridView.setAdapter(mgva);
+					// If the current models are served by a
+					if (mng instanceof FileModelManager) {
+						registerForContextMenu(gridView);
+					}
 
 					gridView.setOnItemClickListener(new GridView.OnItemClickListener() {
 
 						public void onItemClick(AdapterView<?> av, View view,
 								int position, long id) {
-							Intent intent = new Intent(
-									ModelListActivity.this,
+							Intent intent = new Intent(ModelListActivity.this,
 									ShowModelActivity.class);
 							// Forward extras
 							intent.putExtras(getIntent().getExtras());
@@ -227,16 +236,20 @@ public class ModelListActivity extends Activity {
 							try {
 								mng.setModelDir(i.modeldir);
 							} catch (AModelManager.ModelManagerException me) {
-								Toast.makeText(ModelListActivity.this,
+								Toast.makeText(
+										ModelListActivity.this,
 										"Error setting the model directory "
-												+ i.modeldir, Toast.LENGTH_LONG);
+												+ i.modeldir + ": "
+												+ me.getMessage(),
+										Toast.LENGTH_LONG).show();
 								Log.e("ProbSelectionActivity",
 										"Error setting the model directory "
 												+ i.modeldir, me);
 								return;
 							}
 							intent.putExtra("ModelType", i.type);
-							intent.putExtra(Const.EXTRA_MODELMANAGER_MODELDIR, i.modeldir);
+							intent.putExtra(Const.EXTRA_MODELMANAGER_MODELDIR,
+									i.modeldir);
 							ModelListActivity.this.startActivityForResult(
 									intent, 0);
 						}
@@ -253,7 +266,7 @@ public class ModelListActivity extends Activity {
 					items = mng.getModelDescriptors();
 					mgva = new ModelsGridViewAdapter();
 				} catch (AModelManager.ModelManagerException ex) {
-					Log.e("ProbSelectionActivity",
+					Log.e("ModelListActivity",
 							"Failed loading model descriptors", ex);
 				}
 
@@ -307,6 +320,48 @@ public class ModelListActivity extends Activity {
 							});
 		}
 		return builder.create();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu,
+	 * android.view.View, android.view.ContextMenu.ContextMenuInfo)
+	 */
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		getMenuInflater().inflate(R.menu.modellist_contextmenu, menu);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		switch (item.getItemId()) {
+		case R.id.context_deleteModelItem:
+			String dir = items.get(info.position).modeldir;
+			try {
+				mng.setModelDir(dir);
+			} catch (ModelManagerException e) {
+				return false;
+			}
+			if (((FileModelManager) mng).clearCurrentModel()) {
+				items.remove(info.position);
+				gridView.invalidateViews();
+			} else
+				Toast.makeText(this, "Deleting model failed.",
+						Toast.LENGTH_LONG).show();
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
 
 }

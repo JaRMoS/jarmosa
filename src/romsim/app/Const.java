@@ -4,16 +4,22 @@
  */
 package romsim.app;
 
+import java.net.URL;
+
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
-import rmcommon.io.WebModelManager;
+import rmcommon.io.CachingModelManager;
 import romsim.app.io.AssetModelManager;
 import romsim.app.io.SDModelManager;
+import romsim.app.io.WebModelManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 /**
  * Class that contains miscellaneous ROMSim specific constants.
+ * 
+ * TODO: create a menu in the main activity that allows to set the preferences (e.g. model caching)
  * 
  * @author Daniel Wirtz
  * @date Aug 24, 2011
@@ -52,6 +58,21 @@ public class Const {
 	public static final String EXTRA_MODELMANAGER_MODELDIR = "amodelmanager_modeldir";
 	
 	/**
+	 * The filename for the application preferences.
+	 */
+	public static final String PREFERENCES_FILENAME = "romsim.app.prefs";
+	
+	/**
+	 * The name for the preference storing information about whether models should be cached when loaded from a web location.
+	 */
+	public static final String PREF_MODELCACHING = "modelCaching";
+	
+	/**
+	 * The name for the preference storing information about whether existing model data is overwritten when caching remote models.
+	 */
+	public static final String PREF_MODELCACHING_OVERWRITE = "modelCachingOverwrite";
+	
+	/**
 	 * Returns a model manager instance for the current intent.
 	 * 
 	 * The intent has to contain the class names of the ModelManagers in the string extra CLASSNAME_EXTRA,
@@ -70,7 +91,11 @@ public class Const {
 		} else if ("SDModelManager".equals(classname)) {
 			res = new SDModelManager(c);
 		} else if ("WebModelManager".equals(classname)) {
-			res = new WebModelManager(i.getStringExtra("URL"));
+			res = new WebModelManager((URL)i.getSerializableExtra("URL"),c);
+			SharedPreferences p = c.getSharedPreferences(PREFERENCES_FILENAME, 0);
+			if (p.getBoolean(PREF_MODELCACHING, false)) {
+				res = new CachingModelManager(res, new SDModelManager(c), p.getBoolean(PREF_MODELCACHING_OVERWRITE, false));
+			}
 		} else {
 			if (classname == null) {
 				throw new RuntimeException("ModelManagerService: Intent string extra '"
@@ -85,5 +110,38 @@ public class Const {
 		}
 		return res;
 	}
+	
+//	public static boolean showQuestion(final Activity a, String text) {
+//		
+//		class Res {
+//			public boolean result = false;
+//		}
+//		final Res r = new Res();
+//		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//		    @Override
+//		    public void onClick(DialogInterface dialog, int which) {
+//		        switch (which){
+//		        case DialogInterface.BUTTON_POSITIVE:
+//		            r.result = true;
+//		            break;
+//		        case DialogInterface.BUTTON_NEGATIVE:
+//		            r.result = false;
+//		            break;
+//		        }
+//		        dialog.dismiss();
+//		        a.notify();
+//		    }
+//		};
+//
+//		new AlertDialog.Builder(a).setMessage(text).setPositiveButton("Yes", dialogClickListener)
+//		    .setNegativeButton("No", dialogClickListener).show();
+//		try {
+//			a.wait();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return r.result;
+//	}
 
 }

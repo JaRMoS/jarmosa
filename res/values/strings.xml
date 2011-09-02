@@ -4,7 +4,7 @@
     <string name="welcome_str">Welcome to the ROM-Sim App.</string>
     <string name="enterURLLabel">Enter the URL where the KerMor models reside:</string>
     <string name="downloadString">Retrieve list</string>
-    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/kermordsapp</string>
+    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/romsim</string>
     
     <!-- old strings from rbappmit -->
     <string name="chooseNLabel">Set RB dimension</string>
@@ -12,4 +12,5 @@
     <string name="solveString">Solve</string>
     <string name="okString">OK</string>
     <string name="visString">Visualize</string>
+    <string name="invalidURL">Invalid URL.</string>
 </resources>

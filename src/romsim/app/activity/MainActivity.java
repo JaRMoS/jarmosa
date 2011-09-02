@@ -1,6 +1,8 @@
 package romsim.app.activity;
 
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import romsim.app.Const;
 import romsim.app.R;
@@ -11,21 +13,24 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * @author Daniel Wirtz
  * @date Aug 23, 2011
  * 
- * TODO: Check out-of-memory errors
- * TODO: New orientation causes model to be re-loaded in RBActivity
- * TODO: model list as single list with descriptions
- * TODO: fix visualization black moments for rb models
+ *       TODO: Check out-of-memory errors TODO: New orientation causes model to
+ *       be re-loaded in RBActivity TODO: model list as single list with
+ *       descriptions TODO: fix visualization black moments for rb models
  */
 public class MainActivity extends Activity {
 
@@ -38,6 +43,11 @@ public class MainActivity extends Activity {
 	 * Dialog ID for the "no sd card access" dialog
 	 */
 	public static final int NO_SD_ID = 2;
+
+	/**
+	 * Options dialog ID
+	 */
+	public static final int OPTIONS_ID = 3;
 
 	/**
 	 * The ModelManager created for the current MainActivity.
@@ -54,21 +64,22 @@ public class MainActivity extends Activity {
 
 		Const.APP_DATA_DIRECTORY = getApplicationInfo().dataDir + "/files";
 
-//		testwas();
+		// testwas();
 
 		// Add listener to the Solve button
 		Button btn = (Button) findViewById(R.id.btnAssets);
-		btn.setOnClickListener(new View.OnClickListener(){
+		btn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-
-				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
-				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "AssetModelManager");
+				Intent intent = new Intent(MainActivity.this,
+						ModelListActivity.class);
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
+						"AssetModelManager");
 				// intent.putExtras(getIntent().getExtras());
 				startActivityForResult(intent, 0);
 			}
 		});
 		btn = (Button) findViewById(R.id.btnSDCard);
-		btn.setOnClickListener(new View.OnClickListener(){
+		btn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 
 				if (!SDModelManager.ensureSDDir()) {
@@ -76,63 +87,25 @@ public class MainActivity extends Activity {
 					return;
 				}
 
-				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
-				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "SDModelManager");
+				Intent intent = new Intent(MainActivity.this,
+						ModelListActivity.class);
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
+						"SDModelManager");
 				startActivityForResult(intent, 0);
 			}
 		});
-		ImageButton ibtn = (ImageButton) findViewById(R.id.btnDownload);
-		ibtn.setOnClickListener(new View.OnClickListener(){
+		Button ibtn = (Button) findViewById(R.id.btnDownload);
+		ibtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				showDialog(DOWNLOAD_DIALOG_ID);
 			}
 		});
 	}
 
-	@SuppressWarnings("unused")
-	private void testwas() {
-		AssetModelManager m = new AssetModelManager(getApplicationContext());
-		try {
-			m.setModelDir("aghdemo");
-
-			ClassLoader cl = m.getClassLoader();
-			 Class<?> c = cl.loadClass("AffineFunctions");
-			c = cl.loadClass("AffineFunctions");
-
-			Object ci = c.newInstance();
-			int a = 0;
-
-			Method meth = c.getMethod("get_n_F_functions");
-			Object res = meth.invoke(ci);
-			a = (Integer) res;
-			System.out.println("a=" + a);
-			
-			m.setModelDir("demo1");
-			ClassLoader cl2 = m.getClassLoader();
-			
-			c = cl.loadClass("AffineFunctions");
-			ci = c.newInstance();
-			res = meth.invoke(ci);
-			a = (Integer) res;
-			System.out.println("a=" + a);
-			
-			c = cl2.loadClass("AffineFunctions");
-			meth = c.getMethod("get_n_F_functions");
-			ci = c.newInstance();
-			res = meth.invoke(ci);
-			a = (Integer) res;
-			System.out.println("a=" + a);
-			
-		} catch (Exception e) {
-			Log.e("testwas", "DOOMED!", e);
-			e.printStackTrace();
-			finish();
-		}
-	}
-
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		switch (id) {
 		case DOWNLOAD_DIALOG_ID:
 			downloadDialog = new Dialog(this);
@@ -142,33 +115,45 @@ public class MainActivity extends Activity {
 
 			// When the download button is pressed, we read the offline_data
 			// files from the specified URL
-			Button downloadButton = (Button) downloadDialog.findViewById(R.id.downloadButton);
-			downloadButton.setOnClickListener(new View.OnClickListener(){
+			Button downloadButton = (Button) downloadDialog
+					.findViewById(R.id.downloadButton);
+			downloadButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 
 					// Get the directory_name from the EditText object
-					EditText urlEntry = (EditText) downloadDialog.findViewById(R.id.urlEntry);
+					EditText urlEntry = (EditText) downloadDialog
+							.findViewById(R.id.urlEntry);
+
+					URL u = null;
+					try {
+						// Add forwardslash if not entered
+						// if (!url.endsWith("/")) url += "/";
+						u = new URL(urlEntry.getText().toString().trim());
+					} catch (MalformedURLException e) {
+						Toast.makeText(MainActivity.this, R.string.invalidURL,
+								Toast.LENGTH_SHORT);
+						return;
+					}
 
 					// Dismiss the URL specification dialog
 					dismissDialog(DOWNLOAD_DIALOG_ID);
 
-					Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
-
-					String url = urlEntry.getText().toString().trim();
-					// Add forwardslash if not entered
-					if (!url.endsWith("/")) url += "/";
-
-					intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "WebModelManager");
-					intent.putExtra("URL", url);
+					Intent intent = new Intent(MainActivity.this,
+							ModelListActivity.class);
+					intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
+							"WebModelManager");
+					intent.putExtra("URL", u);
+					intent.putExtra("modelCaching", true);
 
 					startActivityForResult(intent, 0);
 				}
 			});
 
 			// Add listener to cancel download
-			Button quitDownloadButton = (Button) downloadDialog.findViewById(R.id.quitDownloadButton);
-			quitDownloadButton.setOnClickListener(new View.OnClickListener(){
+			Button quitDownloadButton = (Button) downloadDialog
+					.findViewById(R.id.quitDownloadButton);
+			quitDownloadButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 					dismissDialog(1);
@@ -179,12 +164,49 @@ public class MainActivity extends Activity {
 			dialog = downloadDialog;
 			break;
 		case NO_SD_ID:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Could not ensure rbappmit-SDcard folder.").setCancelable(false).setNeutralButton("OK", new DialogInterface.OnClickListener(){
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.dismiss();
-				}
-			});
+			builder.setMessage("Could not ensure rbappmit-SDcard folder.")
+					.setCancelable(false)
+					.setNeutralButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.dismiss();
+								}
+							});
+			dialog = builder.create();
+			break;
+		case OPTIONS_ID:
+			final SharedPreferences p = getSharedPreferences(
+					Const.PREFERENCES_FILENAME, 0);
+			boolean[] bools = new boolean[] {
+					p.getBoolean(Const.PREF_MODELCACHING, false),
+					p.getBoolean(Const.PREF_MODELCACHING_OVERWRITE, false) };
+
+			builder = new AlertDialog.Builder(MainActivity.this);
+			builder.setTitle("ROMSim options");
+			builder.setMultiChoiceItems(new String[] { "Enable model caching",
+					"Overwrite existing models" }, bools,
+					new DialogInterface.OnMultiChoiceClickListener() {
+						public void onClick(DialogInterface dialog, int item,
+								boolean checked) {
+							if (item == 0) {
+								p.edit()
+										.putBoolean(Const.PREF_MODELCACHING,
+												checked).commit();
+							} else {
+								p.edit()
+										.putBoolean(
+												Const.PREF_MODELCACHING_OVERWRITE,
+												checked).commit();
+							}
+						}
+					});
+			builder.setNeutralButton("OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int item) {
+							dialog.dismiss();
+						}
+					});
 			dialog = builder.create();
 			break;
 		default:
@@ -192,6 +214,71 @@ public class MainActivity extends Activity {
 			break;
 		}
 		return dialog;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
+	 */
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		if (item.getItemId() == R.id.mm_settings) {
+			showDialog(OPTIONS_ID);
+			return true;
+		} else {
+			return super.onMenuItemSelected(featureId, item);
+		}
+	}
+
+	// populate main menu
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.clear();
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@SuppressWarnings("unused")
+	private void testwas() {
+		AssetModelManager m = new AssetModelManager(getApplicationContext());
+		try {
+			m.setModelDir("aghdemo");
+
+			ClassLoader cl = m.getClassLoader();
+			Class<?> c = cl.loadClass("AffineFunctions");
+			c = cl.loadClass("AffineFunctions");
+
+			Object ci = c.newInstance();
+			int a = 0;
+
+			Method meth = c.getMethod("get_n_F_functions");
+			Object res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+
+			m.setModelDir("demo1");
+			ClassLoader cl2 = m.getClassLoader();
+
+			c = cl.loadClass("AffineFunctions");
+			ci = c.newInstance();
+			res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+
+			c = cl2.loadClass("AffineFunctions");
+			meth = c.getMethod("get_n_F_functions");
+			ci = c.newInstance();
+			res = meth.invoke(ci);
+			a = (Integer) res;
+			System.out.println("a=" + a);
+
+		} catch (Exception e) {
+			Log.e("testwas", "DOOMED!", e);
+			e.printStackTrace();
+			finish();
+		}
 	}
 
 	// private void startMMService(String classname, String extra) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:titleCondensed="Delete" android:enabled="true"
+		android:title="Delete model" android:visible="true"
+		android:id="@+id/context_deleteModelItem" android:icon="@drawable/notfound"></item>
+</menu>
