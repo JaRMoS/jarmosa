@@ -3,11 +3,16 @@
  */
 package romsim.app.activity.kermor;
 
+import org.apache.commons.math.linear.RealMatrix;
+
+import kermor.java.KerMorException;
 import kermor.java.ReducedModel;
+import rmcommon.Parameters;
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
 import romsim.app.Const;
 import romsim.app.ModelManagerProgressHandler;
+import romsim.app.ParamBars;
 import romsim.app.R;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -17,15 +22,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TableLayout;
 import android.widget.Toast;
 
 /**
- * @author Ernst
+ * @author Daniel Wirtz @date 2011-09-24
  * 
  */
 public class SimulationActivity extends Activity {
 
-	private ReducedModel rm;
+	public static ReducedModel rm;
 
 	/**
 	 * ProgressDialog to display while downloading data.
@@ -33,11 +41,13 @@ public class SimulationActivity extends Activity {
 	private ProgressDialog pd;
 
 	private AModelManager mng = null;
+	private ParamBars pb = null;
+	private RealMatrix res = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.mainpage);
+		setContentView(R.layout.kermor_main);
 
 		// Create model manager instance to use
 		try {
@@ -48,29 +58,65 @@ public class SimulationActivity extends Activity {
 			return;
 		}
 
-		pd = ProgressDialog.show(SimulationActivity.this, "Loading model data", "", true, true, new OnCancelListener(){
+		pd = ProgressDialog.show(SimulationActivity.this, "Loading model data",
+				"", true, true, new OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						// delete_downloaded_files();
+						setResult(0);
+						finish();
+					}
+				});
+
+		final Handler sh = new Handler() {
 			@Override
-			public void onCancel(DialogInterface dialog) {
-				// delete_downloaded_files();
-				setResult(0);
-				finish();
+			public void handleMessage(Message msg) {
+				pd.dismiss();
+				
+				Toast.makeText(SimulationActivity.this,
+						"Model successfully simulated!", Toast.LENGTH_LONG).show();
 			}
+		};
+		
+		// Add listener to the Solve button
+		Button solveButton = (Button) findViewById(R.id.solveButton);
+		solveButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View view) {
+				pd = ProgressDialog.show(SimulationActivity.this, "",
+						"Solving...");
+				new Thread() {
+					public void run() {
+						try {
+							rm.simulate(rm.params.getCurrent());
+							sh.sendEmptyMessage(0);
+						} catch (KerMorException e) {
+							Log.e("SimulationActivity", "Error simulating", e);
+						}
+					}
+				}.start();
+			}
+
 		});
 
-		final ModelManagerProgressHandler progressHandler = new ModelManagerProgressHandler(){
+		final ModelManagerProgressHandler progressHandler = new ModelManagerProgressHandler() {
 			public void handleMessage(Message msg) {
 				pd.setMessage(msg.getData().getString("file") + "...");
 			}
 		};
 		mng.addMessageHandler(progressHandler);
 
-		final Handler h = new Handler(){
+		final Handler h = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
+
+				pb = new ParamBars(SimulationActivity.this, rm.params);
+				pb.createBars((TableLayout) findViewById(R.id.paramLayout));
+
 				pd.dismiss();
 				mng.removeMessageHandler(progressHandler);
 
-				Toast.makeText(SimulationActivity.this, "Model successfully loaded!", Toast.LENGTH_LONG).show();
+				Toast.makeText(SimulationActivity.this,
+						"Model successfully loaded!", Toast.LENGTH_LONG).show();
 
 				// RealMatrix res = null;
 				// try {
@@ -82,17 +128,17 @@ public class SimulationActivity extends Activity {
 				// Log.d("SimulationActivity", res.toString());
 				// Display stuff!
 			}
-
 		};
 
-		(new Thread(){
+		(new Thread() {
 
 			@Override
 			public void run() {
 				try {
 					rm = ReducedModel.load(mng);
 				} catch (Exception e) {
-					Log.e("SimulationActivity", "Error loading reduced model.", e);
+					Log.e("SimulationActivity", "Error loading reduced model.",
+							e);
 				}
 				h.sendEmptyMessage(0);
 			}

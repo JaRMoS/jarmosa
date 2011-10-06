@@ -101,7 +101,7 @@ public class OutputPlotterActivity extends Activity {
 	private double progressYVal;
 
 	// A boolean to indicate whether we are doing a sweep over parameters
-	public boolean isSweep;
+	public int sweepIndex;
 
 	// Strings for labeling the plot
 	public String title;
@@ -153,7 +153,7 @@ public class OutputPlotterActivity extends Activity {
 
 		extras = getIntent().getExtras();
 
-		isSweep = extras.getBoolean("isSweep");
+		sweepIndex = extras.getInt("sweepIndex");
 		title = extras.getString("title");
 		dt = extras.getDouble("dt");
 		xMin = extras.getDouble("xMin");
@@ -254,7 +254,7 @@ public class OutputPlotterActivity extends Activity {
 				LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
 		// Add listener to the Visualize button
-		if (!isSweep) {
+		if (sweepIndex == -1) {
 			Button visButton = (Button) findViewById(R.id.unsteadyVisButton);
 			visButton.setOnClickListener(new View.OnClickListener() {
 
@@ -277,13 +277,12 @@ public class OutputPlotterActivity extends Activity {
 				public void onClick(View view) {
 					// Next create the bundle and initialize it
 					Bundle bundle = new Bundle();
-					bundle.putBoolean("isSweep", true);
+					bundle.putBoolean("isSweep", sweepIndex > -1);
 
 					Intent intent = new Intent(OutputPlotterActivity.this,
 							RBVisualization.class);
 					intent.putExtras(bundle);
 					OutputPlotterActivity.this.startActivity(intent);
-
 				}
 			});
 		}
@@ -332,7 +331,7 @@ public class OutputPlotterActivity extends Activity {
 		XYSeries series = new XYSeries("");
 		series.add(progressXVal, yMin);
 		series.add(progressXVal, yMax);
-		if (!isSweep || progressYVal > yMax || progressYVal < yMin)
+		if (sweepIndex == -1 || progressYVal > yMax || progressYVal < yMin)
 			progressYVal = yMin; // don't want to stretch graph
 		series.add(progressXVal, progressYVal);
 		dataset.addSeries(series);
@@ -549,7 +548,7 @@ public class OutputPlotterActivity extends Activity {
 	 * has occurred
 	 */
 	public void add_sweep_point(float xpos) {
-		if (isSweep) {
+		if (sweepIndex > -1) {
 			// make sure xpos is within the range (0.01, 0.99)
 			xpos = xpos < 0.01f ? 0.01f : xpos;
 			xpos = xpos > 0.99f ? 0.99f : xpos;
@@ -820,7 +819,7 @@ public class OutputPlotterActivity extends Activity {
 		case LABEL_DIALOG_ID:
 			AlertDialog.Builder builder2 = new AlertDialog.Builder(
 					OutputPlotterActivity.this);
-			if (isSweep) {
+			if (sweepIndex > -1) {
 				String[] labelStrings = new String[3];
 				labelStrings[0] = "Add sweep points";
 				labelStrings[1] = "Show data labels";
@@ -967,12 +966,13 @@ public class OutputPlotterActivity extends Activity {
 
 			String message = "Online N = " + RBActivity.mOnlineNForGui + "\n\n"
 					+ "Parameters: \n\n";
-			for (int i = 0; i < RBActivity.mCurrentParamForGUI.length; i++) {
-				if (isSweep && Integer.parseInt(xLabel) == (i + 1))
+			double[] param = RBActivity.rb.mRbSystem.getParams().getCurrent();
+			for (int i = 0; i < param.length; i++) {
+				if (sweepIndex > -1 && Integer.parseInt(xLabel) == (i + 1))
 					message = message + (i + 1) + ": " + "Sweep\n";
 				else
 					message = message + (i + 1) + ": "
-							+ RBActivity.mCurrentParamForGUI[i] + "\n";
+							+ param[i] + "\n";
 			}
 			message = message + "\nChange values?";
 			infoBuilder.setMessage(message);
@@ -1051,9 +1051,9 @@ public class OutputPlotterActivity extends Activity {
 				}
 			}
 
-			RBActivity.mCurrentParamForGUI[RBActivity.mSweepIndex] = xcurrent;
+			//RBActivity.mCurrentParamForGUI[RBActivity] = xcurrent;
 			RBContainer rb = RBActivity.rb;
-			rb.mRbSystem.getParams().setCurrent(RBActivity.mCurrentParamForGUI);
+			rb.mRbSystem.getParams().setCurrent(sweepIndex, xcurrent);
 			rb.mRbSystem.RB_solve(RBActivity.mOnlineNForGui);
 
 			double[][] new_RB_outputs_all_k = new double[n_outputs][n_time_steps + 1];

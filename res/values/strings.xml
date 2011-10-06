@@ -8,8 +8,8 @@
     
     <!-- old strings from rbappmit -->
     <string name="chooseNLabel">Set RB dimension</string>
-    <string name="chooseParamLabel">Set parameters</string>
-    <string name="solveString">Solve</string>
+    <string name="chooseParamLabel">Set model parameters</string>
+    <string name="solveString">Simulate</string>
     <string name="okString">OK</string>
     <string name="visString">Visualize</string>
     <string name="invalidURL">Invalid URL.</string>

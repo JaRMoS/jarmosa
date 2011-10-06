@@ -32,6 +32,7 @@ import rmcommon.io.CachingModelManager;
 import rmcommon.io.WebModelManager;
 import rmcommon.visual.ColorGenerator;
 import romsim.app.ModelManagerProgressHandler;
+import romsim.app.ParamBars;
 import romsim.app.R;
 import romsim.app.misc.rb.IndexedButton;
 import romsim.app.misc.rb.IndexedSeekBar;
@@ -96,16 +97,16 @@ public class RBActivity extends Activity {
 	/**
 	 * Array of TextViews and SeekBars for constructing the parameter selection
 	 */
-	private TextView[] mParamLabels;
-	private SeekBar[] mParamBars;
-	private Button[] mParamButtons;
+	// private TextView[] mParamLabels;
+	// private SeekBar[] mParamBars;
+	// private Button[] mParamButtons;
 
 	/**
 	 * Member variable to store index number of currently selected parameter
 	 * button
 	 */
-	private int paramButtonIndex;
-	private TextView paramInputField;
+	// private int paramButtonIndex;
+	// private TextView paramInputField;
 
 	/**
 	 * The online N constructed by the GUI. We use this value when we call
@@ -122,7 +123,7 @@ public class RBActivity extends Activity {
 	 * The current parameter constructed by the GUI. We set the RBSystem's
 	 * current parameter to this before performing a solve.
 	 */
-	public static double[] mCurrentParamForGUI;
+	// public static double[] mCurrentParamForGUI;
 
 	/**
 	 * The parameters for a parameter sweep.
@@ -132,7 +133,7 @@ public class RBActivity extends Activity {
 	/**
 	 * The index for the parameter sweep, -1 implies no sweep.
 	 */
-	public static int mSweepIndex;
+	// public static int mSweepIndex;
 
 	/**
 	 * The name of the jar file (containing compiled files in .dex form) that we
@@ -156,6 +157,8 @@ public class RBActivity extends Activity {
 
 	private AModelManager mng;
 
+	private ParamBars pb;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -175,16 +178,12 @@ public class RBActivity extends Activity {
 		rb = new RBContainer();
 		cg = new ColorGenerator();
 
-		// initialize sweep index to -1
-		mSweepIndex = -1;
-
 		// Add listener to the Solve button
 		Button solveButton = (Button) findViewById(R.id.solveButton);
 		solveButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				pd = ProgressDialog.show(RBActivity.this, "", "Solving...");
-				SolveThread st = new SolveThread();
-				st.start();
+				new SolveThread().start();
 			}
 
 		});
@@ -193,7 +192,6 @@ public class RBActivity extends Activity {
 		SeekBar onlineNSeekBar = (SeekBar) findViewById(R.id.onlineNSeekbar);
 		onlineNSeekBar
 				.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
 					public void onProgressChanged(SeekBar seekBar,
 							int progress, boolean fromUser) {
 						mOnlineNForGui = (progress + 1);
@@ -394,143 +392,143 @@ public class RBActivity extends Activity {
 
 			break;
 
-		case SWEEP_DIALOG_ID: {
-			final Parameters p = rb.mRbSystem.getParams();
-			final int np = p.getNumParams();
-			try {
-				final String[] paramStrings = new String[np + 1];
+		// case SWEEP_DIALOG_ID: {
+		// final Parameters p = rb.mRbSystem.getParams();
+		// final int np = p.getNumParams();
+		// try {
+		// final String[] paramStrings = new String[np + 1];
+		//
+		// paramStrings[0] = "No Sweep";
+		// for (int i = 0; i < paramStrings.length; i++) {
+		// if (i > 0) {
+		// paramStrings[i] = "Parameter " + i;
+		// }
+		// }
+		//
+		// builder = new AlertDialog.Builder(RBActivity.this);
+		// builder.setTitle("Pick sweep parameter");
+		// builder.setItems(paramStrings,
+		// new DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialog, int item) {
+		// // Show a Toast for the selected item
+		// Toast.makeText(getApplicationContext(),
+		// paramStrings[item], Toast.LENGTH_SHORT)
+		// .show();
+		// // Send a message that indicates which parameter
+		// // was chosen
+		// sweepHandler.sendEmptyMessage(item - 1);
+		//
+		// // disable selected slider, enable all others
+		// // set disabled slider's progress to 0, all
+		// // others to old values
+		// try {
+		// for (int i = 0; i < np; i++) {
+		// mParamBars[i].setEnabled(true);
+		// double slopeVal = (100 / (p
+		// .getMaxValue(i) - p
+		// .getMinValue(i)));
+		// Double progressVal = Double
+		// .valueOf((slopeVal * mCurrentParamForGUI[i])
+		// - (p.getMinValue(i) * slopeVal));
+		// mParamBars[i].setProgress(progressVal
+		// .intValue());
+		// }
+		// } catch (Exception e) {
+		// }
+		// if (item >= 1) {
+		// mParamBars[item - 1].setProgress(0);
+		// mParamBars[item - 1].setEnabled(false);
+		// }
+		//
+		// // disable selected parameter button, enable all
+		// // others
+		// // set disabled button to "sweep", all others to
+		// // old values
+		// try {
+		// for (int i = 0; i < np; i++) {
+		// displayParamValue(i,
+		// mCurrentParamForGUI[i]);
+		// mParamButtons[i].setEnabled(true);
+		// }
+		// } catch (Exception e) {
+		// }
+		// if (item >= 1) {
+		// mParamButtons[item - 1].setText("Sweep");
+		// mParamButtons[item - 1].setEnabled(false);
+		// }
+		// }
+		// });
+		// dialog = builder.create();
+		// } catch (Exception e) {
+		// Log.e(DEBUG_TAG,
+		// "Exception thrown during creation of Sweep dialog");
+		// dialog = null;
+		// }
+		// break;
+		// }
 
-				paramStrings[0] = "No Sweep";
-				for (int i = 0; i < paramStrings.length; i++) {
-					if (i > 0) {
-						paramStrings[i] = "Parameter " + i;
-					}
-				}
-
-				builder = new AlertDialog.Builder(RBActivity.this);
-				builder.setTitle("Pick sweep parameter");
-				builder.setItems(paramStrings,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int item) {
-								// Show a Toast for the selected item
-								Toast.makeText(getApplicationContext(),
-										paramStrings[item], Toast.LENGTH_SHORT)
-										.show();
-								// Send a message that indicates which parameter
-								// was chosen
-								sweepHandler.sendEmptyMessage(item - 1);
-
-								// disable selected slider, enable all others
-								// set disabled slider's progress to 0, all
-								// others to old values
-								try {
-									for (int i = 0; i < np; i++) {
-										mParamBars[i].setEnabled(true);
-										double slopeVal = (100 / (p
-												.getMaxValue(i) - p
-												.getMinValue(i)));
-										Double progressVal = Double
-												.valueOf((slopeVal * mCurrentParamForGUI[i])
-														- (p.getMinValue(i) * slopeVal));
-										mParamBars[i].setProgress(progressVal
-												.intValue());
-									}
-								} catch (Exception e) {
-								}
-								if (item >= 1) {
-									mParamBars[item - 1].setProgress(0);
-									mParamBars[item - 1].setEnabled(false);
-								}
-
-								// disable selected parameter button, enable all
-								// others
-								// set disabled button to "sweep", all others to
-								// old values
-								try {
-									for (int i = 0; i < np; i++) {
-										displayParamValue(i,
-												mCurrentParamForGUI[i]);
-										mParamButtons[i].setEnabled(true);
-									}
-								} catch (Exception e) {
-								}
-								if (item >= 1) {
-									mParamButtons[item - 1].setText("Sweep");
-									mParamButtons[item - 1].setEnabled(false);
-								}
-							}
-						});
-				dialog = builder.create();
-			} catch (Exception e) {
-				Log.e(DEBUG_TAG,
-						"Exception thrown during creation of Sweep dialog");
-				dialog = null;
-			}
-			break;
-		}
-
-		case PARAM_DIALOG_ID: {
-			final Parameters p = rb.mRbSystem.getParams();
-			dialog = new Dialog(this);
-			dialog.setContentView(R.layout.rb_param_dialog);
-			dialog.setTitle("Minimum: " + p.getMinValue(paramButtonIndex)
-					+ " Maximum: " + p.getMaxValue(paramButtonIndex));
-			dialog.setCancelable(false);
-
-			paramInputField = (EditText) dialog
-					.findViewById(R.id.param_input_textview);
-
-			// field should accept signed doubles only
-			paramInputField.setInputType(InputType.TYPE_CLASS_NUMBER
-					| InputType.TYPE_NUMBER_FLAG_DECIMAL
-					| InputType.TYPE_NUMBER_FLAG_SIGNED);
-
-			// user-submitted parameter value will be handled when the ok button
-			// is pressed
-			Button okButton2 = (Button) dialog
-					.findViewById(R.id.param_okButton);
-			okButton2.setOnClickListener(new View.OnClickListener() {
-
-				public void onClick(View view) {
-					// determine if value in input field is within acceptable
-					// range
-					String userParamString = paramInputField.getText()
-							.toString();
-					double userParam;
-					try {
-						userParam = Double.parseDouble(userParamString);
-					} catch (NumberFormatException e) {
-						// if user submits non-double, default value is out of
-						// bounds to trigger toast
-						userParam = p.getMinValue(paramButtonIndex) - 1;
-					}
-
-					if (userParam <= p.getMaxValue(paramButtonIndex)
-							&& userParam >= p.getMinValue(paramButtonIndex)) {
-						// update parameter bars
-						double slopeVal = (100 / (p
-								.getMaxValue(paramButtonIndex) - p
-								.getMinValue(paramButtonIndex)));
-						Double progressVal = Double
-								.valueOf((slopeVal * userParam)
-										- (p.getMinValue(paramButtonIndex) * slopeVal));
-						mParamBars[paramButtonIndex].setProgress(progressVal
-								.intValue());
-
-						// call displayParamValue to update parameter value
-						displayParamValue(paramButtonIndex, userParam);
-					} else {
-						Toast.makeText(getApplicationContext(),
-								"Invalid Value", Toast.LENGTH_SHORT).show();
-					}
-
-					dismissDialog(PARAM_DIALOG_ID);
-					removeDialog(PARAM_DIALOG_ID);
-				}
-
-			});
-			break;
-		}
+		// case PARAM_DIALOG_ID: {
+		// final Parameters p = rb.mRbSystem.getParams();
+		// dialog = new Dialog(this);
+		// dialog.setContentView(R.layout.rb_param_dialog);
+		// dialog.setTitle("Minimum: " + p.getMinValue(paramButtonIndex)
+		// + " Maximum: " + p.getMaxValue(paramButtonIndex));
+		// dialog.setCancelable(false);
+		//
+		// paramInputField = (EditText) dialog
+		// .findViewById(R.id.param_input_textview);
+		//
+		// // field should accept signed doubles only
+		// paramInputField.setInputType(InputType.TYPE_CLASS_NUMBER
+		// | InputType.TYPE_NUMBER_FLAG_DECIMAL
+		// | InputType.TYPE_NUMBER_FLAG_SIGNED);
+		//
+		// // user-submitted parameter value will be handled when the ok button
+		// // is pressed
+		// Button okButton2 = (Button) dialog
+		// .findViewById(R.id.param_okButton);
+		// okButton2.setOnClickListener(new View.OnClickListener() {
+		//
+		// public void onClick(View view) {
+		// // determine if value in input field is within acceptable
+		// // range
+		// String userParamString = paramInputField.getText()
+		// .toString();
+		// double userParam;
+		// try {
+		// userParam = Double.parseDouble(userParamString);
+		// } catch (NumberFormatException e) {
+		// // if user submits non-double, default value is out of
+		// // bounds to trigger toast
+		// userParam = p.getMinValue(paramButtonIndex) - 1;
+		// }
+		//
+		// if (userParam <= p.getMaxValue(paramButtonIndex)
+		// && userParam >= p.getMinValue(paramButtonIndex)) {
+		// // update parameter bars
+		// double slopeVal = (100 / (p
+		// .getMaxValue(paramButtonIndex) - p
+		// .getMinValue(paramButtonIndex)));
+		// Double progressVal = Double
+		// .valueOf((slopeVal * userParam)
+		// - (p.getMinValue(paramButtonIndex) * slopeVal));
+		// mParamBars[paramButtonIndex].setProgress(progressVal
+		// .intValue());
+		//
+		// // call displayParamValue to update parameter value
+		// displayParamValue(paramButtonIndex, userParam);
+		// } else {
+		// Toast.makeText(getApplicationContext(),
+		// "Invalid Value", Toast.LENGTH_SHORT).show();
+		// }
+		//
+		// dismissDialog(PARAM_DIALOG_ID);
+		// removeDialog(PARAM_DIALOG_ID);
+		// }
+		//
+		// });
+		// break;
+		// }
 		default:
 			dialog = null;
 		}
@@ -550,32 +548,32 @@ public class RBActivity extends Activity {
 	 * @param current_param
 	 *            The parameter value to display
 	 */
-	private void displayParamValue(int index, double current_param) {
-		String current_param_str;
-		double abs = Math.abs(current_param);
-		if ((abs < 0.1) && (current_param != 0.)) {
-			DecimalFormat decimal_format = new DecimalFormat("0.###E0");
-			current_param_str = decimal_format.format(current_param);
-		} else if ((abs < 1) && (abs >= 0)) {
-			DecimalFormat decimal_format = new DecimalFormat("@@@");
-			current_param_str = decimal_format.format(current_param);
-		} else {
-			DecimalFormat decimal_format = new DecimalFormat("@@@@");
-			current_param_str = decimal_format.format(current_param);
-		}
-
-		// Make sure we set the parameter to be the same as what the TextView
-		// shows
-		mCurrentParamForGUI[index] = Double.parseDouble(current_param_str);
-
-		mParamLabels[index].setText(Html.fromHtml(rb.mRbSystem.getParams()
-				.getLabel(index)));
-		mParamButtons[index].setText(Html.fromHtml(current_param_str));
-
-		// Set title
-		TextView problemTitleView = (TextView) findViewById(R.id.problemTitle);
-		problemTitleView.setText(rb.problemTitle);
-	}
+	// private void displayParamValue(int index, double current_param) {
+	// String current_param_str;
+	// double abs = Math.abs(current_param);
+	// if ((abs < 0.1) && (current_param != 0.)) {
+	// DecimalFormat decimal_format = new DecimalFormat("0.###E0");
+	// current_param_str = decimal_format.format(current_param);
+	// } else if ((abs < 1) && (abs >= 0)) {
+	// DecimalFormat decimal_format = new DecimalFormat("@@@");
+	// current_param_str = decimal_format.format(current_param);
+	// } else {
+	// DecimalFormat decimal_format = new DecimalFormat("@@@@");
+	// current_param_str = decimal_format.format(current_param);
+	// }
+	//
+	// // Make sure we set the parameter to be the same as what the TextView
+	// // shows
+	// mCurrentParamForGUI[index] = Double.parseDouble(current_param_str);
+	//
+	// mParamLabels[index].setText(Html.fromHtml(rb.mRbSystem.getParams()
+	// .getLabel(index)));
+	// mParamButtons[index].setText(Html.fromHtml(current_param_str));
+	//
+	// // Set title
+	// TextView problemTitleView = (TextView) findViewById(R.id.problemTitle);
+	// problemTitleView.setText(rb.problemTitle);
+	// }
 
 	/**
 	 * Initialize the SeekBar that allows us to select Online N
@@ -593,177 +591,176 @@ public class RBActivity extends Activity {
 		onlineNSeekBar.setProgress(0);
 	}
 
-	/**
-	 * Initialize the list view depending on the number of parameters in the
-	 * system and on the parameter ranges.
-	 */
-	private void initializeParamBars() {
+	// /**
+	// * Initialize the list view depending on the number of parameters in the
+	// * system and on the parameter ranges.
+	// */
+	// private void initializeParamBars() {
+	//
+	// Parameters p = rb.mRbSystem.getParams();
+	// int np = p.getNumParams();
+	//
+	// // Create String array of parameters to store in the ListView
+	// try {
+	// TableLayout paramLayout = (TableLayout) findViewById(R.id.paramLayout);
+	//
+	// // Clear the paramLayout in case we're doing a new problem
+	// paramLayout.removeAllViews();
+	//
+	// mParamLabels = new TextView[np];
+	// mParamBars = new SeekBar[np];
+	// mParamButtons = new Button[np];
+	//
+	// for (int i = 0; i < np; i++) {
+	// TableRow row = new TableRow(this);
+	// row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+	// LayoutParams.FILL_PARENT));
+	//
+	// // First add the text label
+	// mParamLabels[i] = new TextView(this);
+	// mParamLabels[i].setTextSize(15); // Size is in scaled pixels
+	// mParamLabels[i].setLayoutParams(new TableRow.LayoutParams(
+	// TableRow.LayoutParams.WRAP_CONTENT,
+	// TableRow.LayoutParams.WRAP_CONTENT));
+	// mParamLabels[i].setPadding(0, 0, 4, 0);
+	// row.addView(mParamLabels[i]);
+	//
+	// // Next add the SeekBar
+	// mParamBars[i] = new IndexedSeekBar(this);
+	// ((IndexedSeekBar) mParamBars[i]).setIndex(i);
+	// mParamBars[i].setLayoutParams(new LayoutParams(
+	// LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+	// mParamBars[i].setPadding(10, 10, 10, 0); // Set 10px padding on
+	// // left and right
+	// row.addView(mParamBars[i]);
+	//
+	// // Finally add the parameter value text
+	// mParamButtons[i] = new IndexedButton(this);
+	// ((IndexedButton) mParamButtons[i]).setIndex(i);
+	// row.addView(mParamButtons[i]);
+	//
+	// paramLayout.addView(row, new TableLayout.LayoutParams(
+	// LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+	// }
+	//
+	// // Initialize mCurrentParamForGUI to min_parameter
+	// mCurrentParamForGUI = p.getCurrent();
+	// for (int i = 0; i < np; i++) {
+	// displayParamValue(i, mCurrentParamForGUI[i]);
+	//
+	// // Also set param bars to match current param
+	// int prog = (int) Math.round(100 * mCurrentParamForGUI[i]
+	// / (p.getMaxValue(i) - p.getMinValue(i)));
+	// mParamBars[i].setProgress(prog);
+	// }
+	// } catch (Exception e) {
+	// Log.e("RBActivity", "Failed init param bars", e);
+	// e.printStackTrace();
+	// }
+	//
+	// addParamBarListeners();
+	//
+	// addParamButtonListeners();
+	//
+	// }
 
-		Parameters p = rb.mRbSystem.getParams();
-		int np = p.getNumParams();
+	// /**
+	// * Add a new button to perform a parameter sweep
+	// */
+	// private void initializeParamSweep() {
+	//
+	// try {
+	//
+	// LinearLayout sweepLayout = (LinearLayout)
+	// findViewById(R.id.sweepButtonHolder);
+	//
+	// Button sweepButton = new Button(this);
+	// sweepButton.setText("\u00B5 Sweep");
+	// sweepButton.setTextSize(22);
+	// sweepButton.setOnClickListener(new View.OnClickListener() {
+	//
+	// public void onClick(View view) {
+	//
+	// // Create an alert dialog with radio buttons for
+	// // selecting the sweep parameter
+	// showDialog(SWEEP_DIALOG_ID);
+	// }
+	// });
+	//
+	// sweepLayout.addView(sweepButton, new LinearLayout.LayoutParams(
+	// LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	//
+	// }
 
-		// Create String array of parameters to store in the ListView
-		try {
-			TableLayout paramLayout = (TableLayout) findViewById(R.id.paramLayout);
+	// // This helper function adds listeners to
+	// // the parameter value buttons
+	// private void addParamButtonListeners() {
+	// for (int i = 0; i < rb.mRbSystem.getParams().getNumParams(); i++) {
+	// mParamButtons[i].setOnClickListener(new View.OnClickListener() {
+	// public void onClick(View v) {
+	// paramButtonIndex = ((IndexedButton) v).getIndex();
+	// showDialog(PARAM_DIALOG_ID);
+	// }
+	// });
+	// }
+	// }
 
-			// Clear the paramLayout in case we're doing a new problem
-			paramLayout.removeAllViews();
+	// // This helper function adds the listeners
+	// // to the newly built parameter SeekBars
+	// private void addParamBarListeners() {
+	// final Parameters p = rb.mRbSystem.getParams();
+	// // Add a listener to each SeekBar
+	// for (int i = 0; i < p.getNumParams(); i++) {
+	// mParamBars[i]
+	// .setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+	//
+	// public void onProgressChanged(SeekBar seekBar,
+	// int progress, boolean fromUser) {
+	//
+	// if (fromUser) {
+	// IndexedSeekBar isb = (IndexedSeekBar) seekBar;
+	// int index = isb.getIndex();
+	//
+	// if (rb.mRbSystem != null) {
+	// double param_range = p.getMaxValue(index)
+	// - p.getMinValue(index);
+	//
+	// double current_param = p.getMinValue(index)
+	// + param_range * progress
+	// / seekBar.getMax();
+	//
+	// displayParamValue(index, current_param);
+	// }
+	//
+	// }
+	// }
+	//
+	// public void onStartTrackingTouch(SeekBar seekBar) {
+	// }
+	//
+	// public void onStopTrackingTouch(SeekBar seekBar) {
+	// }
+	// });
+	// }
+	//
+	// }
 
-			mParamLabels = new TextView[np];
-			mParamBars = new SeekBar[np];
-			mParamButtons = new Button[np];
-
-			for (int i = 0; i < np; i++) {
-				TableRow row = new TableRow(this);
-				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
-						LayoutParams.FILL_PARENT));
-
-				// First add the text label
-				mParamLabels[i] = new TextView(this);
-				mParamLabels[i].setTextSize(15); // Size is in scaled pixels
-				mParamLabels[i].setLayoutParams(new TableRow.LayoutParams(
-						TableRow.LayoutParams.WRAP_CONTENT,
-						TableRow.LayoutParams.WRAP_CONTENT));
-				mParamLabels[i].setPadding(0, 0, 4, 0);
-				row.addView(mParamLabels[i]);
-
-				// Next add the SeekBar
-				mParamBars[i] = new IndexedSeekBar(this);
-				((IndexedSeekBar) mParamBars[i]).setIndex(i);
-				mParamBars[i].setLayoutParams(new LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-				mParamBars[i].setPadding(10, 10, 10, 0); // Set 10px padding on
-				// left and right
-				row.addView(mParamBars[i]);
-
-				// Finally add the parameter value text
-				mParamButtons[i] = new IndexedButton(this);
-				((IndexedButton) mParamButtons[i]).setIndex(i);
-				row.addView(mParamButtons[i]);
-
-				paramLayout.addView(row, new TableLayout.LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-			}
-
-			// Initialize mCurrentParamForGUI to min_parameter
-			mCurrentParamForGUI = p.getCurrent();
-			for (int i = 0; i < np; i++) {
-				displayParamValue(i, mCurrentParamForGUI[i]);
-
-				// Also set param bars to match current param
-				int prog = (int) Math.round(100 * mCurrentParamForGUI[i]
-						/ (p.getMaxValue(i) - p.getMinValue(i)));
-				mParamBars[i].setProgress(prog);
-			}
-		} catch (Exception e) {
-			Log.e("RBActivity", "Failed init param bars", e);
-			e.printStackTrace();
-		}
-
-		addParamBarListeners();
-
-		addParamButtonListeners();
-
-	}
-
-	/**
-	 * Add a new button to perform a parameter sweep
-	 */
-	private void initializeParamSweep() {
-
-		try {
-
-			LinearLayout sweepLayout = (LinearLayout) findViewById(R.id.sweepButtonHolder);
-
-			Button sweepButton = new Button(this);
-			sweepButton.setText("\u00B5 Sweep");
-			sweepButton.setTextSize(22);
-			sweepButton.setOnClickListener(new View.OnClickListener() {
-
-				public void onClick(View view) {
-
-					// Create an alert dialog with radio buttons for
-					// selecting the sweep parameter
-					showDialog(SWEEP_DIALOG_ID);
-				}
-			});
-
-			sweepLayout.addView(sweepButton, new LinearLayout.LayoutParams(
-					LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	// This helper function adds listeners to
-	// the parameter value buttons
-	private void addParamButtonListeners() {
-		for (int i = 0; i < rb.mRbSystem.getParams().getNumParams(); i++) {
-			mParamButtons[i].setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					paramButtonIndex = ((IndexedButton) v).getIndex();
-					showDialog(PARAM_DIALOG_ID);
-				}
-			});
-		}
-	}
-
-	// This helper function adds the listeners
-	// to the newly built parameter SeekBars
-	private void addParamBarListeners() {
-		final Parameters p = rb.mRbSystem.getParams();
-		// Add a listener to each SeekBar
-		for (int i = 0; i < p.getNumParams(); i++) {
-			mParamBars[i]
-					.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-						public void onProgressChanged(SeekBar seekBar,
-								int progress, boolean fromUser) {
-
-							if (fromUser) {
-								IndexedSeekBar isb = (IndexedSeekBar) seekBar;
-								int index = isb.getIndex();
-
-								if (rb.mRbSystem != null) {
-									double param_range = p.getMaxValue(index)
-											- p.getMinValue(index);
-
-									double current_param = p.getMinValue(index)
-											+ param_range * progress
-											/ seekBar.getMax();
-
-									displayParamValue(index, current_param);
-								}
-
-							}
-						}
-
-						public void onStartTrackingTouch(SeekBar seekBar) {
-						}
-
-						public void onStopTrackingTouch(SeekBar seekBar) {
-						}
-					});
-		}
-
-	}
-
-	final Handler sweepHandler = new Handler() {
-		public void handleMessage(Message msg) {
-			mSweepIndex = msg.what;
-			Log.d(DEBUG_TAG, "Sweep index set to " + mSweepIndex);
-		}
-	};
+	// final Handler sweepHandler = new Handler() {
+	// public void handleMessage(Message msg) {
+	// mSweepIndex = msg.what;
+	// Log.d(DEBUG_TAG, "Sweep index set to " + mSweepIndex);
+	// }
+	// };
 
 	// Define the Handler that receives messages from the thread and updates the
 	// progress
 	// handler is a final member object of the RBActivity class
 	final Handler downloadHandler = new Handler() {
 		public void handleMessage(Message msg) {
-			pd.dismiss();
-
 			// Now check if there was a problem or not
 			boolean downloadSuccessful = msg.getData()
 					.getBoolean("loadsuccess");
@@ -771,6 +768,7 @@ public class RBActivity extends Activity {
 					+ ", model dir: " + mng.getModelDir());
 
 			if (!downloadSuccessful) {
+				pd.dismiss();
 				showDialog(DOWNLOAD_FAILED_DIALOG_ID);
 				delete_downloaded_files();
 			} else {
@@ -779,7 +777,8 @@ public class RBActivity extends Activity {
 				RBActivity.this.initializeOnlineNBar();
 
 				// Initialize the ListView for the parameters
-				RBActivity.this.initializeParamBars();
+				pb = new ParamBars(RBActivity.this, rb.mRbSystem.getParams());
+				pb.createBars((TableLayout) findViewById(R.id.paramLayout));
 
 				// // Set link to problem info page
 				// TextView linkView = (TextView) findViewById(R.id.link_view);
@@ -790,10 +789,15 @@ public class RBActivity extends Activity {
 
 				if ((rb.getSystemType() == SystemType.LINEAR_STEADY)
 						|| (rb.getSystemType() == SystemType.LINEAR_COMPLEX_STEADY)) {
-					RBActivity.this.initializeParamSweep();
+					pb.createSweepButton((LinearLayout) findViewById(R.id.sweepButtonHolder));
 				}
-			}
 
+				// Set title
+				TextView problemTitleView = (TextView) findViewById(R.id.problemTitle);
+				problemTitleView.setText(rb.problemTitle);
+
+				pd.dismiss();
+			}
 		}
 	};
 
@@ -853,9 +857,9 @@ public class RBActivity extends Activity {
 			case LINEAR_STEADY:
 			case LINEAR_COMPLEX_STEADY:
 
-				if (mSweepIndex == -1) {
+				if (pb.getSweepIndex() == -1) {
 
-					p.setCurrent(mCurrentParamForGUI);
+					// p.setCurrent(mCurrentParamForGUI);
 					rb.mRbSystem.RB_solve(mOnlineNForGui);
 
 					handler.sendEmptyMessage(0);
@@ -888,19 +892,19 @@ public class RBActivity extends Activity {
 					// Create the bundle and initialize it
 					Bundle bundle = new Bundle();
 
-					double sweepParamRange = p.getMaxValue(mSweepIndex)
-							- p.getMinValue(mSweepIndex);
+					double sweepParamRange = p.getMaxValue(pb.getSweepIndex())
+							- p.getMinValue(pb.getSweepIndex());
 					double sweepIncrement = sweepParamRange / (numSweepPts - 1);
 
 					float[][][] vLTfunc = new float[numSweepPts][][];
 
 					for (int i = 0; i < numSweepPts; i++) {
-						double new_param = p.getMinValue(mSweepIndex) + i
-								* sweepIncrement;
-						mCurrentParamForGUI[mSweepIndex] = new_param;
-						p.setCurrent(mCurrentParamForGUI);
-						mSweepParam[i] = mCurrentParamForGUI.clone();
-						Log.d(DEBUG_TAG, "Set new param " + mCurrentParamForGUI);
+						double new_param = p.getMinValue(pb.getSweepIndex())
+								+ i * sweepIncrement;
+						// p.setCurrent(mCurrentParamForGUI);
+						mSweepParam[i] = p.getCurrent().clone();
+						Log.d(DEBUG_TAG, "Set new param " + p.getCurrent());
+						p.setCurrent(pb.getSweepIndex(), new_param);
 						rb.mRbSystem.RB_solve(mOnlineNForGui);
 
 						if (rb.mRbSystem.isReal)
@@ -928,13 +932,13 @@ public class RBActivity extends Activity {
 					rb.mRbSystem.getGeometry().vLTfunc = vLTfunc;
 					rb.mRbSystem.set_sweep_sol(RB_sweep_sol);
 
-					bundle.putBoolean("isSweep", true);
+					bundle.putInt("sweepIndex", pb.getSweepIndex());
 					bundle.putString("title", "Online N = " + mOnlineNForGui);
 					bundle.putDouble("dt", sweepIncrement);
-					bundle.putDouble("xMin", p.getMinValue(mSweepIndex));
-					bundle.putDouble("xMax", p.getMaxValue(mSweepIndex));
+					bundle.putDouble("xMin", p.getMinValue(pb.getSweepIndex()));
+					bundle.putDouble("xMax", p.getMaxValue(pb.getSweepIndex()));
 					bundle.putString("xLabel",
-							Integer.toString(mSweepIndex + 1));
+							Integer.toString(pb.getSweepIndex() + 1));
 					bundle.putInt("n_time_steps", numSweepPts);
 					bundle.putInt("n_outputs", n_outputs);
 					for (int i = 0; i < n_outputs; i++) {
@@ -956,16 +960,15 @@ public class RBActivity extends Activity {
 			case QN_UNSTEADY:
 
 				// Perform the solve
-				p.setCurrent(mCurrentParamForGUI);
+				// p.setCurrent(mCurrentParamForGUI);
 				rb.mRbSystem.RB_solve(mOnlineNForGui);
 
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
 				bundle.putBoolean("isReal", rb.mRbSystem.isReal);
 				bundle.putBoolean("isSweep", false);
-				bundle.putString("title",
-						"Online N = " + mOnlineNForGui + ", parameter = "
-								+ Arrays.toString(mCurrentParamForGUI));
+				bundle.putString("title", "Online N = " + mOnlineNForGui
+						+ ", parameter = " + Arrays.toString(p.getCurrent()));
 				bundle.putDouble("dt",
 						((TransientRBSystem) rb.mRbSystem).getdt());
 				bundle.putDouble("xMin", 0);
