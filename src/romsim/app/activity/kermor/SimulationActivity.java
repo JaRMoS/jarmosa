@@ -87,7 +87,7 @@ public class SimulationActivity extends Activity {
 				new Thread() {
 					public void run() {
 						try {
-							rm.simulate(rm.params.getCurrent());
+							rm.simulate(rm.params.getCurrent(),rm.system.currentInput());
 							sh.sendEmptyMessage(0);
 						} catch (KerMorException e) {
 							Log.e("SimulationActivity", "Error simulating", e);

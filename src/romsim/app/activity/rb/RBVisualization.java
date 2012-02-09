@@ -50,7 +50,7 @@ public class RBVisualization extends Activity {
 		super.onCreate(savedInstanceState);
 
 		RBContainer rb = RBActivity.rb;
-		GeometryData glData = rb.mRbSystem.getGeometry();
+		GeometryData geoData = rb.mRbSystem.getGeometry();
 
 		Bundle extras = getIntent().getExtras();
 
@@ -62,11 +62,11 @@ public class RBVisualization extends Activity {
 				float[][] LT = rb.mRbSystem.get_tranformation_data();
 				float[][][] LTfunc_array = new float[1][LT.length][LT[0].length];
 				LTfunc_array[0] = LT;
-				glData.set_LTfunc(LTfunc_array);
+				geoData.set_LTfunc(LTfunc_array);
 			} else {
 				double[][] p = new double[1][];
 				p[0] = rb.mRbSystem.getParams().getCurrent().clone();
-				mesh_transform_custom(p, glData);
+				mesh_transform_custom(p, geoData);
 			}
 
 			float[][][] truth_sol = rb.mRbSystem.getFullSolution();
@@ -81,26 +81,26 @@ public class RBVisualization extends Activity {
 				switch (rb.mRbSystem.getNumFields()) {
 				// One field variable
 				case 1:
-					glData.set1FieldData(truth_sol[0][0]);
+					geoData.set1FieldData(truth_sol[0][0]);
 					break;
 				// Two field variables
 				case 2:
-					if (truth_sol[0][0].length == glData.nodes)
+					if (truth_sol[0][0].length == geoData.nodes)
 						// The solution data is node displacement data in x and
 						// y directions
-						glData.set2FieldDeformationData(truth_sol[0][0], truth_sol[1][0]);
+						geoData.setXYDeformationData(truth_sol[0][0], truth_sol[1][0]);
 					else
 						// The solution data are normal field values
-						glData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+						geoData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
-					if (truth_sol[0][0].length == glData.nodes)
-						glData.set3FieldDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					if (truth_sol[0][0].length == geoData.nodes)
+						geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					else
-						glData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+						geoData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					break;
 				case 4:
-					glData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
+					geoData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
 			/*
@@ -113,7 +113,7 @@ public class RBVisualization extends Activity {
 				 * but why three fields?
 				 */
 				case 1:
-					glData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+					geoData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 		} else {
@@ -121,9 +121,9 @@ public class RBVisualization extends Activity {
 			 * Parameter sweep case
 			 */
 			if (!rb.mRbSystem.is_custom_mesh_transform()) {
-				glData.set_LTfunc(glData.vLTfunc);
+				geoData.set_LTfunc(geoData.vLTfunc);
 			} else {
-				mesh_transform_custom(RBActivity.mSweepParam, glData);
+				mesh_transform_custom(RBActivity.mSweepParam, geoData);
 			}
 			
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
@@ -131,22 +131,22 @@ public class RBVisualization extends Activity {
 			if (rb.mRbSystem.isReal) {
 				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
-					glData.set1FieldData(truth_sol[0][0]);
+					geoData.set1FieldData(truth_sol[0][0]);
 					break;
 				case 2:
-					glData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+					geoData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
-					glData.set3FieldDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
 					break;
 				case 4:
-					glData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
+					geoData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
 					break;
 				}
 			} else {
 				switch (rb.mRbSystem.getNumFields()) {
 				case 1:
-					glData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+					geoData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 			}
@@ -155,7 +155,7 @@ public class RBVisualization extends Activity {
 		/*
 		 * Add colors to the data!
 		 */
-		glData.computeColorData(RBActivity.cg);
+		geoData.computeColorData(RBActivity.cg);
 
 		// Set Sensor + Manager
 		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -164,7 +164,7 @@ public class RBVisualization extends Activity {
 			accSensor = sensors.get(0);
 		}
 
-		glView = new GLView(this, glData);
+		glView = new GLView(this, geoData);
 		setContentView(glView);
 	}
 

@@ -20,11 +20,14 @@ package romsim.app.activity.kermor;
 
 import java.util.List;
 
+import org.apache.commons.math.linear.RealMatrix;
+
 import kermor.java.ReducedModel;
 
 import rb.java.RBContainer;
 import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
+import rmcommon.visual.ColorGenerator;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -33,6 +36,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.FloatMath;
 
 /**
  * @author David J. Knezevic and Phuong Huynh
@@ -49,101 +53,51 @@ public class Visualization extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-//		super.onCreate(savedInstanceState);
-//
-//		ReducedModel rm = SimulationActivity.rm;
-//		GeometryData glData = rm.geo;
-//
-//		Bundle extras = getIntent().getExtras();
-//
-//		/*
-//		 * Standard case: Normal display.
-//		 */
-//		if (!extras.getBoolean("isSweep")) {
-//			if (!rb.mRbSystem.is_custom_mesh_transform()) {
-//				float[][] LT = rb.mRbSystem.get_tranformation_data();
-//				float[][][] LTfunc_array = new float[1][LT.length][LT[0].length];
-//				LTfunc_array[0] = LT;
-//				glData.set_LTfunc(LTfunc_array);
-//			} else {
-//				double[][] p = new double[1][];
-//				p[0] = rb.mRbSystem.getParams().getCurrent().clone();
-//				mesh_transform_custom(p, glData);
-//			}
-//
-//			float[][][] truth_sol = rm.getOutput();
-//
-//			/*
-//			 * System has real data, so only [*][0][*] is used
-//			 */
-//			if (rb.mRbSystem.isReal)
-//				/*
-//				 * Check which solution field is to display.
-//				 */
-//				switch (rb.mRbSystem.getNumFields()) {
-//				// One field variable
-//				case 1:
-//					glData.set1FieldData(truth_sol[0][0]);
-//					break;
-//				
-//			
-//		} else {
-////			/*
-////			 * Parameter sweep case
-////			 */
-////			if (!rb.mRbSystem.is_custom_mesh_transform()) {
-////				glData.set_LTfunc(glData.vLTfunc);
-////			} else {
-////				mesh_transform_custom(RBActivity.mSweepParam, glData);
-////			}
-////			
-////			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
-////
-////			if (rb.mRbSystem.isReal) {
-////				switch (rb.mRbSystem.getNumFields()) {
-////				case 1:
-////					glData.set1FieldData(truth_sol[0][0]);
-////					break;
-////				case 2:
-////					glData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
-////					break;
-////				case 3:
-////					glData.set3FieldDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-////					break;
-////				case 4:
-////					glData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
-////					break;
-////				}
-////			} else {
-////				switch (rb.mRbSystem.getNumFields()) {
-////				case 1:
-////					glData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
-////					break;
-////				}
-////			}
-//		}
-//		
-//		/*
-//		 * Add colors to the data!
-//		 */
-//		glData.computeColorData(RBActivity.cg);
-//
-//		// Set Sensor + Manager
-//		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//		sensors = myManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-//		if (sensors.size() > 0) {
-//			accSensor = sensors.get(0);
-//		}
-//
-//		glView = new GLView(this, glData);
-//		setContentView(glView);
+		super.onCreate(savedInstanceState);
+
+		ReducedModel rm = SimulationActivity.rm;
+		GeometryData geoData = rm.geo;
+
+		// Bundle extras = getIntent().getExtras();
+
+		float[][] res = rm.getOutput();
+
+		// TODO: Export this mapping as "fieldmapping" class for the 
+		// model to allow generic ODE - to - node transfer.
+		int len = res[0].length;
+		float[] xDispl = new float[len];
+		float[] yDispl = new float[len];
+		float[] zDispl = new float[len];
+		for (int step = 0; step < len; step++) {
+			for (int i = 0; i < res.length; i += 6) {
+				xDispl[step] = res[i][step];
+				yDispl[step] = res[i+1][step];
+				zDispl[step] = res[i+2][step];
+			}
+		}
+		geoData.setXYZDeformationData(xDispl, yDispl, zDispl);
+
+		/*
+		 * Add colors to the data!
+		 */
+		geoData.computeColorData(new ColorGenerator());
+
+		// Set Sensor + Manager
+		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		sensors = myManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+		if (sensors.size() > 0) {
+			accSensor = sensors.get(0);
+		}
+
+		glView = new GLView(this, geoData);
+		setContentView(glView);
 	}
 
-	
-	private final SensorEventListener mySensorListener = new SensorEventListener(){
+	private final SensorEventListener mySensorListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent event) {
 			// send data
-			glView.setSensorParam(event.values[0], event.values[1], event.values[2]);
+			glView.setSensorParam(event.values[0], event.values[1],
+					event.values[2]);
 			// update (commented out since not used)
 			/*
 			 * oldX = event.values[0]; oldY = event.values[1]; oldZ =
@@ -158,7 +112,8 @@ public class Visualization extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		myManager.registerListener(mySensorListener, accSensor, SensorManager.SENSOR_DELAY_GAME);
+		myManager.registerListener(mySensorListener, accSensor,
+				SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	@Override
