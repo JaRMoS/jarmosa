@@ -153,7 +153,10 @@ public class OutputPlotterActivity extends Activity {
 
 		extras = getIntent().getExtras();
 
-		sweepIndex = extras.getInt("sweepIndex");
+		sweepIndex = -1;
+		if (extras.getBoolean("isSweep", false)) {
+			sweepIndex = extras.getInt("sweepIndex");
+		}
 		title = extras.getString("title");
 		dt = extras.getDouble("dt");
 		xMin = extras.getDouble("xMin");
@@ -253,40 +256,16 @@ public class OutputPlotterActivity extends Activity {
 		legendLayout.addView(row, new TableLayout.LayoutParams(
 				LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
-		// Add listener to the Visualize button
-		if (sweepIndex == -1) {
-			Button visButton = (Button) findViewById(R.id.unsteadyVisButton);
-			visButton.setOnClickListener(new View.OnClickListener() {
+		Button visButton = (Button) findViewById(R.id.unsteadyVisButton);
+		visButton.setOnClickListener(new View.OnClickListener() {
 
-				public void onClick(View view) {
-					// Next create the bundle and initialize it
-					Bundle bundle = new Bundle();
-					bundle.putBoolean("isSweep", false);
-
-					Intent intent = new Intent(OutputPlotterActivity.this,
-							RBVisualization.class);
-					intent.putExtras(bundle);
-					OutputPlotterActivity.this.startActivity(intent);
-
-				}
-			});
-		} else { // sweep case
-			Button visButton = (Button) findViewById(R.id.unsteadyVisButton);
-			visButton.setOnClickListener(new View.OnClickListener() {
-
-				public void onClick(View view) {
-					// Next create the bundle and initialize it
-					Bundle bundle = new Bundle();
-					bundle.putBoolean("isSweep", sweepIndex > -1);
-
-					Intent intent = new Intent(OutputPlotterActivity.this,
-							RBVisualization.class);
-					intent.putExtras(bundle);
-					OutputPlotterActivity.this.startActivity(intent);
-				}
-			});
-		}
-
+			public void onClick(View view) {
+				Intent intent = new Intent(OutputPlotterActivity.this,
+						RBVisualization.class);
+				intent.putExtras(OutputPlotterActivity.this.getIntent().getExtras());
+				OutputPlotterActivity.this.startActivity(intent);
+			}
+		});
 	}
 
 	/**

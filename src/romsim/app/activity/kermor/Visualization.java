@@ -20,14 +20,10 @@ package romsim.app.activity.kermor;
 
 import java.util.List;
 
-import org.apache.commons.math.linear.RealMatrix;
-
 import kermor.java.ReducedModel;
-
-import rb.java.RBContainer;
-import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
 import rmcommon.visual.ColorGenerator;
+import rmcommon.visual.VisualizationData;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -36,7 +32,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.FloatMath;
 
 /**
  * @author David J. Knezevic and Phuong Huynh
@@ -57,6 +52,7 @@ public class Visualization extends Activity {
 
 		ReducedModel rm = SimulationActivity.rm;
 		GeometryData geoData = rm.geo;
+		VisualizationData vData = new VisualizationData(geoData);
 
 		// Bundle extras = getIntent().getExtras();
 
@@ -80,7 +76,7 @@ public class Visualization extends Activity {
 		/*
 		 * Add colors to the data!
 		 */
-		geoData.computeColorData(new ColorGenerator());
+		vData.computeColorData(new ColorGenerator());
 
 		// Set Sensor + Manager
 		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -89,7 +85,7 @@ public class Visualization extends Activity {
 			accSensor = sensors.get(0);
 		}
 
-		glView = new GLView(this, geoData);
+		glView = new GLView(this, vData);
 		setContentView(glView);
 	}
 

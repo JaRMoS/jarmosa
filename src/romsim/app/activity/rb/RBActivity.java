@@ -34,8 +34,6 @@ import rmcommon.visual.ColorGenerator;
 import romsim.app.ModelManagerProgressHandler;
 import romsim.app.ParamBars;
 import romsim.app.R;
-import romsim.app.misc.rb.IndexedButton;
-import romsim.app.misc.rb.IndexedSeekBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -46,19 +44,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Html;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * This is the main Activity class for the app. This Activity handles
@@ -317,7 +309,7 @@ public class RBActivity extends Activity {
 				public void onClick(View view) {
 
 					// mRbModel.nodal_transform(rb.mRbSystem.get_tranformation_data());
-					if (rb.mRbSystem.getNumFields() > 0) {
+					if (rb.mRbSystem.getNumOutputVisualizationFields() > 0) {
 						// Next create the bundle and initialize it
 						Bundle bundle = new Bundle();
 						/*
@@ -866,7 +858,7 @@ public class RBActivity extends Activity {
 				} else { // We need to perform a sweep
 					int numSweepPts = 10;
 					numSweepPts = Math
-							.round(100000 / (rb.mRbSystem.getNumFields() * rb.mRbSystem
+							.round(100000 / (rb.mRbSystem.getNumOutputVisualizationFields() * rb.mRbSystem
 									.getGeometry().nodes));
 					if (!rb.mRbSystem.isReal)
 						numSweepPts /= 3;
@@ -924,7 +916,7 @@ public class RBActivity extends Activity {
 										.get_RB_output_error_bound(n, false);
 							}
 
-						if (rb.mRbSystem.getNumFields() > 0) {
+						if (rb.mRbSystem.getNumOutputVisualizationFields() > 0) {
 							RB_sweep_sol[i] = rb.mRbSystem.get_RBsolution();
 							vLTfunc[i] = rb.mRbSystem.get_tranformation_data();
 						}

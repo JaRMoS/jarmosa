@@ -18,7 +18,7 @@
 
 package romsim.app.visual;
 
-import rmcommon.geometry.GeometryData;
+import rmcommon.visual.VisualizationData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
@@ -37,6 +37,7 @@ public class GLView extends GLSurfaceView {
 	private static final String LOG_TAG = GLView.class.getSimpleName();
 	
 	private GLRenderer _renderer;
+	private VisualizationData visData;
 
 	private float _x = 0;
 	private float _y = 0;
@@ -52,10 +53,11 @@ public class GLView extends GLSurfaceView {
 	 * @param context
 	 * @param geoData
 	 */
-	public GLView(Context context, GeometryData geoData) {
+	public GLView(Context context, VisualizationData visData) {
 		super(context);
 		setFocusableInTouchMode(true);
-		_renderer = new GLRenderer(geoData);
+		this.visData = visData;
+		_renderer = new GLRenderer(visData);
 
 		Configuration c = getResources().getConfiguration();
 		if (c.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -145,7 +147,7 @@ public class GLView extends GLSurfaceView {
 				return true;
 			case 82: // KEYCODE_MENU
 				if ((_renderer.fGeoData.is2D())
-						|| (_renderer.fGeoData.fields > 0))
+						|| (visData.getNumVisualizationFields() > 0))
 					_renderer.setcField(_renderer.getcField() + 1);
 				else
 					// enable tilting

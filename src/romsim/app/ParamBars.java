@@ -8,18 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rmcommon.Parameters;
-import romsim.app.activity.rb.RBActivity;
-import romsim.app.misc.rb.IndexedButton;
-import romsim.app.misc.rb.IndexedSeekBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
@@ -30,9 +23,9 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TableRow.LayoutParams;
 
 /**
  * @author CreaByte

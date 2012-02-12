@@ -26,6 +26,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import rmcommon.geometry.GeometryData;
+import rmcommon.visual.VisualizationData;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
@@ -82,6 +83,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	private int currentFrame = 0, oldFrame = 0;
 
 	GeometryData fGeoData;
+	VisualizationData vData;
 
 	private FloatBuffer floatBuf;
 	boolean isconstant = false;
@@ -103,8 +105,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	 * 
 	 * @param globj
 	 */
-	public GLRenderer(GeometryData globj) {
-		fGeoData = globj;
+	public GLRenderer(VisualizationData vData) {
+		this.vData = vData;
+		fGeoData = vData.getGeometryData();
 	}
 
 	/**
@@ -122,15 +125,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	public void increase_frame(float fdelay) {
 		oldFrame = currentFrame;
 
-		current_framef += fdelay * fGeoData.frame_num[currentField];
+		current_framef += fdelay * vData.numFrames;
 		currentFrame = Math.round(current_framef);
-		if (currentFrame >= fGeoData.frame_num[currentField]) {
+		if (currentFrame >= vData.numFrames) {
 			currentFrame = 0;
 			current_framef = 0;
 		}
 		if (currentFrame < 0) {
-			currentFrame = fGeoData.frame_num[currentField] - 1;
-			current_framef = fGeoData.frame_num[currentField] - 1;
+			currentFrame = vData.numFrames - 1;
+			current_framef = vData.numFrames - 1;
 		}
 	}
 
@@ -144,13 +147,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 		current_framef += fdelay;
 		currentFrame = Math.round(current_framef);
-		if (currentFrame >= fGeoData.frame_num[currentField]) {
+		if (currentFrame >= vData.numFrames) {
 			currentFrame = 0;
 			current_framef = 0;
 		}
 		if (currentFrame < 0) {
-			currentFrame = fGeoData.frame_num[currentField] - 1;
-			current_framef = fGeoData.frame_num[currentField] - 1;
+			currentFrame = vData.numFrames - 1;
+			current_framef = vData.numFrames - 1;
 		}
 	}
 
@@ -207,11 +210,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		 * Animation color buffer contains RBSystem.getVisualNumTimesteps()
 		 * times the color data for a single solution.
 		 */
-		_color_off = new int[fGeoData.fields];
-		for (int i = 0; i < fGeoData.fields; i++) {
+		_color_off = new int[vData.getNumVisualizationFields()];
+		for (int i = 0; i < vData.getNumVisualizationFields(); i++) {
 			_color_off[i] = curFloatBufOffset;
-			floatBuf.put(fGeoData.getFieldColors(i));
-			curFloatBufOffset += fGeoData.getFieldColors(i).length;
+			floatBuf.put(vData.getFieldColors(i));
+			curFloatBufOffset += vData.getFieldColors(i).length;
 			Log.d("GLRenderer", "float_count (color[" + i + "]) = "
 					+ curFloatBufOffset + "/" + floatBuf.capacity());
 		}
@@ -383,7 +386,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				GL10.GL_UNSIGNED_SHORT, shortBuf);
 
 		// Draw the wireframe for a n field object
-		if ((fGeoData.isConstantField(currentField)) | (!fGeoData.is2D())) {
+		if ((vData.isConstantField(currentField)) | (!fGeoData.is2D())) {
 			// Draw the wireframe mesh
 			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
 			shortBuf.position(_indexwf_off);
@@ -481,7 +484,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	 * @param cField
 	 */
 	public void setcField(int cField) {
-		if (cField > (fGeoData.fields - 1))
+		if (cField > (vData.getNumVisualizationFields() - 1))
 			cField = 0;
 		currentField = cField;
 	}

@@ -3,11 +3,11 @@
  */
 package romsim.app.activity.kermor;
 
-import org.apache.commons.math.linear.RealMatrix;
-
 import kermor.java.KerMorException;
 import kermor.java.ReducedModel;
-import rmcommon.Parameters;
+
+import org.apache.commons.math.linear.RealMatrix;
+
 import rmcommon.io.AModelManager;
 import rmcommon.io.AModelManager.ModelManagerException;
 import romsim.app.Const;

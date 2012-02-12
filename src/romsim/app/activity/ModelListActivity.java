@@ -208,7 +208,9 @@ public class ModelListActivity extends Activity {
 		final Handler h = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				pd.dismiss();
+				if (pd.isShowing()) {
+					pd.dismiss();
+				}
 
 				if (items == null || items.size() == 0) {
 					showDialog(NO_MODELS_DIALOG_ID);

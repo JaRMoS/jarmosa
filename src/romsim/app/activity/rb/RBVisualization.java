@@ -23,6 +23,7 @@ import java.util.List;
 import rb.java.RBContainer;
 import rmcommon.Log;
 import rmcommon.geometry.GeometryData;
+import rmcommon.visual.VisualizationData;
 import romsim.app.visual.GLView;
 import android.app.Activity;
 import android.content.Context;
@@ -51,6 +52,7 @@ public class RBVisualization extends Activity {
 
 		RBContainer rb = RBActivity.rb;
 		GeometryData geoData = rb.mRbSystem.getGeometry();
+		VisualizationData visData = new VisualizationData(geoData);
 
 		Bundle extras = getIntent().getExtras();
 
@@ -78,42 +80,50 @@ public class RBVisualization extends Activity {
 				/*
 				 * Check which solution field is to display.
 				 */
-				switch (rb.mRbSystem.getNumFields()) {
+				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				// One field variable
 				case 1:
-					geoData.set1FieldData(truth_sol[0][0]);
+					visData.set1FieldData(truth_sol[0][0]);
 					break;
 				// Two field variables
 				case 2:
-					if (truth_sol[0][0].length == geoData.nodes)
+					if (truth_sol[0][0].length == geoData.nodes) {
 						// The solution data is node displacement data in x and
 						// y directions
 						geoData.setXYDeformationData(truth_sol[0][0], truth_sol[1][0]);
-					else
+						// Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
+						float[] zeros = new float[truth_sol[0][0].length];
+						visData.set1FieldData(zeros);
+					} else
 						// The solution data are normal field values
-						geoData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+						visData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
-					if (truth_sol[0][0].length == geoData.nodes)
+					if (truth_sol[0][0].length == geoData.nodes) {
 						geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-					else
-						geoData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					// 	Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
+						float[] zeros = new float[truth_sol[0][0].length];
+						visData.set1FieldData(zeros);
+					} else {
+						visData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					}
 					break;
 				case 4:
-					geoData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
+					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					visData.set1FieldData(truth_sol[3][0]);
 					break;
 				}
 			/*
-			 * System has complex data, so [*][0][*] and [*][1][*] are
+			 * System has complex data, so [*][0][*] and [*][1][*] are real and complex parts (?)
 			 */
 			else
-				switch (rb.mRbSystem.getNumFields()) {
+				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				/*
 				 * Seems to be the only case: one field variable, but complex.
 				 * but why three fields?
 				 */
 				case 1:
-					geoData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+					visData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 		} else {
@@ -129,24 +139,28 @@ public class RBVisualization extends Activity {
 			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
 			if (rb.mRbSystem.isReal) {
-				switch (rb.mRbSystem.getNumFields()) {
+				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				case 1:
-					geoData.set1FieldData(truth_sol[0][0]);
+					visData.set1FieldData(truth_sol[0][0]);
 					break;
 				case 2:
-					geoData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+					visData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
 					break;
 				case 3:
 					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					// Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
+					float[] zeros = new float[truth_sol[0][0].length];
+					visData.set1FieldData(zeros);
 					break;
 				case 4:
-					geoData.set4FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0], truth_sol[3][0]);
+					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+					visData.set1FieldData(truth_sol[3][0]);
 					break;
 				}
 			} else {
-				switch (rb.mRbSystem.getNumFields()) {
+				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				case 1:
-					geoData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+					visData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
 					break;
 				}
 			}
@@ -155,7 +169,7 @@ public class RBVisualization extends Activity {
 		/*
 		 * Add colors to the data!
 		 */
-		geoData.computeColorData(RBActivity.cg);
+		visData.computeColorData(RBActivity.cg);
 
 		// Set Sensor + Manager
 		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -164,7 +178,7 @@ public class RBVisualization extends Activity {
 			accSensor = sensors.get(0);
 		}
 
-		glView = new GLView(this, geoData);
+		glView = new GLView(this, visData);
 		setContentView(glView);
 	}
 
