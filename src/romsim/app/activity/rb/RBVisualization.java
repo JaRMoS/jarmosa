@@ -18,10 +18,13 @@
 
 package romsim.app.activity.rb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rb.java.RBContainer;
 import rmcommon.Log;
+import rmcommon.SimulationResult;
+import rmcommon.SolutionField;
 import rmcommon.geometry.GeometryData;
 import rmcommon.visual.VisualizationData;
 import romsim.app.visual.GLView;
@@ -71,61 +74,86 @@ public class RBVisualization extends Activity {
 				mesh_transform_custom(p, geoData);
 			}
 
-			float[][][] truth_sol = rb.mRbSystem.getFullSolution();
-
+			SimulationResult simRes = rb.mRbSystem.getSimulationResults();
+			/*
+			 * Create "fake" solution field with zeros for all simulations that only involve displacements.
+			 * @TODO create a "default" field that creates colors..
+			 */
+			float[] zeros = new float[simRes.getField(0).getSize()];
+			List<SolutionField> f = new ArrayList<SolutionField>();
+			f.add(new SolutionField(zeros));
 			/*
 			 * System has real data, so only [*][0][*] is used
 			 */
-			if (rb.mRbSystem.isReal)
+			if (!simRes.isComplex()) {
+				// if (rb.mRbSystem.isReal)
 				/*
 				 * Check which solution field is to display.
 				 */
 				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				// One field variable
 				case 1:
-					visData.set1FieldData(truth_sol[0][0]);
+					visData.setSolutionFields(simRes.getFields());
+					// visData.set1FieldData(truth_sol.getField(0).getRealValues());
 					break;
 				// Two field variables
 				case 2:
-					if (truth_sol[0][0].length == geoData.nodes) {
+					if (simRes.hasDeformationData()) {
+						// if (truth_sol[0][0].length == geoData.nodes) {
 						// The solution data is node displacement data in x and
 						// y directions
-						geoData.setXYDeformationData(truth_sol[0][0], truth_sol[1][0]);
-						// Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
-						float[] zeros = new float[truth_sol[0][0].length];
-						visData.set1FieldData(zeros);
+						geoData.setDisplacementData(simRes
+								.getDeformationData());
+						// Set the solution field to one with all zeros
+						// (formerly merged into the code for set3FieldData)
+						visData.setSolutionFields(f);
 					} else
 						// The solution data are normal field values
-						visData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+//						visData.set2FieldData(simRes.getField(0)
+//								.getRealValues(), simRes.getField(1)
+//								.getRealValues());
+						visData.setSolutionFields(simRes.getFields());
 					break;
 				case 3:
-					if (truth_sol[0][0].length == geoData.nodes) {
-						geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-					// 	Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
-						float[] zeros = new float[truth_sol[0][0].length];
-						visData.set1FieldData(zeros);
+					if (simRes.hasDeformationData()) {
+						// if (truth_sol[0][0].length == geoData.nodes) {
+						geoData.setDisplacementData(simRes
+								.getDeformationData());
+						// Set the solution field to one with all zeros
+						// (formerly merged into the code for set3FieldData)
+						visData.setSolutionFields(f);
 					} else {
-						visData.set3FieldData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
+//						visData.set3FieldData(simRes.getField(0)
+//								.getRealValues(), simRes.getField(1)
+//								.getRealValues(), simRes.getField(2)
+//								.getRealValues());
+						visData.setSolutionFields(simRes.getFields());
 					}
 					break;
 				case 4:
-					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-					visData.set1FieldData(truth_sol[3][0]);
+					geoData.setDisplacementData(simRes.getDeformationData());
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				}
-			/*
-			 * System has complex data, so [*][0][*] and [*][1][*] are real and complex parts (?)
-			 */
-			else
+				/*
+				 * System has complex data, so [*][0][*] and [*][1][*] are real
+				 * and complex parts (?)
+				 */
+			} else {
 				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				/*
 				 * Seems to be the only case: one field variable, but complex.
 				 * but why three fields?
 				 */
 				case 1:
-					visData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+//					visData.set3FieldData(simRes.getField(0)
+//							.getComplexValues()[0], simRes.getField(0)
+//							.getComplexValues()[1], simRes.getField(0)
+//							.getNorms());
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				}
+			}
 		} else {
 			/*
 			 * Parameter sweep case
@@ -135,37 +163,54 @@ public class RBVisualization extends Activity {
 			} else {
 				mesh_transform_custom(RBActivity.mSweepParam, geoData);
 			}
-			
-			float[][][] truth_sol = rb.mRbSystem.get_sweep_truth_sol();
 
-			if (rb.mRbSystem.isReal) {
+			SimulationResult simRes = rb.mRbSystem.getSweepSimResults();
+			/*
+			 * Create "fake" solution field with zeros for all simulations that only involve displacements.
+			 * @TODO create a "default" field that creates colors..
+			 */
+			float[] zeros = new float[simRes.getField(0).getSize()];
+			List<SolutionField> f = new ArrayList<SolutionField>();
+			f.add(new SolutionField(zeros));
+			
+			if (!simRes.isComplex()) {
 				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				case 1:
-					visData.set1FieldData(truth_sol[0][0]);
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				case 2:
-					visData.set2FieldData(truth_sol[0][0], truth_sol[1][0]);
+//					visData.set2FieldData(
+//							simRes.getField(0).getRealValues(), simRes
+//									.getField(1).getRealValues());
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				case 3:
-					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-					// Set the solution field to one with all zeros (formerly merged into the code for set3FieldData) 
-					float[] zeros = new float[truth_sol[0][0].length];
-					visData.set1FieldData(zeros);
+					geoData.setDisplacementData(simRes.getDeformationData());
+					// Set the solution field to one with all zeros (formerly
+					// merged into the code for set3FieldData)
+					visData.setSolutionFields(f);
 					break;
 				case 4:
-					geoData.setXYZDeformationData(truth_sol[0][0], truth_sol[1][0], truth_sol[2][0]);
-					visData.set1FieldData(truth_sol[3][0]);
+					geoData.setDisplacementData(simRes.getDeformationData());
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				}
+				/*
+				 * Complex sweep case
+				 */
 			} else {
 				switch (rb.mRbSystem.getNumOutputVisualizationFields()) {
 				case 1:
-					visData.set3FieldData(truth_sol[0][0], truth_sol[0][1], truth_sol[0][2]);
+//					visData.set3FieldData(simRes.getField(0)
+//							.getComplexValues()[0], simRes.getField(0)
+//							.getComplexValues()[1], simRes.getField(0)
+//							.getNorms());
+					visData.setSolutionFields(simRes.getFields());
 					break;
 				}
 			}
 		}
-		
+
 		/*
 		 * Add colors to the data!
 		 */
@@ -195,7 +240,8 @@ public class RBVisualization extends Activity {
 		data.vnode = new float[data.vframe_num * data.nodes * 3];
 		for (int i = 0; i < data.vframe_num; i++) {
 			// get current nodal data
-			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(mu[i], data.reference_node.clone());
+			float[] tmpnode = RBActivity.rb.mRbSystem.mesh_transform(mu[i],
+					data.reference_node.clone());
 			Log.d("GLRenderer", mu[i][0] + " " + mu[i][1]);
 			Log.d("GLRenderer", tmpnode[4] + " " + data.node[4]);
 			data.node = tmpnode.clone();
@@ -208,10 +254,11 @@ public class RBVisualization extends Activity {
 		}
 	}
 
-	private final SensorEventListener mySensorListener = new SensorEventListener(){
+	private final SensorEventListener mySensorListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent event) {
 			// send data
-			glView.setSensorParam(event.values[0], event.values[1], event.values[2]);
+			glView.setSensorParam(event.values[0], event.values[1],
+					event.values[2]);
 			// update (commented out since not used)
 			/*
 			 * oldX = event.values[0]; oldY = event.values[1]; oldZ =
@@ -226,7 +273,8 @@ public class RBVisualization extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		myManager.registerListener(mySensorListener, accSensor, SensorManager.SENSOR_DELAY_GAME);
+		myManager.registerListener(mySensorListener, accSensor,
+				SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	@Override

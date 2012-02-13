@@ -71,7 +71,7 @@ public class Visualization extends Activity {
 				zDispl[step] = res[i+2][step];
 			}
 		}
-		geoData.setXYZDeformationData(xDispl, yDispl, zDispl);
+		geoData.setDisplacementData(xDispl, yDispl, zDispl);
 
 		/*
 		 * Add colors to the data!
