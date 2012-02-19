@@ -244,7 +244,7 @@ public class MainActivity extends Activity {
 	private void testwas() {
 		AssetModelManager m = new AssetModelManager(getApplicationContext());
 		try {
-			m.setModelDir("aghdemo");
+			m.useModel("aghdemo");
 
 			ClassLoader cl = m.getClassLoader();
 			Class<?> c = cl.loadClass("AffineFunctions");
@@ -258,7 +258,7 @@ public class MainActivity extends Activity {
 			a = (Integer) res;
 			System.out.println("a=" + a);
 
-			m.setModelDir("demo1");
+			m.useModel("demo1");
 			ClassLoader cl2 = m.getClassLoader();
 
 			c = cl.loadClass("AffineFunctions");

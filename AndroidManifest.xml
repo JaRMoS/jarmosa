@@ -22,5 +22,10 @@
         <activity android:name=".activity.rb.RBVisualization"></activity>
         <activity android:name=".activity.rb.OutputPlotterActivity"></activity>
 		<activity android:name="rmcommon.geometry.GLData"></activity>
+		
+		<uses-library android:name="android.test.runner" />
     </application>
+    
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    android:label="ROMSim tests" android:targetPackage="romsim.app"/>
 </manifest>

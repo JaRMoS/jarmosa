@@ -135,7 +135,8 @@ public class SimulationActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					rm = ReducedModel.load(mng);
+					rm = new ReducedModel();
+					rm.loadOfflineData(mng);
 				} catch (Exception e) {
 					Log.e("SimulationActivity", "Error loading reduced model.",
 							e);

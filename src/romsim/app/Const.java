@@ -106,7 +106,7 @@ public class Const {
 		}
 		String md = i.getStringExtra(EXTRA_MODELMANAGER_MODELDIR);
 		if (md != null) {
-			res.setModelDir(md);
+			res.useModel(md);
 		}
 		return res;
 	}

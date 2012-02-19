@@ -236,7 +236,7 @@ public class ModelListActivity extends Activity {
 							ModelDescriptor i = (ModelDescriptor) av
 									.getItemAtPosition(position);
 							try {
-								mng.setModelDir(i.modeldir);
+								mng.useModel(i.modeldir);
 							} catch (AModelManager.ModelManagerException me) {
 								Toast.makeText(
 										ModelListActivity.this,
@@ -350,7 +350,7 @@ public class ModelListActivity extends Activity {
 		case R.id.context_deleteModelItem:
 			String dir = items.get(info.position).modeldir;
 			try {
-				mng.setModelDir(dir);
+				mng.useModel(dir);
 			} catch (ModelManagerException e) {
 				return false;
 			}

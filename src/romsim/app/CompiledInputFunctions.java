@@ -30,7 +30,6 @@ public class CompiledInputFunctions implements IInputFunctions {
 	 */
 	@Override
 	public int getNumFunctions() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -39,7 +38,6 @@ public class CompiledInputFunctions implements IInputFunctions {
 	 */
 	@Override
 	public double[] evaluate(double t, int idx) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

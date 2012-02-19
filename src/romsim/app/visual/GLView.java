@@ -36,7 +36,7 @@ public class GLView extends GLSurfaceView {
 	@SuppressWarnings("unused")
 	private static final String LOG_TAG = GLView.class.getSimpleName();
 	
-	private GLRenderer _renderer;
+	private GLRenderer glRend;
 	private VisualizationData visData;
 
 	private float _x = 0;
@@ -57,18 +57,18 @@ public class GLView extends GLSurfaceView {
 		super(context);
 		setFocusableInTouchMode(true);
 		this.visData = visData;
-		_renderer = new GLRenderer(visData);
+		glRend = new GLRenderer(visData);
 
 		Configuration c = getResources().getConfiguration();
 		if (c.orientation == Configuration.ORIENTATION_PORTRAIT) {
 			// _renderer.setcField(0);
-			_renderer.setOrientation(true);
+			glRend.setOrientation(true);
 		} else if (c.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			// _renderer.setcField(1);
-			_renderer.setOrientation(false);
+			glRend.setOrientation(false);
 		}
 
-		setRenderer(_renderer);
+		setRenderer(glRend);
 	}
 
 	/**
@@ -80,13 +80,13 @@ public class GLView extends GLSurfaceView {
 			ismTouch = false;
 			_x = event.getX();
 			_y = event.getY();
-			current_paused = _renderer.ispaused;
-			_renderer.pause();
+			current_paused = glRend.ispaused;
+			glRend.pause();
 			break;
 
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_POINTER_UP:
-			_renderer.ispaused = current_paused;
+			glRend.ispaused = current_paused;
 			break;
 		case MotionEvent.ACTION_MOVE:
 			// pass touchscreen data to the renderer
@@ -95,7 +95,7 @@ public class GLView extends GLSurfaceView {
 				final float ydiff = (_y - event.getY());
 				queueEvent(new Runnable() {
 					public void run() {
-						_renderer.setPos(true, -xdiff / 20.0f, ydiff / 20.0f,
+						glRend.setPos(true, -xdiff / 20.0f, ydiff / 20.0f,
 								0.0f);
 					}
 				});
@@ -108,7 +108,7 @@ public class GLView extends GLSurfaceView {
 				if (dist > 10f) {
 					queueEvent(new Runnable() {
 						public void run() {
-							_renderer.zoom(dist / _dist * old_zoom);
+							glRend.zoom(dist / _dist * old_zoom);
 						}
 					});
 				}
@@ -119,9 +119,9 @@ public class GLView extends GLSurfaceView {
 			_x = event.getX(0) - event.getX(0);
 			_y = event.getY(1) - event.getY(0);
 			_dist = (float) Math.sqrt(_x * _x + _y * _y);
-			old_zoom = _renderer.scale_rat;
-			current_paused = _renderer.ispaused;
-			_renderer.pause();
+			old_zoom = glRend.scale_rat;
+			current_paused = glRend.ispaused;
+			glRend.pause();
 			break;
 		}
 		return true;
@@ -135,33 +135,33 @@ public class GLView extends GLSurfaceView {
 			switch (keyCode) {
 			case 24: // KEYCODE_VOLUME_UP
 				// isSensorCtrl = !isSensorCtrl;
-				_renderer.ispaused = true;
-				_renderer.isContinuousRotation = false;
-				_renderer.increase_ndframe(1f);
+				glRend.ispaused = true;
+				glRend.isContinuousRotation = false;
+				glRend.increase_ndframe(1f);
 				return true;
 			case 25: // KEYCODE_VOLUME_DOWN
 				// isSensorCtrl = !isSensorCtrl;
-				_renderer.ispaused = true;
-				_renderer.isContinuousRotation = false;
-				_renderer.increase_ndframe(-1f);
+				glRend.ispaused = true;
+				glRend.isContinuousRotation = false;
+				glRend.increase_ndframe(-1f);
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((_renderer.fGeoData.is2D())
-						|| (visData.getNumVisualizationFields() > 0))
-					_renderer.setcField(_renderer.getcField() + 1);
+				if ((glRend.fGeoData.is2D())
+						|| (visData.getNumVisFeatures() > 0))
+					glRend.nextColorField();
 				else
 					// enable tilting
 					// isSensorCtrl = !isSensorCtrl;
 					// swap face rendering
-					_renderer.isFrontFace = !_renderer.isFrontFace;
+					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			case 83: // KEYCODE_HOME
 				// do nothing!
 				return true;
 			case 84: // KEYCODE_SEARCH
-				_renderer.ispaused = !_renderer.ispaused;
-				if (!_renderer.fGeoData.is2D())
-					_renderer.isFrontFace = !_renderer.isFrontFace;
+				glRend.ispaused = !glRend.ispaused;
+				if (!glRend.fGeoData.is2D())
+					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			default:
 				return super.onKeyDown(keyCode, event);
@@ -179,16 +179,16 @@ public class GLView extends GLSurfaceView {
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
 			if ((TBx >= 0) & (TBy <= 0)) // zoom in if trackball is moving in
 											// the 2D "positive" direction
-				_renderer.zoomin();
+				glRend.zoomin();
 			else
-				_renderer.zoomout(); // and zoom out if not
+				glRend.zoomout(); // and zoom out if not
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			_renderer.resetZoom(); // reset to original status when users push
+			glRend.resetZoom(); // reset to original status when users push
 									// the "pearl"
-			_renderer.setPos(true, 0.0f, 0.0f, 0.0f);
-			_renderer.ispaused = false;
-			_renderer.isContinuousRotation = true;
+			glRend.setPos(true, 0.0f, 0.0f, 0.0f);
+			glRend.ispaused = false;
+			glRend.isContinuousRotation = true;
 		}
 		return true;
 	}
@@ -200,7 +200,7 @@ public class GLView extends GLSurfaceView {
 	 */
 	public void setSensorParam(float x, float y, float z) {
 		if (isSensorCtrl) {
-			_renderer.setPos(false, -x / 1.50f, -y / 1.50f, 0.0f);
+			glRend.setPos(false, -x / 1.50f, -y / 1.50f, 0.0f);
 		}
 	}
 }

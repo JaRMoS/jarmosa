@@ -21,6 +21,7 @@ package romsim.app.activity.kermor;
 import java.util.List;
 
 import kermor.java.ReducedModel;
+import rmcommon.SimulationResult;
 import rmcommon.geometry.GeometryData;
 import rmcommon.visual.ColorGenerator;
 import rmcommon.visual.VisualizationData;
@@ -51,32 +52,18 @@ public class Visualization extends Activity {
 		super.onCreate(savedInstanceState);
 
 		ReducedModel rm = SimulationActivity.rm;
-		GeometryData geoData = rm.geo;
+		GeometryData geoData = rm.getGeometry();
 		VisualizationData vData = new VisualizationData(geoData);
 
 		// Bundle extras = getIntent().getExtras();
 
-		float[][] res = rm.getOutput();
-
-		// TODO: Export this mapping as "fieldmapping" class for the 
-		// model to allow generic ODE - to - node transfer.
-		int len = res[0].length;
-		float[] xDispl = new float[len];
-		float[] yDispl = new float[len];
-		float[] zDispl = new float[len];
-		for (int step = 0; step < len; step++) {
-			for (int i = 0; i < res.length; i += 6) {
-				xDispl[step] = res[i][step];
-				yDispl[step] = res[i+1][step];
-				zDispl[step] = res[i+2][step];
-			}
-		}
-		geoData.setDisplacementData(xDispl, yDispl, zDispl);
+		SimulationResult res = rm.getSimulationResult();
+		vData.useResult(res);
 
 		/*
 		 * Add colors to the data!
 		 */
-		vData.computeColorData(new ColorGenerator());
+		vData.computeVisualFeatures(new ColorGenerator());
 
 		// Set Sensor + Manager
 		myManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);

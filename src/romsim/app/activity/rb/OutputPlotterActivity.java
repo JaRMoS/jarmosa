@@ -1030,10 +1030,9 @@ public class OutputPlotterActivity extends Activity {
 				}
 			}
 
-			//RBActivity.mCurrentParamForGUI[RBActivity] = xcurrent;
 			RBContainer rb = RBActivity.rb;
 			rb.mRbSystem.getParams().setCurrent(sweepIndex, xcurrent);
-			rb.mRbSystem.RB_solve(RBActivity.mOnlineNForGui);
+			rb.mRbSystem.solveRB(RBActivity.mOnlineNForGui);
 
 			double[][] new_RB_outputs_all_k = new double[n_outputs][n_time_steps + 1];
 			double[][] new_RB_outputs_LB = new double[n_outputs][n_time_steps + 1];

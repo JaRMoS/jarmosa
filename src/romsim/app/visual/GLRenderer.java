@@ -20,13 +20,13 @@ package romsim.app.visual;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import rmcommon.geometry.GeometryData;
 import rmcommon.visual.VisualizationData;
+import romsim.app.activity.rb.RBActivity;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
@@ -39,12 +39,6 @@ import android.util.Log;
  */
 public class GLRenderer implements GLSurfaceView.Renderer {
 
-	/*--------------------------------------------------*/
-	/* Camera class using quaternion */
-	
-
-	private int _anivertex_off = 0;
-
 	/**
 	 * Offset for the color data in the float buffer, for each field
 	 */
@@ -54,7 +48,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Offset for the faces data in short buffer
 	 */
-	private int _index_off = 0;
+	private int _faces_off = 0;
 
 	/**
 	 * Offset for the wireframe (edges) data in float buffer
@@ -78,7 +72,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	// Camera control
 	private Camera camera;
 	private float current_framef = 0f;
-	private int currentField = 0;
+
+	/**
+	 * The currently plotted color field
+	 */
+	private int currentColorField = 0;
 
 	private int currentFrame = 0, oldFrame = 0;
 
@@ -86,18 +84,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	VisualizationData vData;
 
 	private FloatBuffer floatBuf;
+	private ShortBuffer shortBuf;
+
 	boolean isconstant = false;
 	boolean isContinuousRotation = true;
 
 	boolean isFrontFace = true;
 	boolean ispaused = false;
+
 	private float pos[] = { 0f, 0f, 0f }; // touchscreeen control data
 	/**
 	 * scaling ratio (for zooming)
 	 */
 	public float scale_rat = 1.0f;
-
-	private ShortBuffer shortBuf;
 
 	/**
 	 * Creates a new OpenGL renderer using the GLObject as geometry/field value
@@ -108,13 +107,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	public GLRenderer(VisualizationData vData) {
 		this.vData = vData;
 		fGeoData = vData.getGeometryData();
+		// Use the (global) buffers from RBActivity
+		floatBuf = RBActivity.floatBuf;
+		shortBuf = RBActivity.shortBuf;
 	}
 
 	/**
-	 * @return The current rendering field
+	 * Shows the next color field, if available.
 	 */
-	public int getcField() {
-		return currentField;
+	public void nextColorField() {
+		currentColorField++;
+		currentColorField %= vData.getNumVisFeatures();
+		Log.d("GLRenderer", "Next color field index: "+currentColorField+", total: "+_color_off.length);
 	}
 
 	/**
@@ -166,85 +170,69 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	 */
 	private void initRendering() {
 
+		currentFrame = 0;
+		current_framef = 0.0f;
+
 		/*
 		 * Clear and init the buffers
 		 */
-		shortBuf = fGeoData._shortBuffer;
+		floatBuf.clear();
 		shortBuf.clear();
 		int curShortBufOffset = 0;
-
-		floatBuf = fGeoData._floatBuffer;
-		floatBuf.clear();
 		int curFloatBufOffset = 0;
 
-		/*
-		 * Node float buffer
+		/**
+		 * Node float buffer (also includes animations if displacements are
+		 * given)
 		 */
 		_vertex_off = curFloatBufOffset;
-		floatBuf.put(fGeoData.node);
-		curFloatBufOffset += fGeoData.node.length;
-		Log.d("GLRenderer", "float_count (vertex) = " + curFloatBufOffset + "/"
-				+ floatBuf.capacity());
+		floatBuf.put(fGeoData.vertices);
+		curFloatBufOffset += fGeoData.vertices.length;
+		Log.d("GLRenderer", "FloatBuffer: Added " + fGeoData.vertices.length + " floats for vertices. Fill state: "
+				+ curFloatBufOffset + "/" + floatBuf.capacity());
 
-		/*
-		 * Faces buffer
+		/**
+		 * Element faces buffer
 		 */
-		_index_off = curShortBufOffset;
+		_faces_off = curShortBufOffset;
 		shortBuf.put(fGeoData.face);
 		curShortBufOffset += fGeoData.face.length;
-		Log.d("GLRenderer", "short_count (index) = " + curShortBufOffset + "/"
-				+ shortBuf.capacity());
+		Log.d("GLRenderer", "ShortBuffer: Added " + fGeoData.face.length + " short for element faces. Fill state: "
+				+ curShortBufOffset + "/" + shortBuf.capacity());
 
-		/*
-		 * Edges buffer
+		/**
+		 * Element edges buffer
 		 */
 		_indexwf_off = curShortBufOffset;
 		shortBuf.put(fGeoData.face_wf);
 		curShortBufOffset += fGeoData.face_wf.length;
-		Log.d("GLRenderer", "short_count (indexwf) = " + curShortBufOffset
-				+ "/" + shortBuf.capacity());
+		Log.d("GLRenderer", "ShortBuffer: Added " + fGeoData.face_wf.length
+				+ " short for faces wireframe. Fill state: " + curShortBufOffset + "/" + shortBuf.capacity());
 
-		/*
-		 * Colors for each solution field.
+		/**
+		 * Colors for each visualization field.
 		 * 
 		 * Animation color buffer contains RBSystem.getVisualNumTimesteps()
 		 * times the color data for a single solution.
 		 */
-		_color_off = new int[vData.getNumVisualizationFields()];
-		for (int i = 0; i < vData.getNumVisualizationFields(); i++) {
+		_color_off = new int[vData.getNumVisFeatures()];
+		for (int i = 0; i < vData.getNumVisFeatures(); i++) {
 			_color_off[i] = curFloatBufOffset;
-			floatBuf.put(vData.getFieldColors(i));
-			curFloatBufOffset += vData.getFieldColors(i).length;
-			Log.d("GLRenderer", "float_count (color[" + i + "]) = "
-					+ curFloatBufOffset + "/" + floatBuf.capacity());
+			float[] col = vData.getVisualizationFeature(i).Colors;
+			floatBuf.put(col);
+			curFloatBufOffset += col.length;
+			Log.d("GLRenderer", "FloatBuffer: Added " + col.length + " floats for color field " + (i + 1)
+					+ ". Fill state: " + curFloatBufOffset + "/" + floatBuf.capacity());
 		}
 
-		// init array for 3D object
+		// Init array for 3D object
 		if (!fGeoData.is2D()) {
 			_normal_off = curFloatBufOffset;
 			floatBuf.put(fGeoData.normal);
 			curFloatBufOffset += fGeoData.normal.length;
-			Log.d("GLRenderer", "float_count (normal) = " + curFloatBufOffset
-					+ "/" + floatBuf.capacity());
+			Log.d("GLRenderer", "FloatBuffer: Added " + fGeoData.normal.length
+					+ " floats for 3D normal data. Fill state: " + curFloatBufOffset + "/" + floatBuf.capacity());
 		}
-
-		// init vertex animation buffer
-		if (fGeoData.isgeoani) {
-			_anivertex_off = curFloatBufOffset;
-			floatBuf.put(fGeoData.vnode);
-			curFloatBufOffset += fGeoData.vnode.length;
-			Log.d("GLRenderer", "float_count (anivertex) = "
-					+ curFloatBufOffset + "/" + floatBuf.capacity());
-			// } else {
-			// This piece of assignment is actually never used (same flag
-			// isgeoani)
-			// _anivertex_off = float_count;
-			// _floatBuffer.put(fGeoData.node);
-			// float_count += fGeoData.node.length;
-			// Log.d("GLRenderer", "float_count (anivertex) = " + float_count
-			// + "/" + _floatBuffer.capacity());
-		}
-
 	}
 
 	/**
@@ -256,10 +244,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		// gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+
 		if (!fGeoData.is2D()) // enable depth test for 3D rendering
 			gl.glEnable(GL10.GL_DEPTH_TEST);
 
-		// gl.glEnable(GL10.GL_CULL_FACE);
 		if ((isFrontFace) || (fGeoData.is2D())) {
 			// enable blending (for rendering wireframe)
 			if (!fGeoData.is2D())
@@ -291,14 +279,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			float[] lightSpecular = { 0.7f, 0.7f, 0.7f, 1.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightSpecular, 0);
 			// light position
-			float[] lightPosition = { -fGeoData.boxsize, -fGeoData.boxsize,
-					0.0f, 0.0f };
+			float[] lightPosition = { -fGeoData.boxsize, -fGeoData.boxsize, 0.0f, 0.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPosition, 0);
 			// light direction
-			float[] lightDirection = { fGeoData.boxsize, fGeoData.boxsize,
-					fGeoData.boxsize, 0.0f };
-			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION,
-					lightDirection, 0);
+			float[] lightDirection = { fGeoData.boxsize, fGeoData.boxsize, fGeoData.boxsize, 0.0f };
+			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION, lightDirection, 0);
 			// 90 degree FOV
 			gl.glLightf(GL10.GL_LIGHT0, GL10.GL_SPOT_CUTOFF, 45.0f);
 
@@ -314,8 +299,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		 * touchscreen control Rotation, zoom etc
 		 */
 		if (fGeoData.is2D()) {// we just move the object around in 2D cases
-			gl.glTranslatef(pos[0] * fGeoData.boxsize / 20f, pos[1]
-					* fGeoData.boxsize / 20f, pos[2] * fGeoData.boxsize / 20f);
+			gl.glTranslatef(pos[0] * fGeoData.boxsize / 20f, pos[1] * fGeoData.boxsize / 20f, pos[2] * fGeoData.boxsize
+					/ 20f);
 		} else { // but we rotate the object in 3D cases
 					// set yawing/pitching rotation angles and update camera
 			camera.SetRotation(-pos[0] * 8f, -pos[1] * 8f);
@@ -327,14 +312,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 				// delay the rotation parameters...
 				pos[0] = pos[0] * (1 - (float) Math.exp(-Math.abs(pos[0])));
 				pos[1] = pos[1] * (1 - (float) Math.exp(-Math.abs(pos[1])));
-				pos[0] = Math.abs(pos[0]) > 3.00f ? Math.signum(pos[0]) * 3.00f
-						: pos[0];
-				pos[1] = Math.abs(pos[1]) > 3.00f ? Math.signum(pos[1]) * 3.00f
-						: pos[1];
-				pos[0] = Math.abs(pos[0]) > minrot ? pos[0] : Math
-						.signum(pos[0]) * minrot;
-				pos[1] = Math.abs(pos[1]) > minrot ? pos[1] : Math
-						.signum(pos[1]) * minrot;
+				pos[0] = Math.abs(pos[0]) > 3.00f ? Math.signum(pos[0]) * 3.00f : pos[0];
+				pos[1] = Math.abs(pos[1]) > 3.00f ? Math.signum(pos[1]) * 3.00f : pos[1];
+				pos[0] = Math.abs(pos[0]) > minrot ? pos[0] : Math.signum(pos[0]) * minrot;
+				pos[1] = Math.abs(pos[1]) > minrot ? pos[1] : Math.signum(pos[1]) * minrot;
 			} else {
 				// reset the rotation parameters
 				pos[0] = 0.0f;
@@ -344,59 +325,47 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 			// gl.glTranslatef(-camera.Position[0],-camera.Position[1],-camera.Position[2]);
 		}
 
-		// using our vertex data
-		if (fGeoData.isgeoani) {
-			/*
-			 * Animated plot: Use offset for animation vertexes and access the
-			 * set for the current frame
-			 */
-			floatBuf.position(_anivertex_off + currentFrame
-					* (fGeoData.nodes * 3));
-			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, floatBuf);
-		} else {
-			/*
-			 * Normal plot: Use plain position in float buffer for vertex data
-			 */
-			floatBuf.position(_vertex_off);
-			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, floatBuf);
-		}
+		/*
+		 * Set pointer to vertex data Always uses currentFrame, which is zero in
+		 * case of no animation.
+		 */
+		floatBuf.position(_vertex_off + currentFrame * (fGeoData.numVertices * 3));
+		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, floatBuf);
 
 		/*
 		 * specify the color data for the current frame Four values each: R, G,
 		 * B, Alpha
 		 */
-		floatBuf.position(_color_off[currentField] + currentFrame
-				* (fGeoData.nodes * 4));
-		if (oldFrame != currentFrame) {
-			int oldpos = floatBuf.position();
-			Log.d("GLRenderer", "Plotting frame " + currentFrame
-					+ " with pointer pos " + oldpos);
-			float[] data = new float[100];
-			floatBuf.get(data, 0, 100);
-			Log.d("GLRenderer", "Floats read for current frame: "+Arrays.toString(data));
-			floatBuf.position(oldpos);
-		}
+		floatBuf.position(_color_off[currentColorField] + currentFrame * (fGeoData.numVertices * 4));
+//		if (oldFrame != currentFrame) {
+//			Log.d("GLRenderer", "Plotting frame " + currentFrame + " with color pointer at " + floatBuf.position());
+//			int oldpos = floatBuf.position();
+//			float[] data = new float[100];
+//			floatBuf.get(data, 0, 100);
+//			Log.d("GLRenderer", "Floats read for current frame: " + Arrays.toString(data));
+//			floatBuf.position(oldpos);
+//		}
 		gl.glColorPointer(4, GL10.GL_FLOAT, 0, floatBuf);
 
 		/*
 		 * Draw the elements using the above declared nodes and color data
 		 */
-		shortBuf.position(_index_off);
-		gl.glDrawElements(GL10.GL_TRIANGLES, fGeoData.faces * 3,
-				GL10.GL_UNSIGNED_SHORT, shortBuf);
+
+		shortBuf.position(_faces_off);
+		gl.glDrawElements(GL10.GL_TRIANGLES, fGeoData.faces * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
 
 		// Draw the wireframe for a n field object
-		if ((vData.isConstantField(currentField)) | (!fGeoData.is2D())) {
-			// Draw the wireframe mesh
-			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
-			shortBuf.position(_indexwf_off);
-			gl.glDrawElements(GL10.GL_LINES, fGeoData.faces * 6,
-					GL10.GL_UNSIGNED_SHORT, shortBuf);
-		}
+//		if ((vData.isConstantFeature(currentColorField)) | (!fGeoData.is2D())) {
+//			// Draw the wireframe mesh
+//			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+//			shortBuf.position(_indexwf_off);
+//			gl.glDrawElements(GL10.GL_LINES, fGeoData.faces * 6, GL10.GL_UNSIGNED_SHORT, shortBuf);
+//		}
 
-		// Draw next animation frame
-		if (!ispaused)
+		// Draw next animation frame if there are more than one
+		if (!ispaused && vData.numFrames > 1) {
 			increase_frame(0.01f);
+		}
 	}
 
 	/**
@@ -436,9 +405,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		else
 			exrat = 0.95f;
 		// orthographic view
-		gl.glOrthof(-exrat * fGeoData.boxsize / AR[0], exrat * fGeoData.boxsize
-				/ AR[0], -exrat * fGeoData.boxsize / AR[1], exrat
-				* fGeoData.boxsize / AR[1], -100, 100);
+		gl.glOrthof(-exrat * fGeoData.boxsize / AR[0], exrat * fGeoData.boxsize / AR[0], -exrat * fGeoData.boxsize
+				/ AR[1], exrat * fGeoData.boxsize / AR[1], -100, 100);
 
 		gl.glViewport(0, 0, (int) _width, (int) _height);
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
@@ -476,17 +444,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 	 */
 	public void resetZoom() {
 		scale_rat = 1.0f;
-	}
-
-	/**
-	 * Sets the current rendering field
-	 * 
-	 * @param cField
-	 */
-	public void setcField(int cField) {
-		if (cField > (vData.getNumVisualizationFields() - 1))
-			cField = 0;
-		currentField = cField;
 	}
 
 	/**
@@ -552,4 +509,35 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 		if (scale_rat < 0.25f)
 			scale_rat = 0.25f;
 	}
+	
+//	@Test
+//	public void testGL() {
+//		FileModelManager f = new FileModelManager("models");
+//		try {
+//			f.useModel("demo1");
+//		} catch (ModelManagerException e) {
+//			e.printStackTrace();
+//			fail(e.getMessage());
+//		}
+//		
+//		RBContainer rb = new RBContainer();
+//		assertTrue(rb.loadModel(f));
+//		
+//		// Perform the solve
+//		RBSystem s=rb.mRbSystem;
+//		double[] par = s.getParams().getRandomParam();
+////		double[] par = new double[]{.5, .5};
+//		s.getParams().setCurrent(par);
+//		s.solveRB(s.getNBF()/2);
+//		
+//		SimulationResult res = s.getSimulationResults();
+//		GeometryData g = rb.mRbSystem.getGeometry();
+//		VisualizationData v = new VisualizationData(g);
+//		v.useResult(res);
+//		
+//		v.computeVisualFeatures(new ColorGenerator());
+//		
+//		GLRenderer gl = new GLRenderer(v);
+//		gl.initRendering();
+//	}
 }
