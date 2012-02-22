@@ -36,6 +36,7 @@ import rmcommon.io.AModelManager.ModelManagerException;
 import rmcommon.io.CachingModelManager;
 import rmcommon.io.WebModelManager;
 import rmcommon.visual.ColorGenerator;
+import rmcommon.visual.VisualizationData;
 import romsim.app.ModelManagerProgressHandler;
 import romsim.app.ParamBars;
 import romsim.app.R;
@@ -156,28 +157,6 @@ public class RBActivity extends Activity {
 	
 	private Bundle bundle = null;
 
-	/**
-	 * Allocates short and float buffers for the rendering process and sets the
-	 * position to zero.
-	 * 
-	 */
-	private void allocateBuffer() {
-		int SHORT_MAX = 250000;
-		int FLOAT_MAX = 1000000;
-
-		Log.d("RBActivity", "Allocating GL short buffer:" + SHORT_MAX * 2 + " bytes");
-		ByteBuffer vbb = ByteBuffer.allocateDirect(SHORT_MAX * 2);
-		vbb.order(ByteOrder.nativeOrder());
-		shortBuf = vbb.asShortBuffer();
-		shortBuf.position(0);
-
-		Log.d("RBActivity", "Allocating GL float buffer:" + FLOAT_MAX * 4 + " bytes");
-		ByteBuffer fbb = ByteBuffer.allocateDirect(FLOAT_MAX * 4);
-		fbb.order(ByteOrder.nativeOrder());
-		floatBuf = fbb.asFloatBuffer();
-		floatBuf.position(0);
-	}
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -195,7 +174,12 @@ public class RBActivity extends Activity {
 
 		rb = new RBContainer();
 		cg = new ColorGenerator();
-		allocateBuffer();
+		/**
+		 * Initialize the buffers here as they are stored with the RBActivity for low memory requirements
+		 * on subsequent visualizations.
+		 */
+		floatBuf = VisualizationData.createFloatBuffer();
+		shortBuf = VisualizationData.createShortBuffer();
 
 		// Add listener to the Solve button
 		Button solveButton = (Button) findViewById(R.id.solveButton);

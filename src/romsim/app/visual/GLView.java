@@ -27,15 +27,16 @@ import android.view.MotionEvent;
 
 /**
  * Changes made by:
+ * 
  * @author Daniel Wirtz
  * @date Aug 23, 2011
- *
+ * 
  */
 public class GLView extends GLSurfaceView {
-	
+
 	@SuppressWarnings("unused")
 	private static final String LOG_TAG = GLView.class.getSimpleName();
-	
+
 	private GLRenderer glRend;
 	private VisualizationData visData;
 
@@ -80,13 +81,16 @@ public class GLView extends GLSurfaceView {
 			ismTouch = false;
 			_x = event.getX();
 			_y = event.getY();
-			current_paused = glRend.ispaused;
+			current_paused = glRend.isPaused();
 			glRend.pause();
 			break;
 
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_POINTER_UP:
-			glRend.ispaused = current_paused;
+			if (current_paused)
+				glRend.pause();
+			else
+				glRend.unpause();
 			break;
 		case MotionEvent.ACTION_MOVE:
 			// pass touchscreen data to the renderer
@@ -95,8 +99,7 @@ public class GLView extends GLSurfaceView {
 				final float ydiff = (_y - event.getY());
 				queueEvent(new Runnable() {
 					public void run() {
-						glRend.setPos(true, -xdiff / 20.0f, ydiff / 20.0f,
-								0.0f);
+						glRend.setPos(true, -xdiff / 20.0f, ydiff / 20.0f, 0.0f);
 					}
 				});
 				_x = event.getX();
@@ -120,7 +123,7 @@ public class GLView extends GLSurfaceView {
 			_y = event.getY(1) - event.getY(0);
 			_dist = (float) Math.sqrt(_x * _x + _y * _y);
 			old_zoom = glRend.scale_rat;
-			current_paused = glRend.ispaused;
+			current_paused = glRend.isPaused();
 			glRend.pause();
 			break;
 		}
@@ -135,19 +138,18 @@ public class GLView extends GLSurfaceView {
 			switch (keyCode) {
 			case 24: // KEYCODE_VOLUME_UP
 				// isSensorCtrl = !isSensorCtrl;
-				glRend.ispaused = true;
+				glRend.pause();
 				glRend.isContinuousRotation = false;
 				glRend.increase_ndframe(1f);
 				return true;
 			case 25: // KEYCODE_VOLUME_DOWN
 				// isSensorCtrl = !isSensorCtrl;
-				glRend.ispaused = true;
+				glRend.pause();
 				glRend.isContinuousRotation = false;
 				glRend.increase_ndframe(-1f);
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((glRend.fGeoData.is2D())
-						|| (visData.getNumVisFeatures() > 0))
+				if ((glRend.fGeoData.is2D()) || (visData.getNumVisFeatures() > 0))
 					glRend.nextColorField();
 				else
 					// enable tilting
@@ -159,7 +161,10 @@ public class GLView extends GLSurfaceView {
 				// do nothing!
 				return true;
 			case 84: // KEYCODE_SEARCH
-				glRend.ispaused = !glRend.ispaused;
+				if (glRend.isPaused())
+					glRend.unpause();
+				else
+					glRend.pause();
 				if (!glRend.fGeoData.is2D())
 					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
@@ -185,9 +190,9 @@ public class GLView extends GLSurfaceView {
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			glRend.resetZoom(); // reset to original status when users push
-									// the "pearl"
+								// the "pearl"
 			glRend.setPos(true, 0.0f, 0.0f, 0.0f);
-			glRend.ispaused = false;
+			glRend.unpause();
 			glRend.isContinuousRotation = true;
 		}
 		return true;

@@ -67,7 +67,8 @@ public class RBVisualization extends Activity {
 			simRes = s.getSimulationResults();
 		}
 
-		VisualizationData visData = new VisualizationData(s.getGeometry());
+		VisualizationData visData = new VisualizationData(s.getGeometry(), RBActivity.floatBuf, RBActivity.shortBuf);
+
 		/*
 		 * Assign the result to the VisualizationData
 		 */

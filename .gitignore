@@ -2,3 +2,5 @@
 /gen
 /bin
 .classpath
+*.log
+*.properties
