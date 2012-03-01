@@ -48,12 +48,12 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
-		if (!fGeoData.is2D()) // enable depth test for 3D rendering
+		if (!gData.is2D()) // enable depth test for 3D rendering
 			gl.glEnable(GL10.GL_DEPTH_TEST);
 
-		if ((isFrontFace) || (fGeoData.is2D())) {
+		if ((isFrontFace) || (gData.is2D())) {
 			// enable blending (for rendering wireframe)
-			if (!fGeoData.is2D())
+			if (!gData.is2D())
 				gl.glDisable(GL10.GL_CULL_FACE);
 			gl.glFrontFace(GL10.GL_CCW);
 		} else {
@@ -65,7 +65,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glLoadIdentity();
 
 		// setup Light
-		if (!fGeoData.is2D()) {
+		if (!gData.is2D()) {
 			gl.glEnable(GL10.GL_LIGHTING); // Enable light
 			gl.glEnable(GL10.GL_LIGHT0); // turn on the light
 			gl.glEnable(GL10.GL_COLOR_MATERIAL); // turn on color lighting
@@ -82,10 +82,10 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 			float[] lightSpecular = { 0.7f, 0.7f, 0.7f, 1.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightSpecular, 0);
 			// light position
-			float[] lightPosition = { -fGeoData.boxsize, -fGeoData.boxsize, 0.0f, 0.0f };
+			float[] lightPosition = { -gData.boxsize, -gData.boxsize, 0.0f, 0.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPosition, 0);
 			// light direction
-			float[] lightDirection = { fGeoData.boxsize, fGeoData.boxsize, fGeoData.boxsize, 0.0f };
+			float[] lightDirection = { gData.boxsize, gData.boxsize, gData.boxsize, 0.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION, lightDirection, 0);
 			// 90 degree FOV
 			gl.glLightf(GL10.GL_LIGHT0, GL10.GL_SPOT_CUTOFF, 45.0f);
@@ -101,8 +101,8 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		/*
 		 * touchscreen control Rotation, zoom etc
 		 */
-		if (fGeoData.is2D()) {// we just move the object around in 2D cases
-			gl.glTranslatef(pos[0] * fGeoData.boxsize / 20f, pos[1] * fGeoData.boxsize / 20f, pos[2] * fGeoData.boxsize
+		if (gData.is2D()) {// we just move the object around in 2D cases
+			gl.glTranslatef(pos[0] * gData.boxsize / 20f, pos[1] * gData.boxsize / 20f, pos[2] * gData.boxsize
 					/ 20f);
 		} else { // but we rotate the object in 3D cases
 					// set yawing/pitching rotation angles and update camera
@@ -132,14 +132,14 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		 * Set pointer to vertex data Always uses currentFrame, which is zero in
 		 * case of no animation.
 		 */
-		floatBuf.position(_vertex_off + currentFrame * (fGeoData.numVertices * 3));
+		floatBuf.position(_vertex_off + currentFrame * (gData.getNumVertices() * 3));
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, floatBuf);
 
 		/*
 		 * specify the color data for the current frame Four values each: R, G,
 		 * B, Alpha
 		 */
-		floatBuf.position(_color_off[currentColorField] + currentFrame * (fGeoData.numVertices * 4));
+		floatBuf.position(_color_off[currentColorField] + currentFrame * (gData.getNumVertices() * 4));
 //		if (oldFrame != currentFrame) {
 //			Log.d("GLRenderer", "Plotting frame " + currentFrame + " with color pointer at " + floatBuf.position());
 //			int oldpos = floatBuf.position();
@@ -155,7 +155,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		 */
 
 		shortBuf.position(_faces_off);
-		gl.glDrawElements(GL10.GL_TRIANGLES, fGeoData.faces * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
+		gl.glDrawElements(GL10.GL_TRIANGLES, gData.numFaces * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
 
 		// Draw the wireframe for a n field object
 //		if ((vData.isConstantFeature(currentColorField)) | (!fGeoData.is2D())) {
@@ -197,13 +197,13 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glMatrixMode(GL10.GL_PROJECTION);
 
 		float exrat; // marginal extension ratio
-		if (fGeoData.is2D())
+		if (gData.is2D())
 			exrat = 0.65f;
 		else
 			exrat = 0.95f;
 		// orthographic view
-		gl.glOrthof(-exrat * fGeoData.boxsize / AR[0], exrat * fGeoData.boxsize / AR[0], -exrat * fGeoData.boxsize
-				/ AR[1], exrat * fGeoData.boxsize / AR[1], -100, 100);
+		gl.glOrthof(-exrat * gData.boxsize / AR[0], exrat * gData.boxsize / AR[0], -exrat * gData.boxsize
+				/ AR[1], exrat * gData.boxsize / AR[1], -100, 100);
 
 		gl.glViewport(0, 0, (int) _width, (int) _height);
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
@@ -225,7 +225,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 
 		// Enable normal for 3D object
-		if (!fGeoData.is2D())
+		if (!gData.is2D())
 			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
 	}
 

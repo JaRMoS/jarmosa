@@ -149,7 +149,7 @@ public class GLView extends GLSurfaceView {
 				glRend.increase_ndframe(-1f);
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((glRend.fGeoData.is2D()) || (visData.getNumVisFeatures() > 0))
+				if ((glRend.gData.is2D()) || (visData.getNumVisFeatures() > 0))
 					glRend.nextColorField();
 				else
 					// enable tilting
@@ -165,7 +165,7 @@ public class GLView extends GLSurfaceView {
 					glRend.unpause();
 				else
 					glRend.pause();
-				if (!glRend.fGeoData.is2D())
+				if (!glRend.gData.is2D())
 					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			default:

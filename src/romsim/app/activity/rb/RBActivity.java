@@ -310,7 +310,7 @@ public class RBActivity extends Activity {
 			visButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
-					if (rb.mRbSystem.getNumOutputVisualizationFields() > 0) {
+					if (rb.mRbSystem.getNumDoFFields() > 0) {
 						Intent intent = new Intent(RBActivity.this, RBVisualization.class);
 						// The bundle was filled in onCreate / SolveThread!
 						intent.putExtras(bundle);
