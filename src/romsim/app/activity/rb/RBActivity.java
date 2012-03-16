@@ -18,8 +18,6 @@
 
 package romsim.app.activity.rb;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.text.DecimalFormat;
@@ -688,7 +686,7 @@ public class RBActivity extends Activity {
 
 				if (pb.getSweepIndex() == -1) {
 
-					s.solveRB(mOnlineNForGui);
+					s.computeRBSolution(mOnlineNForGui);
 					bundle.putBoolean("isSweep", false);
 
 					handler.sendEmptyMessage(0);
@@ -723,7 +721,7 @@ public class RBActivity extends Activity {
 			case QN_UNSTEADY:
 
 				// Perform the solve
-				s.solveRB(mOnlineNForGui);
+				s.computeRBSolution(mOnlineNForGui);
 
 				bundle.putBoolean("isReal", s.isReal);
 				/**

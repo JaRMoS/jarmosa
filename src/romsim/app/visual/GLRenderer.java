@@ -48,12 +48,12 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
-		if (!gData.is2D()) // enable depth test for 3D rendering
+		if (!is2D()) // enable depth test for 3D rendering
 			gl.glEnable(GL10.GL_DEPTH_TEST);
 
-		if ((isFrontFace) || (gData.is2D())) {
+		if ((isFrontFace) || (is2D())) {
 			// enable blending (for rendering wireframe)
-			if (!gData.is2D())
+			if (!is2D())
 				gl.glDisable(GL10.GL_CULL_FACE);
 			gl.glFrontFace(GL10.GL_CCW);
 		} else {
@@ -65,7 +65,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glLoadIdentity();
 
 		// setup Light
-		if (!gData.is2D()) {
+		if (!is2D()) {
 			gl.glEnable(GL10.GL_LIGHTING); // Enable light
 			gl.glEnable(GL10.GL_LIGHT0); // turn on the light
 			gl.glEnable(GL10.GL_COLOR_MATERIAL); // turn on color lighting
@@ -82,93 +82,63 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 			float[] lightSpecular = { 0.7f, 0.7f, 0.7f, 1.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightSpecular, 0);
 			// light position
-			float[] lightPosition = { -gData.boxsize, -gData.boxsize, 0.0f, 0.0f };
+			float[] lightPosition = { -getBoxSize(), -getBoxSize(), 0.0f, 0.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPosition, 0);
 			// light direction
-			float[] lightDirection = { gData.boxsize, gData.boxsize, gData.boxsize, 0.0f };
+			float[] lightDirection = { getBoxSize(), getBoxSize(), getBoxSize(), 0.0f };
 			gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION, lightDirection, 0);
 			// 90 degree FOV
 			gl.glLightf(GL10.GL_LIGHT0, GL10.GL_SPOT_CUTOFF, 45.0f);
 
 			// using our normal data
-			floatBuf.position(_normal_off);
+			floatBuf.position(getCurrentNormalsOffset());
 			gl.glNormalPointer(GL10.GL_FLOAT, 0, floatBuf);
 		}
 
 		// zoom in/out the model
-		gl.glScalef(scale_rat, scale_rat, scale_rat);
+		gl.glScalef(getScalingFactor(), getScalingFactor(), getScalingFactor());
 
 		/*
 		 * touchscreen control Rotation, zoom etc
 		 */
-		if (gData.is2D()) {// we just move the object around in 2D cases
-			gl.glTranslatef(pos[0] * gData.boxsize / 20f, pos[1] * gData.boxsize / 20f, pos[2] * gData.boxsize
-					/ 20f);
-		} else { // but we rotate the object in 3D cases
-					// set yawing/pitching rotation angles and update camera
-			camera.SetRotation(-pos[0] * 8f, -pos[1] * 8f);
-			// update rotation matrix
-			gl.glMultMatrixf(camera.M, 0);
-			// update rotation parameters
-			if (isContinuousRotation) {
-				float minrot = 0.02f / scale_rat;
-				// delay the rotation parameters...
-				pos[0] = pos[0] * (1 - (float) Math.exp(-Math.abs(pos[0])));
-				pos[1] = pos[1] * (1 - (float) Math.exp(-Math.abs(pos[1])));
-				pos[0] = Math.abs(pos[0]) > 3.00f ? Math.signum(pos[0]) * 3.00f : pos[0];
-				pos[1] = Math.abs(pos[1]) > 3.00f ? Math.signum(pos[1]) * 3.00f : pos[1];
-				pos[0] = Math.abs(pos[0]) > minrot ? pos[0] : Math.signum(pos[0]) * minrot;
-				pos[1] = Math.abs(pos[1]) > minrot ? pos[1] : Math.signum(pos[1]) * minrot;
-			} else {
-				// reset the rotation parameters
-				pos[0] = 0.0f;
-				pos[1] = 0.0f;
-			}
-
-			// gl.glTranslatef(-camera.Position[0],-camera.Position[1],-camera.Position[2]);
+		if (is2D()) {
+			gl.glTranslatef(getXTranslation(), getYTranslation(), 0);
+		} else {
+			gl.glMultMatrixf(getRotationMatrix(), 0);
 		}
 
 		/*
 		 * Set pointer to vertex data Always uses currentFrame, which is zero in
 		 * case of no animation.
 		 */
-		floatBuf.position(_vertex_off + currentFrame * (gData.getNumVertices() * 3));
+		floatBuf.position(getCurrentVertexOffset());
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, floatBuf);
 
 		/*
 		 * specify the color data for the current frame Four values each: R, G,
 		 * B, Alpha
 		 */
-		floatBuf.position(_color_off[currentColorField] + currentFrame * (gData.getNumVertices() * 4));
-//		if (oldFrame != currentFrame) {
-//			Log.d("GLRenderer", "Plotting frame " + currentFrame + " with color pointer at " + floatBuf.position());
-//			int oldpos = floatBuf.position();
-//			float[] data = new float[100];
-//			floatBuf.get(data, 0, 100);
-//			Log.d("GLRenderer", "Floats read for current frame: " + Arrays.toString(data));
-//			floatBuf.position(oldpos);
-//		}
+		floatBuf.position(getCurrentColorOffset());
 		gl.glColorPointer(4, GL10.GL_FLOAT, 0, floatBuf);
 
 		/*
 		 * Draw the elements using the above declared nodes and color data
 		 */
 
-		shortBuf.position(_faces_off);
-		gl.glDrawElements(GL10.GL_TRIANGLES, gData.numFaces * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
+		shortBuf.position(getFaceOffset());
+		gl.glDrawElements(GL10.GL_TRIANGLES, getNumFaces() * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
 
 		// Draw the wireframe for a n field object
-//		if ((vData.isConstantFeature(currentColorField)) | (!fGeoData.is2D())) {
-//			// Draw the wireframe mesh
-//			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
-//			shortBuf.position(_indexwf_off);
-//			gl.glDrawElements(GL10.GL_LINES, fGeoData.faces * 6, GL10.GL_UNSIGNED_SHORT, shortBuf);
-//		}
+		// if ((vData.isConstantFeature(currentColorField)) |
+		// (!fGeoData.is2D())) {
+		// // Draw the wireframe mesh
+		// gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+		// shortBuf.position(_indexwf_off);
+		// gl.glDrawElements(GL10.GL_LINES, fGeoData.faces * 6,
+		// GL10.GL_UNSIGNED_SHORT, shortBuf);
+		// }
 
-		// Draw next animation frame if there are more than one
-		if (!ispaused && vData.numFrames > 1) {
-			increase_frame(0.01f);
-		}
+		frameRendered();
 	}
 
 	/**
@@ -196,16 +166,11 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glMatrixMode(GL10.GL_PROJECTION);
 
-		float exrat; // marginal extension ratio
-		if (gData.is2D())
-			exrat = 0.65f;
-		else
-			exrat = 0.95f;
 		// orthographic view
-		gl.glOrthof(-exrat * gData.boxsize / AR[0], exrat * gData.boxsize / AR[0], -exrat * gData.boxsize
-				/ AR[1], exrat * gData.boxsize / AR[1], -100, 100);
+		float[] o = getOrtographicProj();
+		gl.glOrthof(o[0], o[1], o[2], o[3], o[4], o[5]);
 
-		gl.glViewport(0, 0, (int) _width, (int) _height);
+		gl.glViewport(0, 0, getWidth(), getHeight());
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 
 		// define the color we want to be displayed as the "clipping wall"
@@ -225,39 +190,38 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 
 		// Enable normal for 3D object
-		if (!gData.is2D())
+		if (!is2D())
 			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
 	}
 
-	
-//	@Test
-//	public void testGL() {
-//		FileModelManager f = new FileModelManager("models");
-//		try {
-//			f.useModel("demo1");
-//		} catch (ModelManagerException e) {
-//			e.printStackTrace();
-//			fail(e.getMessage());
-//		}
-//		
-//		RBContainer rb = new RBContainer();
-//		assertTrue(rb.loadModel(f));
-//		
-//		// Perform the solve
-//		RBSystem s=rb.mRbSystem;
-//		double[] par = s.getParams().getRandomParam();
-////		double[] par = new double[]{.5, .5};
-//		s.getParams().setCurrent(par);
-//		s.solveRB(s.getNBF()/2);
-//		
-//		SimulationResult res = s.getSimulationResults();
-//		GeometryData g = rb.mRbSystem.getGeometry();
-//		VisualizationData v = new VisualizationData(g);
-//		v.useResult(res);
-//		
-//		v.computeVisualFeatures(new ColorGenerator());
-//		
-//		GLRenderer gl = new GLRenderer(v);
-//		gl.initRendering();
-//	}
+	// @Test
+	// public void testGL() {
+	// FileModelManager f = new FileModelManager("models");
+	// try {
+	// f.useModel("demo1");
+	// } catch (ModelManagerException e) {
+	// e.printStackTrace();
+	// fail(e.getMessage());
+	// }
+	//
+	// RBContainer rb = new RBContainer();
+	// assertTrue(rb.loadModel(f));
+	//
+	// // Perform the solve
+	// RBSystem s=rb.mRbSystem;
+	// double[] par = s.getParams().getRandomParam();
+	// // double[] par = new double[]{.5, .5};
+	// s.getParams().setCurrent(par);
+	// s.solveRB(s.getNBF()/2);
+	//
+	// SimulationResult res = s.getSimulationResults();
+	// GeometryData g = rb.mRbSystem.getGeometry();
+	// VisualizationData v = new VisualizationData(g);
+	// v.useResult(res);
+	//
+	// v.computeVisualFeatures(new ColorGenerator());
+	//
+	// GLRenderer gl = new GLRenderer(v);
+	// gl.initRendering();
+	// }
 }

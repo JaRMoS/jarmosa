@@ -18,6 +18,7 @@
 
 package romsim.app.visual;
 
+import rmcommon.visual.OpenGLBase.Orientation;
 import rmcommon.visual.VisualizationData;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -40,14 +41,14 @@ public class GLView extends GLSurfaceView {
 	private GLRenderer glRend;
 	private VisualizationData visData;
 
-	private float _x = 0;
-	private float _y = 0;
-	private float _dist = 1.0f;
-	private float old_zoom = 1.0f;
+	private float x = 0;
+	private float y = 0;
+//	private float _dist = 1.0f;
+	// private float old_zoom = 1.0f;
 
 	boolean ismTouch = false;
 
-	boolean isSensorCtrl = false;
+	// boolean isSensorCtrl = false;
 	boolean current_paused = true;
 
 	/**
@@ -62,11 +63,9 @@ public class GLView extends GLSurfaceView {
 
 		Configuration c = getResources().getConfiguration();
 		if (c.orientation == Configuration.ORIENTATION_PORTRAIT) {
-			// _renderer.setcField(0);
-			glRend.setOrientation(true);
+			glRend.setOrientation(Orientation.PORTRAIT);
 		} else if (c.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			// _renderer.setcField(1);
-			glRend.setOrientation(false);
+			glRend.setOrientation(Orientation.LANDSCAPE);
 		}
 
 		setRenderer(glRend);
@@ -79,8 +78,8 @@ public class GLView extends GLSurfaceView {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
 			ismTouch = false;
-			_x = event.getX();
-			_y = event.getY();
+			x = event.getX();
+			y = event.getY();
 			current_paused = glRend.isPaused();
 			glRend.pause();
 			break;
@@ -95,34 +94,40 @@ public class GLView extends GLSurfaceView {
 		case MotionEvent.ACTION_MOVE:
 			// pass touchscreen data to the renderer
 			if (!ismTouch) {
-				final float xdiff = (_x - event.getX());
-				final float ydiff = (_y - event.getY());
+				final float xdiff = (x - event.getX());
+				final float ydiff = (y - event.getY());
 				queueEvent(new Runnable() {
 					public void run() {
-						glRend.setPos(true, -xdiff / 20.0f, ydiff / 20.0f, 0.0f);
+						glRend.isContinuousRotation = true;
+						glRend.addPos(-xdiff / 20.0f, ydiff / 20.0f);
 					}
 				});
-				_x = event.getX();
-				_y = event.getY();
+				x = event.getX();
+				y = event.getY();
 			} else {
-				_x = event.getX(0) - event.getX(0);
-				_y = event.getY(1) - event.getY(0);
-				final float dist = (float) Math.sqrt(_x * _x + _y * _y);
-				if (dist > 10f) {
-					queueEvent(new Runnable() {
-						public void run() {
-							glRend.zoom(dist / _dist * old_zoom);
-						}
-					});
-				}
+				final boolean in = y < event.getY(1) - event.getY(0);
+				// final float dist = (float) Math.sqrt(_x * _x + _y * _y);
+				// if (dist > 10f) {
+				queueEvent(new Runnable() {
+					public void run() {
+						if (in)
+							glRend.zoomIn();
+						else
+							glRend.zoomOut();
+						// glRend.zoom(dist / _dist * old_zoom);
+					}
+				});
+				// }
+				// _x = event.getX(0) - event.getX(0);
+				y = event.getY(1) - event.getY(0);
 			}
 			break;
 		case MotionEvent.ACTION_POINTER_DOWN:
 			ismTouch = true;
-			_x = event.getX(0) - event.getX(0);
-			_y = event.getY(1) - event.getY(0);
-			_dist = (float) Math.sqrt(_x * _x + _y * _y);
-			old_zoom = glRend.scale_rat;
+			// _x = event.getX(0) - event.getX(0);
+			y = event.getY(1) - event.getY(0);
+			// _dist = (float) Math.sqrt(_x * _x + _y * _y);
+			// old_zoom = glRend.scaleFactor;
 			current_paused = glRend.isPaused();
 			glRend.pause();
 			break;
@@ -137,23 +142,19 @@ public class GLView extends GLSurfaceView {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			switch (keyCode) {
 			case 24: // KEYCODE_VOLUME_UP
-				// isSensorCtrl = !isSensorCtrl;
 				glRend.pause();
 				glRend.isContinuousRotation = false;
-				glRend.increase_ndframe(1f);
+				// glRend.increase_ndframe(-1f);
 				return true;
 			case 25: // KEYCODE_VOLUME_DOWN
-				// isSensorCtrl = !isSensorCtrl;
 				glRend.pause();
 				glRend.isContinuousRotation = false;
-				glRend.increase_ndframe(-1f);
+				// glRend.increase_ndframe(-1f);
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((glRend.gData.is2D()) || (visData.getNumVisFeatures() > 0))
+				if ((glRend.is2D()) || (visData.getNumVisFeatures() > 0))
 					glRend.nextColorField();
 				else
-					// enable tilting
-					// isSensorCtrl = !isSensorCtrl;
 					// swap face rendering
 					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
@@ -165,7 +166,7 @@ public class GLView extends GLSurfaceView {
 					glRend.unpause();
 				else
 					glRend.pause();
-				if (!glRend.gData.is2D())
+				if (!glRend.is2D())
 					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			default:
@@ -184,28 +185,29 @@ public class GLView extends GLSurfaceView {
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
 			if ((TBx >= 0) & (TBy <= 0)) // zoom in if trackball is moving in
 											// the 2D "positive" direction
-				glRend.zoomin();
+				glRend.zoomIn();
 			else
-				glRend.zoomout(); // and zoom out if not
+				glRend.zoomOut(); // and zoom out if not
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			glRend.resetZoom(); // reset to original status when users push
 								// the "pearl"
-			glRend.setPos(true, 0.0f, 0.0f, 0.0f);
+			glRend.isContinuousRotation = true;
+			glRend.addPos(0.0f, 0.0f);
 			glRend.unpause();
 			glRend.isContinuousRotation = true;
 		}
 		return true;
 	}
 
-	/**
-	 * @param x
-	 * @param y
-	 * @param z
-	 */
-	public void setSensorParam(float x, float y, float z) {
-		if (isSensorCtrl) {
-			glRend.setPos(false, -x / 1.50f, -y / 1.50f, 0.0f);
-		}
-	}
+	// /**
+	// * @param x
+	// * @param y
+	// * @param z
+	// */
+	// public void setSensorParam(float x, float y, float z) {
+	// if (isSensorCtrl) {
+	// glRend.addPos(false, -x / 1.50f, -y / 1.50f);
+	// }
+	// }
 }
