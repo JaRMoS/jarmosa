@@ -16,12 +16,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.activity;
+package jarmos.app.activity;
 
-import rmcommon.Log;
-import rmcommon.ModelType;
-import romsim.app.activity.kermor.SimulationActivity;
-import romsim.app.activity.rb.RBActivity;
+import jarmos.Log;
+import jarmos.ModelType;
+import jarmos.app.activity.kermor.SimulationActivity;
+import jarmos.app.activity.rb.RBActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TabActivity;

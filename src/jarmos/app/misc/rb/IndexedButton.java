@@ -16,7 +16,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.misc.rb;
+package jarmos.app.misc.rb;
 
 import android.content.Context;
 import android.widget.Button;

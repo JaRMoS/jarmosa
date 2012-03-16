@@ -4,3 +4,4 @@
 .classpath
 *.log
 *.properties
+!project.properties

@@ -1,13 +1,14 @@
-package romsim.app.activity;
+package jarmos.app.activity;
+
+import jarmos.app.Const;
+import jarmos.app.R;
+import jarmos.app.io.AssetModelManager;
+import jarmos.app.io.SDModelManager;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import romsim.app.Const;
-import romsim.app.R;
-import romsim.app.io.AssetModelManager;
-import romsim.app.io.SDModelManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;

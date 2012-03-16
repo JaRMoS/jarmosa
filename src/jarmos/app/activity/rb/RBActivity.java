@@ -16,7 +16,18 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.activity.rb;
+package jarmos.app.activity.rb;
+
+import jarmos.Parameters;
+import jarmos.app.ModelManagerProgressHandler;
+import jarmos.app.ParamBars;
+import jarmos.app.R;
+import jarmos.io.AModelManager;
+import jarmos.io.AModelManager.ModelManagerException;
+import jarmos.io.CachingModelManager;
+import jarmos.io.WebModelManager;
+import jarmos.visual.ColorGenerator;
+import jarmos.visual.VisualizationData;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -28,16 +39,6 @@ import rb.java.RBContainer;
 import rb.java.RBSystem;
 import rb.java.SystemType;
 import rb.java.TransientRBSystem;
-import rmcommon.Parameters;
-import rmcommon.io.AModelManager;
-import rmcommon.io.AModelManager.ModelManagerException;
-import rmcommon.io.CachingModelManager;
-import rmcommon.io.WebModelManager;
-import rmcommon.visual.ColorGenerator;
-import rmcommon.visual.VisualizationData;
-import romsim.app.ModelManagerProgressHandler;
-import romsim.app.ParamBars;
-import romsim.app.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -163,7 +164,7 @@ public class RBActivity extends Activity {
 
 		// Create model manager instance to use
 		try {
-			mng = romsim.app.Const.getModelManager(getApplicationContext(), getIntent());
+			mng = jarmos.app.Const.getModelManager(getApplicationContext(), getIntent());
 		} catch (ModelManagerException e) {
 			Log.e("RBActivity", "Creation of ModelManager failed", e);
 			finish();

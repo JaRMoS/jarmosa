@@ -16,18 +16,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
 
-package romsim.app.activity;
+package jarmos.app.activity;
+
+import jarmos.ModelDescriptor;
+import jarmos.app.Const;
+import jarmos.app.R;
+import jarmos.io.AModelManager;
+import jarmos.io.AModelManager.ModelManagerException;
+import jarmos.io.FileModelManager;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import rmcommon.ModelDescriptor;
-import rmcommon.io.AModelManager;
-import rmcommon.io.AModelManager.ModelManagerException;
-import rmcommon.io.FileModelManager;
-import romsim.app.Const;
-import romsim.app.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;

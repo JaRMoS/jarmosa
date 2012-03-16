@@ -1,14 +1,15 @@
 /**
  * 
  */
-package romsim.app.io;
+package jarmos.app.io;
+
+import jarmos.app.Const;
+import jarmos.io.AModelManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import rmcommon.io.AModelManager;
-import romsim.app.Const;
 import android.content.Context;
 import android.util.Log;
 
@@ -40,7 +41,7 @@ public class AssetModelManager extends AModelManager {
 	}
 
 	/**
-	 * @see rmcommon.io.AModelManager#getClassLoader()
+	 * @see jarmos.io.AModelManager#getClassLoader()
 	 */
 	@Override
 	public ClassLoader getClassLoader() {
@@ -52,7 +53,7 @@ public class AssetModelManager extends AModelManager {
 			e.printStackTrace();
 			return null;
 		}
-		// return new PathClassLoader("/data/data/romsim.app/files/",
+		// return new PathClassLoader("/data/data/jarmos.app/files/",
 		// super.getClassLoader());
 	}
 
@@ -67,7 +68,7 @@ public class AssetModelManager extends AModelManager {
 	}
 
 	/**
-	 * @see rmcommon.io.AModelManager#modelFileExists(java.lang.String)
+	 * @see jarmos.io.AModelManager#modelFileExists(java.lang.String)
 	 */
 	@Override
 	public boolean modelFileExists(String filename) {

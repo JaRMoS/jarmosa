@@ -1,12 +1,13 @@
 /**
  * 
  */
-package romsim.app.io;
+package jarmos.app.io;
+
+import jarmos.app.Const;
 
 import java.io.IOException;
 import java.net.URL;
 
-import romsim.app.Const;
 import android.content.Context;
 import android.util.Log;
 
@@ -14,7 +15,7 @@ import android.util.Log;
  * @author dwirtz
  *
  */
-public class WebModelManager extends rmcommon.io.WebModelManager {
+public class WebModelManager extends jarmos.io.WebModelManager {
 
 	private DexHelper dh;
 	
@@ -25,7 +26,7 @@ public class WebModelManager extends rmcommon.io.WebModelManager {
 
 	/**
 	 * Overrides the standard implementation as different class loaders (dex) are required within android.
-	 * @see rmcommon.io.WebModelManager#getClassLoader()
+	 * @see jarmos.io.WebModelManager#getClassLoader()
 	 */
 	@Override
 	public ClassLoader getClassLoader() {

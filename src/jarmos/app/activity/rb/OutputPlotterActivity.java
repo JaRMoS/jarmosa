@@ -16,7 +16,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>.
 
-package romsim.app.activity.rb;
+package jarmos.app.activity.rb;
+
+import jarmos.app.R;
+import jarmos.app.misc.rb.SingleLabelChart;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +33,6 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import rb.java.RBContainer;
-import romsim.app.R;
-import romsim.app.misc.rb.SingleLabelChart;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
