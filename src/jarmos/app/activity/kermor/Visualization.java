@@ -23,7 +23,7 @@ import jarmos.app.visual.GLView;
 import jarmos.geometry.GeometryData;
 import jarmos.visual.ColorGenerator;
 import jarmos.visual.VisualizationData;
-import kermor.java.ReducedModel;
+import kermor.ReducedModel;
 import android.app.Activity;
 import android.os.Bundle;
 
