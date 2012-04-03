@@ -6,7 +6,7 @@ package jarmos.app;
 import java.io.File;
 import java.lang.reflect.Method;
 
-import kermor.java.dscomp.IInputFunctions;
+import kermor.dscomp.IInputFunctions;
 import dalvik.system.DexClassLoader;
 
 /**
@@ -26,7 +26,7 @@ public class CompiledInputFunctions implements IInputFunctions {
 	}
 	
 	/* (non-Javadoc)
-	 * @see kermor.java.IInputFunctions#getNumFunctions()
+	 * @see kermor.IInputFunctions#getNumFunctions()
 	 */
 	@Override
 	public int getNumFunctions() {
@@ -34,7 +34,7 @@ public class CompiledInputFunctions implements IInputFunctions {
 	}
 
 	/* (non-Javadoc)
-	 * @see kermor.java.IInputFunctions#evaluate(double, int)
+	 * @see kermor.IInputFunctions#evaluate(double, int)
 	 */
 	@Override
 	public double[] evaluate(double t, int idx) {

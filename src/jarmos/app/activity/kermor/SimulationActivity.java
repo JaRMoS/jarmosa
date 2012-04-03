@@ -9,8 +9,8 @@ import jarmos.app.ParamBars;
 import jarmos.app.R;
 import jarmos.io.AModelManager;
 import jarmos.io.AModelManager.ModelManagerException;
-import kermor.java.KerMorException;
-import kermor.java.ReducedModel;
+import kermor.KerMorException;
+import kermor.ReducedModel;
 
 import org.apache.commons.math.linear.RealMatrix;
 
