@@ -11,7 +11,7 @@
 	<TextView android:enabled="true" android:textColor="@color/white"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:padding="7px" android:textSize="14sp"
-		android:text="ROMSim (Reduced Order Model Simulation) enables simulation and result visualization for models from JRB, JKerMor and rbappmit."
+		android:text="JaRMoSA (Java Reduced Model Simulation App) enables simulation and result visualization for models from JRB, JKerMor and rbappmit."
 		android:gravity="center"></TextView>
 	<TextView android:enabled="true" android:textColor="@color/white"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"

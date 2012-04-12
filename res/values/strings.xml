@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ROM Sim</string>
-    <string name="welcome_str">Welcome to the ROM-Sim App.</string>
-    <string name="enterURLLabel">Enter the URL where the KerMor models reside:</string>
+    <string name="app_name">JaRMoS App</string>
+    <string name="welcome_str">Welcome to the JaRMoS App!</string>
+    <string name="enterURLLabel">Enter the URL where the JaRMoS models reside:</string>
     <string name="downloadString">Retrieve list</string>
-    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/romsim</string>
+    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/jarmosa</string>
     
     <!-- old strings from rbappmit -->
     <string name="chooseNLabel">Set RB dimension</string>

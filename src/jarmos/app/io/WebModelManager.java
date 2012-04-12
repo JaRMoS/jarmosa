@@ -39,5 +39,10 @@ public class WebModelManager extends jarmos.io.WebModelManager {
 			return null;
 		}
 	}
+	
+	@Override
+	protected String getLoadingMessage() {
+		return "Reading remote model info";
+	}
 
 }

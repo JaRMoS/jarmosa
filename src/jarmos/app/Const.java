@@ -1,5 +1,5 @@
 /**
- * Created on Aug 24, 2011 in Project ROMSim
+ * Created on Aug 24, 2011 in Project JaRMoSA
  * Location: jarmos.app.Const.java
  */
 package jarmos.app;
@@ -18,7 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 /**
- * Class that contains miscellaneous ROMSim specific constants.
+ * Class that contains miscellaneous JaRMoS specific constants.
  * 
  * TODO: create a menu in the main activity that allows to set the preferences (e.g. model caching)
  * 

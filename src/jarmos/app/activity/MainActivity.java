@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
 					p.getBoolean(Const.PREF_MODELCACHING_OVERWRITE, false) };
 
 			builder = new AlertDialog.Builder(MainActivity.this);
-			builder.setTitle("ROMSim options");
+			builder.setTitle("JaRMoSA options");
 			builder.setMultiChoiceItems(new String[] { "Enable model caching",
 					"Overwrite existing models" }, bools,
 					new DialogInterface.OnMultiChoiceClickListener() {

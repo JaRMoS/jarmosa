@@ -1,5 +1,5 @@
 /**
- * Created on Aug 24, 2011 in Project ROMSim
+ * Created on Aug 24, 2011 in Project JaRMoSA
  * Location: jarmos.app.io.DexHelper.java
  */
 package jarmos.app.io;

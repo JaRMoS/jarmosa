@@ -22,18 +22,18 @@ public class SDModelManager extends FileModelManager {
 	/**
 	 * SD-Card sub directory
 	 */
-	private static final String SDrbAppDir = "romsim_models";
+	private static final String JARMOSA_SD_DIR = "jarmosa_models";
 
 	/**
 	 * SD Card base directory string
 	 */
-	public static final String SDBase = Environment.getExternalStorageDirectory().toString();
+	public static final String SD_BASE_DIR = Environment.getExternalStorageDirectory().toString();
 
 	/**
 	 * rbAppMIT's root folder on the SD-Card
 	 */
-	public static final String SDModelsDir = SDBase + File.separator
-			+ SDrbAppDir;
+	public static final String SD_MODEL_DIR = SD_BASE_DIR + File.separator
+			+ JARMOSA_SD_DIR;
 
 	private DexHelper dh;
 
@@ -42,7 +42,7 @@ public class SDModelManager extends FileModelManager {
 	 * 
 	 */
 	public SDModelManager(Context c) {
-		super(SDModelsDir);
+		super(SD_MODEL_DIR);
 		dh = new DexHelper(c);
 	}
 
@@ -66,8 +66,13 @@ public class SDModelManager extends FileModelManager {
 	 * @return True if the directory could be ensured, false otherwise
 	 */
 	public static boolean ensureSDDir() {
-		File f = new File(SDModelsDir);
+		File f = new File(SD_MODEL_DIR);
 		if (!f.exists()) return f.mkdirs();
 		return true;
+	}
+	
+	@Override
+	protected String getLoadingMessage() {
+		return "Reading SD card models";
 	}
 }

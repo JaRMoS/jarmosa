@@ -20,10 +20,12 @@ package jarmos.app.activity;
 
 import jarmos.ModelDescriptor;
 import jarmos.app.Const;
+import jarmos.app.ProgressDialogWrapper;
 import jarmos.app.R;
 import jarmos.io.AModelManager;
 import jarmos.io.AModelManager.ModelManagerException;
 import jarmos.io.FileModelManager;
+import jarmos.util.ConsoleProgressReporter;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -99,7 +101,7 @@ public class ModelListActivity extends Activity {
 					}
 					// Take red cross if image cannot be read
 					if (((BitmapDrawable) imgs[i]).getBitmap() == null) {
-						Log.w("ROMSim:ModelListActivity",
+						Log.w("JaRMoSA:ModelListActivity",
 								"Could not read image file for model "
 										+ md.title + " in folder "
 										+ md.modeldir);
@@ -203,16 +205,11 @@ public class ModelListActivity extends Activity {
 			return;
 		}
 
-		final ProgressDialog pd = ProgressDialog.show(this, "",
-				"Loading model list", true);
+		final ProgressDialogWrapper pdw = new ProgressDialogWrapper(this);
 
 		final Handler h = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				if (pd.isShowing()) {
-					pd.dismiss();
-				}
-
 				if (items == null || items.size() == 0) {
 					showDialog(NO_MODELS_DIALOG_ID);
 				} else {
@@ -266,7 +263,7 @@ public class ModelListActivity extends Activity {
 			public void run() {
 
 				try {
-					items = mng.getModelDescriptors();
+					items = mng.getModelDescriptors(pdw);
 					mgva = new ModelsGridViewAdapter();
 				} catch (AModelManager.ModelManagerException ex) {
 					Log.e("ModelListActivity",

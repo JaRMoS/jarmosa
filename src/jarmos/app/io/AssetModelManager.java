@@ -89,4 +89,9 @@ public class AssetModelManager extends AModelManager {
 		return URI.create("file:///android_asset/" + getModelDir());
 	}
 
+	@Override
+	protected String getLoadingMessage() {
+		return "Reading asset models";
+	}
+
 }
