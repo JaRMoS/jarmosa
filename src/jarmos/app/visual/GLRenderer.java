@@ -38,6 +38,10 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 	public GLRenderer(VisualizationData vData) {
 		super(vData);
 	}
+	
+	public GLRenderer(VisualizationData vData, int width, int height) {
+		super(vData, width, height);
+	}
 
 	/**
 	 * @see android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
@@ -52,7 +56,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		if (!is2D()) // enable depth test for 3D rendering
 			gl.glEnable(GL10.GL_DEPTH_TEST);
 
-		if ((isFrontFace) || (is2D())) {
+		if (isFrontFace || is2D()) {
 			// enable blending (for rendering wireframe)
 			if (!is2D())
 				gl.glDisable(GL10.GL_CULL_FACE);
@@ -125,19 +129,17 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 		/*
 		 * Draw the elements using the above declared nodes and color data
 		 */
-
 		shortBuf.position(getFaceOffset());
 		gl.glDrawElements(GL10.GL_TRIANGLES, getNumFaces() * 3, GL10.GL_UNSIGNED_SHORT, shortBuf);
 
 		// Draw the wireframe for a n field object
-		// if ((vData.isConstantFeature(currentColorField)) |
-		// (!fGeoData.is2D())) {
-		// // Draw the wireframe mesh
-		// gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
-		// shortBuf.position(_indexwf_off);
-		// gl.glDrawElements(GL10.GL_LINES, fGeoData.faces * 6,
-		// GL10.GL_UNSIGNED_SHORT, shortBuf);
-		// }
+		if (!is2D() && !isFrontFace) {
+			// Draw the wireframe mesh
+			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+			shortBuf.position(getCurrentWireframeOffset());
+			gl.glDrawElements(GL10.GL_LINES, getNumFaces() * 6,
+					GL10.GL_UNSIGNED_SHORT, shortBuf);
+		}
 
 		frameRendered();
 	}
@@ -148,6 +150,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 	 */
 	@Override
 	public void onSurfaceChanged(GL10 gl, int w, int h) {
+		setSize(w, h);
 		gl.glViewport(0, 0, w, h);
 	}
 

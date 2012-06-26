@@ -23,8 +23,10 @@ import jarmos.visual.VisualizationData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 /**
  * Changes made by:
@@ -32,24 +34,30 @@ import android.view.MotionEvent;
  * @author Daniel Wirtz
  * @date Aug 23, 2011
  * 
+ * Current settings for interacting with the view:
+ * - Volume up/down: Switch visual feature
+ * - Tap on graphic: toggle pause (if there is an animation)
+ * - Search key: draw wireframe for 3D objects
+ * - Press trackball: reset view
+ * 
  */
 public class GLView extends GLSurfaceView {
+	
+	/**
+	 * The minimum distance a mouse movement has to be in order to trigger
+	 * position change of the viewed object.
+	 */
+	private final float MIN_MOVE_DIST = 3f;
 
 	@SuppressWarnings("unused")
 	private static final String LOG_TAG = GLView.class.getSimpleName();
 
 	private GLRenderer glRend;
-	private VisualizationData visData;
 
 	private float x = 0;
 	private float y = 0;
-//	private float _dist = 1.0f;
-	// private float old_zoom = 1.0f;
 
-	boolean ismTouch = false;
-
-	// boolean isSensorCtrl = false;
-	boolean current_paused = true;
+	boolean ismTouch = false, togglePause = false;
 
 	/**
 	 * @param context
@@ -58,7 +66,6 @@ public class GLView extends GLSurfaceView {
 	public GLView(Context context, VisualizationData visData) {
 		super(context);
 		setFocusableInTouchMode(true);
-		this.visData = visData;
 		glRend = new GLRenderer(visData);
 
 		Configuration c = getResources().getConfiguration();
@@ -71,6 +78,13 @@ public class GLView extends GLSurfaceView {
 		setRenderer(glRend);
 	}
 
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		glRend.setSize(w,h);
+		Log.d("GLView", "On size changed: old w/h "+oldw+"/"+oldh+" new w/h"+w+"/"+h);
+	}
+
 	/**
 	 * @see android.view.View#onTouchEvent(android.view.MotionEvent)
 	 */
@@ -78,34 +92,39 @@ public class GLView extends GLSurfaceView {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
 			ismTouch = false;
+			togglePause = true;
 			x = event.getX();
 			y = event.getY();
-			current_paused = glRend.isPaused();
-			glRend.pause();
 			break;
 
 		case MotionEvent.ACTION_UP:
-		case MotionEvent.ACTION_POINTER_UP:
-			if (current_paused)
-				glRend.pause();
-			else
-				glRend.unpause();
+		//case MotionEvent.ACTION_POINTER_UP:
+			if (togglePause) {
+				glRend.togglePause();
+				togglePause = false;
+			}
 			break;
 		case MotionEvent.ACTION_MOVE:
-			// pass touchscreen data to the renderer
+			// Normal case: one touch is moving around
 			if (!ismTouch) {
 				final float xdiff = (x - event.getX());
 				final float ydiff = (y - event.getY());
-				queueEvent(new Runnable() {
-					public void run() {
-						glRend.isContinuousRotation = true;
-						glRend.addPos(-xdiff / 20.0f, ydiff / 20.0f);
-					}
-				});
+				double diff = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+				if (diff > MIN_MOVE_DIST) {
+					togglePause = false;
+					queueEvent(new Runnable() {
+						public void run() {
+							glRend.isContinuousRotation = true;
+							glRend.addPos(-xdiff / 20.0f, ydiff / 20.0f);
+						}
+					});
+				}
 				x = event.getX();
 				y = event.getY();
+				
+				// Zoom case: two (or more) are down, get y difference between the first two.
 			} else {
-				final boolean in = y < event.getY(1) - event.getY(0);
+				final boolean in = y > event.getY(1) - event.getY(0);
 				// final float dist = (float) Math.sqrt(_x * _x + _y * _y);
 				// if (dist > 10f) {
 				queueEvent(new Runnable() {
@@ -122,14 +141,14 @@ public class GLView extends GLSurfaceView {
 				y = event.getY(1) - event.getY(0);
 			}
 			break;
+			
+			// A second pointer has been registered (for zoom)
 		case MotionEvent.ACTION_POINTER_DOWN:
 			ismTouch = true;
-			// _x = event.getX(0) - event.getX(0);
+			togglePause = false;
 			y = event.getY(1) - event.getY(0);
-			// _dist = (float) Math.sqrt(_x * _x + _y * _y);
-			// old_zoom = glRend.scaleFactor;
-			current_paused = glRend.isPaused();
-			glRend.pause();
+			// _x = event.getX(0) - event.getX(0);
+			// _dist = (float) Math.sqrt(_x * _x + _y * _y);			
 			break;
 		}
 		return true;
@@ -142,32 +161,17 @@ public class GLView extends GLSurfaceView {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			switch (keyCode) {
 			case 24: // KEYCODE_VOLUME_UP
-				glRend.pause();
-				glRend.isContinuousRotation = false;
-				// glRend.increase_ndframe(-1f);
+				glRend.nextColorField();
 				return true;
 			case 25: // KEYCODE_VOLUME_DOWN
-				glRend.pause();
-				glRend.isContinuousRotation = false;
-				// glRend.increase_ndframe(-1f);
+				glRend.prevColorField();
 				return true;
 			case 82: // KEYCODE_MENU
-				if ((glRend.is2D()) || (visData.getNumVisFeatures() > 0))
-					glRend.nextColorField();
-				else
-					// swap face rendering
-					glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			case 83: // KEYCODE_HOME
-				// do nothing!
 				return true;
 			case 84: // KEYCODE_SEARCH
-				if (glRend.isPaused())
-					glRend.unpause();
-				else
-					glRend.pause();
-				if (!glRend.is2D())
-					glRend.isFrontFace = !glRend.isFrontFace;
+				glRend.isFrontFace = !glRend.isFrontFace;
 				return true;
 			default:
 				return super.onKeyDown(keyCode, event);
@@ -183,19 +187,14 @@ public class GLView extends GLSurfaceView {
 		float TBx = event.getX();
 		float TBy = event.getY();
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			if ((TBx >= 0) & (TBy <= 0)) // zoom in if trackball is moving in
-											// the 2D "positive" direction
+			// zoom in if trackball is moving in the 2D "positive" direction
+			if ((TBx >= 0) & (TBy <= 0)) 
 				glRend.zoomIn();
-			else
-				glRend.zoomOut(); // and zoom out if not
+			else // and zoom out if not
+				glRend.zoomOut(); 
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			glRend.resetZoom(); // reset to original status when users push
-								// the "pearl"
-			glRend.isContinuousRotation = true;
-			glRend.addPos(0.0f, 0.0f);
-			glRend.unpause();
-			glRend.isContinuousRotation = true;
+			glRend.resetView();
 		}
 		return true;
 	}
