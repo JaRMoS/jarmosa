@@ -1,4 +1,3 @@
-
 package jarmos.app;
 
 import java.io.File;
@@ -13,20 +12,20 @@ import dalvik.system.DexClassLoader;
  * @author Daniel Wirtz @date 2013-08-07
  * 
  * @todo Implement!
- *
+ * 
  */
 public class CompiledInputFunctions implements IInputFunctions {
 
 	private Method numIn;
 	private Class<?> cl;
-	
+
 	public CompiledInputFunctions(String filename) {
 		File f = new File(filename);
-		
+
 		DexClassLoader dl = new DexClassLoader(f.getName(), f.getAbsolutePath(), null,
 				ClassLoader.getSystemClassLoader());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see kermor.IInputFunctions#getNumFunctions()
 	 */

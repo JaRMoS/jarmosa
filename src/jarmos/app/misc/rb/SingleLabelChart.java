@@ -1,20 +1,20 @@
-//    rbAPPmit: An Android front-end for the Certified Reduced Basis Method
-//    Copyright (C) 2010 David J. Knezevic and Phuong Huynh
+// rbAPPmit: An Android front-end for the Certified Reduced Basis Method
+// Copyright (C) 2010 David J. Knezevic and Phuong Huynh
 //
-//    This file is part of rbAPPmit
+// This file is part of rbAPPmit
 //
-//    @ref rbappmit is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
+// @ref rbappmit is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//    @ref rbappmit is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
+// @ref rbappmit is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 //
-//    You should have received a copy of the GNU General Public License
-//    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
+// You should have received a copy of the GNU General Public License
+// along with rbAPPmit. If not, see <http://www.gnu.org/licenses/>.
 
 package jarmos.app.misc.rb;
 
@@ -28,8 +28,7 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 /**
  * A line chart implementation with a single label.
  * 
- * SingleLabelChart is a subclass of LineChart identical to it, except it can
- * only show data label at a time.
+ * SingleLabelChart is a subclass of LineChart identical to it, except it can only show data label at a time.
  * 
  * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
  * framework
@@ -50,8 +49,7 @@ public class SingleLabelChart extends LineChart {
 	// whether to show a progress label
 	private boolean progressLabel;
 
-	public SingleLabelChart(XYMultipleSeriesDataset dataset,
-			XYMultipleSeriesRenderer renderer, int s, int p, boolean pr) {
+	public SingleLabelChart(XYMultipleSeriesDataset dataset, XYMultipleSeriesRenderer renderer, int s, int p, boolean pr) {
 		super(dataset, renderer);
 		seriesNum = s;
 		pointInSeries = p;
@@ -59,10 +57,9 @@ public class SingleLabelChart extends LineChart {
 	}
 
 	@Override
-	public void drawChartValuesText(android.graphics.Canvas canvas,
-			XYSeries series, android.graphics.Paint paint, float[] points,
-			int seriesIndex) // seriesIndex is 0 (mod 3) for output, 1 for LB, 2
-								// for UB
+	public void drawChartValuesText(android.graphics.Canvas canvas, XYSeries series, android.graphics.Paint paint,
+			float[] points, int seriesIndex) // seriesIndex is 0 (mod 3) for output, 1 for LB, 2
+												// for UB
 	{
 
 		// showing numbered labels case
@@ -96,12 +93,8 @@ public class SingleLabelChart extends LineChart {
 				// point in that series
 				for (int k = 0; k < points.length; k += 2) {
 					if (k == pointInSeries && seriesIndex / 3 == seriesNum)
-						super.drawText(
-								canvas,
-								roundToNthPlace(series.getY(k / 2),
-										accuracyPlace), points[k],
-								(points[k + 1] - 3.5f + verticalAdjustment),
-								paint, 0);
+						super.drawText(canvas, roundToNthPlace(series.getY(k / 2), accuracyPlace), points[k],
+								(points[k + 1] - 3.5f + verticalAdjustment), paint, 0);
 				}
 			}
 		}
@@ -109,8 +102,7 @@ public class SingleLabelChart extends LineChart {
 		else {
 			for (int k = 0; k < points.length; k += 2) {
 				if (k > 3 && seriesIndex == seriesNum)
-					super.drawText(canvas, "working", points[k] + 1f,
-							points[k + 1] - 1f, paint, 0);
+					super.drawText(canvas, "working", points[k] + 1f, points[k + 1] - 1f, paint, 0);
 			}
 		}
 	}

@@ -23,7 +23,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 	public GLRenderer(VisualizationData vData) {
 		super(vData);
 	}
-	
+
 	public GLRenderer(VisualizationData vData, int width, int height) {
 		super(vData, width, height);
 	}
@@ -122,16 +122,14 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 			// Draw the wireframe mesh
 			gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
 			shortBuf.position(getCurrentWireframeOffset());
-			gl.glDrawElements(GL10.GL_LINES, getNumFaces() * 6,
-					GL10.GL_UNSIGNED_SHORT, shortBuf);
+			gl.glDrawElements(GL10.GL_LINES, getNumFaces() * 6, GL10.GL_UNSIGNED_SHORT, shortBuf);
 		}
 
 		frameRendered();
 	}
 
 	/**
-	 * @see android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
-	 *      int, int)
+	 * @see android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10, int, int)
 	 */
 	@Override
 	public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -141,7 +139,7 @@ public class GLRenderer extends OpenGLBase implements Renderer {
 
 	/**
 	 * @see android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
-	 *      javax.microedition.khronos.egl.EGLConfig)
+	 * javax.microedition.khronos.egl.EGLConfig)
 	 */
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {

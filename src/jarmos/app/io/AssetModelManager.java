@@ -1,4 +1,3 @@
-
 package jarmos.app.io;
 
 import jarmos.app.Const;
@@ -30,7 +29,7 @@ public class AssetModelManager extends AModelManager {
 	 * Creates a new ModelManager.
 	 * 
 	 * @param c
-	 *            The context (i.e. current Activity)
+	 * The context (i.e. current Activity)
 	 */
 	public AssetModelManager(Context c) {
 		super();
@@ -73,9 +72,9 @@ public class AssetModelManager extends AModelManager {
 		try {
 			// Faster that way
 			getInStreamImpl(filename).close();
-//			for (String f : c.getAssets().list(getModelDir())) {
-//				if (f.equals(filename)) return true;
-//			}
+			// for (String f : c.getAssets().list(getModelDir())) {
+			// if (f.equals(filename)) return true;
+			// }
 		} catch (IOException e) {
 			return false;
 		}

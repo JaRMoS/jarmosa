@@ -10,25 +10,21 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /**
- * Open GL view implementation for display of and interaction with reduced model visualizations 
+ * Open GL view implementation for display of and interaction with reduced model visualizations
  * 
  * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
  * framework
  * 
- * Current settings for interacting with the view:
- * - Volume up/down: Switch visual feature
- * - Tap on graphic: toggle pause (if there is an animation)
- * - Search key: draw wireframe for 3D objects
- * - Press trackball: reset view
+ * Current settings for interacting with the view: - Volume up/down: Switch visual feature - Tap on graphic: toggle
+ * pause (if there is an animation) - Search key: draw wireframe for 3D objects - Press trackball: reset view
  * 
  * @author Daniel Wirtz @date Aug 23, 2011
  * 
  */
 public class GLView extends GLSurfaceView {
-	
+
 	/**
-	 * The minimum distance a mouse movement has to be in order to trigger
-	 * position change of the viewed object.
+	 * The minimum distance a mouse movement has to be in order to trigger position change of the viewed object.
 	 */
 	private final float MIN_MOVE_DIST = 3f;
 
@@ -64,8 +60,8 @@ public class GLView extends GLSurfaceView {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		glRend.setSize(w,h);
-		Log.d("GLView", "On size changed: old w/h "+oldw+"/"+oldh+" new w/h"+w+"/"+h);
+		glRend.setSize(w, h);
+		Log.d("GLView", "On size changed: old w/h " + oldw + "/" + oldh + " new w/h" + w + "/" + h);
 	}
 
 	/**
@@ -81,7 +77,7 @@ public class GLView extends GLSurfaceView {
 			break;
 
 		case MotionEvent.ACTION_UP:
-		//case MotionEvent.ACTION_POINTER_UP:
+			// case MotionEvent.ACTION_POINTER_UP:
 			if (togglePause) {
 				glRend.togglePause();
 				togglePause = false;
@@ -92,7 +88,7 @@ public class GLView extends GLSurfaceView {
 			if (!ismTouch) {
 				final float xdiff = (x - event.getX());
 				final float ydiff = (y - event.getY());
-				double diff = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+				double diff = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 				if (diff > MIN_MOVE_DIST) {
 					togglePause = false;
 					queueEvent(new Runnable() {
@@ -104,7 +100,7 @@ public class GLView extends GLSurfaceView {
 				}
 				x = event.getX();
 				y = event.getY();
-				
+
 				// Zoom case: two (or more) are down, get y difference between the first two.
 			} else {
 				final boolean in = y > event.getY(1) - event.getY(0);
@@ -124,14 +120,14 @@ public class GLView extends GLSurfaceView {
 				y = event.getY(1) - event.getY(0);
 			}
 			break;
-			
-			// A second pointer has been registered (for zoom)
+
+		// A second pointer has been registered (for zoom)
 		case MotionEvent.ACTION_POINTER_DOWN:
 			ismTouch = true;
 			togglePause = false;
 			y = event.getY(1) - event.getY(0);
 			// _x = event.getX(0) - event.getX(0);
-			// _dist = (float) Math.sqrt(_x * _x + _y * _y);			
+			// _dist = (float) Math.sqrt(_x * _x + _y * _y);
 			break;
 		}
 		return true;
@@ -171,10 +167,11 @@ public class GLView extends GLSurfaceView {
 		float TBy = event.getY();
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
 			// zoom in if trackball is moving in the 2D "positive" direction
-			if ((TBx >= 0) & (TBy <= 0)) 
+			if ((TBx >= 0) & (TBy <= 0))
 				glRend.zoomIn();
-			else // and zoom out if not
-				glRend.zoomOut(); 
+			else
+				// and zoom out if not
+				glRend.zoomOut();
 		}
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			glRend.resetView();

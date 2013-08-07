@@ -10,7 +10,7 @@ import android.widget.Button;
  * framework
  * 
  * @author Daniel Wirtz @date 07.08.2013
- *
+ * 
  */
 public class IndexedButton extends Button {
 

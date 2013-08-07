@@ -49,19 +49,17 @@ public class ShowModelActivity extends TabActivity {
 		label1.setGravity(android.view.Gravity.CENTER);
 		label1.setTextSize(16);
 		label1.setLines(4);
-		label1.setTextColor(new ColorStateList(new int[][] {
-				new int[] { android.R.attr.state_selected }, new int[0] },
+		label1.setTextColor(new ColorStateList(new int[][] { new int[] { android.R.attr.state_selected }, new int[0] },
 				new int[] { Color.WHITE, Color.GRAY, }));
 		label1.setSelected(true);
 
 		TextView label2 = new TextView(this);
 		label2.setGravity(android.view.Gravity.CENTER);
 		label2.setTextSize(16);
-		label2.setTextColor(new ColorStateList(new int[][] {
-				new int[] { android.R.attr.state_selected }, new int[0] },
+		label2.setTextColor(new ColorStateList(new int[][] { new int[] { android.R.attr.state_selected }, new int[0] },
 				new int[] { Color.WHITE, Color.GRAY, }));
 		label2.setSelected(false);
-		
+
 		// add tabs
 		TabHost.TabSpec one = tabHost.newTabSpec("tab 1");
 		label1.setText("About ");
@@ -75,16 +73,16 @@ public class ShowModelActivity extends TabActivity {
 		label2.setText("Solve problem");
 		two.setIndicator(label2);
 		Intent intentTwo = null;
-		
+
 		// Using the intent field "ModelType" here avoids instantiation of a new AModelManager..
-		ModelType mt = (ModelType)getIntent().getSerializableExtra("ModelType");
+		ModelType mt = (ModelType) getIntent().getSerializableExtra("ModelType");
 		if (mt == ModelType.JRB || mt == ModelType.rbappmit) {
 			intentTwo = new Intent(ShowModelActivity.this, RBActivity.class);
 		} else if (mt == ModelType.JKerMor) {
 			intentTwo = new Intent(ShowModelActivity.this, SimulationActivity.class);
 		} else {
 			Log.e("ShowModelActitity", "Unknown model type: " + mt);
-			Toast.makeText(this, "Unknown model type: "+ mt, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Unknown model type: " + mt, Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
@@ -105,68 +103,62 @@ public class ShowModelActivity extends TabActivity {
 		finish();
 	}
 
-//	/**
-//	 * Re-populates the main menu every time it is brought up depending on
-//	 * whether help should be displayed
-//	 */
-//	public boolean onPrepareOptionsMenu(Menu menu) {
-//
-//		menu.clear();
-//		MenuInflater inflater = getMenuInflater();
-//		if (getTabHost().getCurrentTab() == 0)
-//			inflater.inflate(R.menu.info_main_menu, menu);
-//		else
-//			inflater.inflate(R.menu.main_menu, menu); // don't want help text
-//														// for info screen
-//		return true;
-//	}
+	// /**
+	// * Re-populates the main menu every time it is brought up depending on
+	// * whether help should be displayed
+	// */
+	// public boolean onPrepareOptionsMenu(Menu menu) {
+	//
+	// menu.clear();
+	// MenuInflater inflater = getMenuInflater();
+	// if (getTabHost().getCurrentTab() == 0)
+	// inflater.inflate(R.menu.info_main_menu, menu);
+	// else
+	// inflater.inflate(R.menu.main_menu, menu); // don't want help text
+	// // for info screen
+	// return true;
+	// }
 
-//	/** Handles item selection in the main menu */
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch (item.getItemId()) {
-//		case R.id.about:
-//			showDialog(ABOUT_DIALOG_ID);
-//			return true;
-//		case R.id.help:
-//			showDialog(HELP_DIALOG_ID);
-//			return true;
-//		case R.id.new_problem:
-//			setResult(0);
-//			getLocalActivityManager().removeAllActivities();
-//			finish();
-//			return true;
-//		case R.id.quit:
-//			setResult(-1);
-//			getLocalActivityManager().removeAllActivities();
-//			finish();
-//			return true;
-//		}
-//		return false;
-//	}
+	// /** Handles item selection in the main menu */
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// switch (item.getItemId()) {
+	// case R.id.about:
+	// showDialog(ABOUT_DIALOG_ID);
+	// return true;
+	// case R.id.help:
+	// showDialog(HELP_DIALOG_ID);
+	// return true;
+	// case R.id.new_problem:
+	// setResult(0);
+	// getLocalActivityManager().removeAllActivities();
+	// finish();
+	// return true;
+	// case R.id.quit:
+	// setResult(-1);
+	// getLocalActivityManager().removeAllActivities();
+	// finish();
+	// return true;
+	// }
+	// return false;
+	// }
 
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
 		switch (id) {
 		case ABOUT_DIALOG_ID:
-			AlertDialog.Builder about_builder = new AlertDialog.Builder(
-					ShowModelActivity.this);
+			AlertDialog.Builder about_builder = new AlertDialog.Builder(ShowModelActivity.this);
 			about_builder
 					.setTitle("rbAPPmit version 0.1")
 					.setMessage(
 							"rbAPPmit:\nAn Android front-end for the Reduced Basis Method\n\n"
-									+ "Copyright (C) 2010\nDavid Knezevic\nPhuong Huynh\n\n"
-									+ "Implementation by:\n"
-									+ "David Knezevic\n"
-									+ "Phuong Huynh\n"
-									+ "Mark Wittels\n\n"
+									+ "Copyright (C) 2010\nDavid Knezevic\nPhuong Huynh\n\n" + "Implementation by:\n"
+									+ "David Knezevic\n" + "Phuong Huynh\n" + "Mark Wittels\n\n"
 									+ "This is free software released under the GPLv3 license")
-					.setPositiveButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dismissDialog(ABOUT_DIALOG_ID);
-								}
-							});
+					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dismissDialog(ABOUT_DIALOG_ID);
+						}
+					});
 			dialog = about_builder.create();
 
 			break;
@@ -184,18 +176,13 @@ public class ShowModelActivity extends TabActivity {
 			message.setPadding(5, 5, 5, 5); // 5 pixels of padding on all sides
 			message.setMovementMethod(LinkMovementMethod.getInstance());
 
-			AlertDialog.Builder help_builder = new AlertDialog.Builder(
-					ShowModelActivity.this);
-			help_builder
-					.setTitle("rbAPPmit help")
-					.setView(message)
-					.setPositiveButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dismissDialog(HELP_DIALOG_ID);
-								}
-							});
+			AlertDialog.Builder help_builder = new AlertDialog.Builder(ShowModelActivity.this);
+			help_builder.setTitle("rbAPPmit help").setView(message)
+					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dismissDialog(HELP_DIALOG_ID);
+						}
+					});
 
 			dialog = help_builder.create();
 

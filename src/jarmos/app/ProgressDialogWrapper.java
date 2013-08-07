@@ -17,11 +17,11 @@ public class ProgressDialogWrapper extends Handler implements IProgressReporter 
 	ProgressDialog pd;
 
 	/**
-	 * Creates a new ProgressDialogWrapper that wraps an Android ProgressDialog
-	 * into the JaRMoS IProgressReporter interface.
+	 * Creates a new ProgressDialogWrapper that wraps an Android ProgressDialog into the JaRMoS IProgressReporter
+	 * interface.
 	 * 
 	 * @param pd
-	 *            The ProgressDialog to wrap into an IProgressReporter
+	 * The ProgressDialog to wrap into an IProgressReporter
 	 */
 	public ProgressDialogWrapper(Activity activity) {
 		pd = new ProgressDialog(activity);
@@ -30,8 +30,7 @@ public class ProgressDialogWrapper extends Handler implements IProgressReporter 
 	}
 
 	/**
-	 * Handles the messages created in the IProgressReporter methods in the
-	 * thread owning the ProgressDialog
+	 * Handles the messages created in the IProgressReporter methods in the thread owning the ProgressDialog
 	 */
 	@Override
 	public void handleMessage(Message msg) {

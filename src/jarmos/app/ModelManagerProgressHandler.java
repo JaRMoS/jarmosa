@@ -9,7 +9,7 @@ import android.os.Message;
  * A progress notification handler implementation for android platforms
  * 
  * @author Daniel Wirtz @date 2013-08-07
- *
+ * 
  */
 public class ModelManagerProgressHandler extends Handler implements IMessageHandler {
 

@@ -50,11 +50,8 @@ public class BrowseActivity extends Activity {
 		// if info page was not supplied/another error occurs while loading,
 		// redirect user to home site
 		browser.setWebViewClient(new WebViewClient() {
-			public void onReceivedError(WebView view, int errorCode,
-					String description, String failingUrl) {
-				Toast.makeText(
-						BrowseActivity.this,
-						"Sorry, no informational page was supplied with this problem",
+			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+				Toast.makeText(BrowseActivity.this, "Sorry, no informational page was supplied with this problem",
 						Toast.LENGTH_LONG).show();
 			}
 		});
@@ -77,11 +74,11 @@ public class BrowseActivity extends Activity {
 				f.write(html.getBytes());
 				f.close();
 			} catch (IOException e) {
-				Log.e("BrowseActivity","Error saving a temporary html file", e);
+				Log.e("BrowseActivity", "Error saving a temporary html file", e);
 				return;
 			}
-			browser.loadUrl("file://"+Const.APP_DATA_DIRECTORY + "/noinfo.html");
-//			browser.loadData(html, "text/html", "utf8");
+			browser.loadUrl("file://" + Const.APP_DATA_DIRECTORY + "/noinfo.html");
+			// browser.loadData(html, "text/html", "utf8");
 		}
 	}
 

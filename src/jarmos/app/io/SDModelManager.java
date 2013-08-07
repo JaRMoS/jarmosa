@@ -31,13 +31,12 @@ public class SDModelManager extends FileModelManager {
 	/**
 	 * rbAppMIT's root folder on the SD-Card
 	 */
-	public static final String SD_MODEL_DIR = SD_BASE_DIR + File.separator
-			+ JARMOSA_SD_DIR;
+	public static final String SD_MODEL_DIR = SD_BASE_DIR + File.separator + JARMOSA_SD_DIR;
 
 	private DexHelper dh;
 
 	/**
-	 * @param c 
+	 * @param c
 	 * 
 	 */
 	public SDModelManager(Context c) {
@@ -53,8 +52,8 @@ public class SDModelManager extends FileModelManager {
 		try {
 			return dh.getDexClassLoader(getInStream(Const.DEX_CLASSES_JARFILE));
 		} catch (IOException e) {
-			Log.e("SDModelManager", "I/O Exception during input stream creation for file "
-					+ Const.DEX_CLASSES_JARFILE + " in model " + getModelDir() + ", loading from SD card", e);
+			Log.e("SDModelManager", "I/O Exception during input stream creation for file " + Const.DEX_CLASSES_JARFILE
+					+ " in model " + getModelDir() + ", loading from SD card", e);
 			e.printStackTrace();
 			return null;
 		}
@@ -66,10 +65,11 @@ public class SDModelManager extends FileModelManager {
 	 */
 	public static boolean ensureSDDir() {
 		File f = new File(SD_MODEL_DIR);
-		if (!f.exists()) return f.mkdirs();
+		if (!f.exists())
+			return f.mkdirs();
 		return true;
 	}
-	
+
 	@Override
 	protected String getLoadingMessage() {
 		return "Reading SD card models";

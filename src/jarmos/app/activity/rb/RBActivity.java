@@ -40,9 +40,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 /**
- * This is the main Activity class for the app. This Activity handles
- * downloading the stored data, initializing the systems and performing the RB
- * solve.
+ * This is the main Activity class for the app. This Activity handles downloading the stored data, initializing the
+ * systems and performing the RB solve.
  * 
  * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
  * framework.
@@ -81,26 +80,23 @@ public class RBActivity extends Activity {
 	// private Button[] mParamButtons;
 
 	/**
-	 * Member variable to store index number of currently selected parameter
-	 * button
+	 * Member variable to store index number of currently selected parameter button
 	 */
 	// private int paramButtonIndex;
 	// private TextView paramInputField;
 
 	/**
-	 * The online N constructed by the GUI. We use this value when we call
-	 * RB_solve.
+	 * The online N constructed by the GUI. We use this value when we call RB_solve.
 	 * 
-	 * Changed the default value to 1 as simulations with zero N makes little
-	 * sense. Up to now, an error was thrown when N=1 from the model and thus
-	 * the seekBar could not be moved, never invoking the onProgressChanged
-	 * event and hence leaving this value at zero.
+	 * Changed the default value to 1 as simulations with zero N makes little sense. Up to now, an error was thrown when
+	 * N=1 from the model and thus the seekBar could not be moved, never invoking the onProgressChanged event and hence
+	 * leaving this value at zero.
 	 */
 	public static int mOnlineNForGui = 1;
 
 	/**
-	 * The current parameter constructed by the GUI. We set the RBSystem's
-	 * current parameter to this before performing a solve.
+	 * The current parameter constructed by the GUI. We set the RBSystem's current parameter to this before performing a
+	 * solve.
 	 */
 	// public static double[] mCurrentParamForGUI;
 
@@ -110,8 +106,7 @@ public class RBActivity extends Activity {
 	// public static int mSweepIndex;
 
 	/**
-	 * The name of the jar file (containing compiled files in .dex form) that we
-	 * download from the server.
+	 * The name of the jar file (containing compiled files in .dex form) that we download from the server.
 	 */
 	protected String jarFileName = "AffineFunctions.jar";
 	/**
@@ -135,7 +130,7 @@ public class RBActivity extends Activity {
 
 	public static FloatBuffer floatBuf;
 	public static ShortBuffer shortBuf;
-	
+
 	private Bundle bundle = null;
 
 	/** Called when the activity is first created. */
@@ -156,8 +151,8 @@ public class RBActivity extends Activity {
 		rb = new RBContainer();
 		cg = new ColorGenerator();
 		/**
-		 * Initialize the buffers here as they are stored with the RBActivity for low memory requirements
-		 * on subsequent visualizations.
+		 * Initialize the buffers here as they are stored with the RBActivity for low memory requirements on subsequent
+		 * visualizations.
 		 */
 		floatBuf = VisualizationData.createFloatBuffer();
 		shortBuf = VisualizationData.createShortBuffer();
@@ -335,7 +330,6 @@ public class RBActivity extends Activity {
 
 			break;
 
-		
 		default:
 			dialog = null;
 		}
@@ -349,11 +343,10 @@ public class RBActivity extends Activity {
 	}
 
 	/**
-	 * A Helper function to display the value of the currently selected
-	 * parameter in the TextView.
+	 * A Helper function to display the value of the currently selected parameter in the TextView.
 	 * 
 	 * @param current_param
-	 *            The parameter value to display
+	 * The parameter value to display
 	 */
 	// private void displayParamValue(int index, double current_param) {
 	// String current_param_str;
@@ -623,8 +616,7 @@ public class RBActivity extends Activity {
 		// int mDemoIndex;
 
 		/**
-		 * Constructor takes a handler and a String specifying the URL of the
-		 * Offline data directory
+		 * Constructor takes a handler and a String specifying the URL of the Offline data directory
 		 */
 		ModelLoader(Handler h) {
 			mHandler = h;
@@ -657,12 +649,11 @@ public class RBActivity extends Activity {
 		public void run() {
 			RBSystem s = rb.mRbSystem;
 			Parameters p = s.getParams();
-			
+
 			// Create the bundle and initialize it
-		    bundle = new Bundle();
-		    
-			
-		    switch (rb.getSystemType()) {
+			bundle = new Bundle();
+
+			switch (rb.getSystemType()) {
 
 			case LINEAR_STEADY:
 			case LINEAR_COMPLEX_STEADY:
@@ -719,17 +710,17 @@ public class RBActivity extends Activity {
 				bundle.putString("xLabel", "time");
 				bundle.putInt("n_time_steps", ((TransientRBSystem) s).n_plotting_steps);
 				bundle.putInt("n_outputs", s.getNumOutputs());
-				
+
 				for (int i = 0; i < s.getNumOutputs(); i++) {
 					bundle.putDoubleArray("output_data_" + i, s.RB_outputs_all_k[i]);
 					bundle.putDoubleArray("output_bound_" + i, s.RB_output_error_bounds_all_k[i]);
 				}
-				
+
 				// Add this bundle to the intent and plot
 				Intent intent = new Intent(RBActivity.this, OutputPlotterActivity.class);
 				intent.putExtras(bundle);
 				RBActivity.this.startActivity(intent);
-				
+
 				break;
 			default:
 				throw new RuntimeException("Invalid/unknown RB system type for solve: " + rb.getSystemType());

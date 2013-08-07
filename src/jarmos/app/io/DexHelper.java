@@ -1,6 +1,5 @@
 /**
- * Created on Aug 24, 2011 in Project JaRMoSA
- * Location: jarmos.app.io.DexHelper.java
+ * Created on Aug 24, 2011 in Project JaRMoSA Location: jarmos.app.io.DexHelper.java
  */
 package jarmos.app.io;
 
@@ -38,7 +37,8 @@ public class DexHelper {
 	}
 
 	/**
-	 * @param in An input stream pointing to a dex jarfile.
+	 * @param in
+	 * An input stream pointing to a dex jarfile.
 	 * @return A class loader that can load clases from the dex-jar file provided via the input stream
 	 */
 	public ClassLoader getDexClassLoader(InputStream in) {
@@ -46,7 +46,8 @@ public class DexHelper {
 		String file = "tmpdex" + System.currentTimeMillis() + ".jar";
 		Log.d("DexHelper", "Using temporary dex-jarfile " + file);
 		try {
-			if (lastFile != null) c.deleteFile(lastFile);
+			if (lastFile != null)
+				c.deleteFile(lastFile);
 
 			String[] files = c.fileList();
 			System.out.println(files);
@@ -58,13 +59,13 @@ public class DexHelper {
 				f.write(buffer, 0, len1);
 			}
 			in.close();
-			Log.d("DexHelper", "Finished preparing local copy of jar-file input stream"
-					+ file);
+			Log.d("DexHelper", "Finished preparing local copy of jar-file input stream" + file);
 		} catch (IOException e) {
 			Log.e("DexHelper", "I/O exception while preparing local copy of jar-file input stream", e);
 		}
 		lastFile = file;
-		return new DexClassLoader(Const.APP_DATA_DIRECTORY + "/" + file, Const.APP_DATA_DIRECTORY, null, c.getClassLoader());
+		return new DexClassLoader(Const.APP_DATA_DIRECTORY + "/" + file, Const.APP_DATA_DIRECTORY, null,
+				c.getClassLoader());
 	}
 
 	/**
@@ -72,8 +73,9 @@ public class DexHelper {
 	 */
 	@Override
 	protected void finalize() throws Throwable {
-		if (lastFile != null) c.deleteFile(lastFile);
+		if (lastFile != null)
+			c.deleteFile(lastFile);
 		super.finalize();
 	}
-	
+
 }

@@ -171,8 +171,7 @@ public class OutputPlotterActivity extends Activity {
 		double[][] RB_output_error_bounds_all_k = new double[n_outputs][];
 		for (int i = 0; i < n_outputs; i++) {
 			RB_outputs_all_k[i] = extras.getDoubleArray("output_data_" + i);
-			RB_output_error_bounds_all_k[i] = extras
-					.getDoubleArray("output_bound_" + i);
+			RB_output_error_bounds_all_k[i] = extras.getDoubleArray("output_bound_" + i);
 		}
 
 		// Create the UB and LB array based on
@@ -199,8 +198,7 @@ public class OutputPlotterActivity extends Activity {
 
 		LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 		mChartView = execute(this);
-		layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT));
+		layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 		// Add the legend
 		TableLayout legendLayout = (TableLayout) findViewById(R.id.legendLayout);
@@ -208,8 +206,7 @@ public class OutputPlotterActivity extends Activity {
 		int n_labels_per_row = 5; // The number of legend labels on each row
 
 		TableRow row = new TableRow(this); // Build an initial row
-		row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT));
+		row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 		int count = 0;
 		while (count < n_outputs) {
@@ -219,8 +216,7 @@ public class OutputPlotterActivity extends Activity {
 			else
 				legend_i.setText("output " + (count + 1) + "   ");
 			legend_i.setTextColor(mColors[count]);
-			legend_i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
-					LayoutParams.WRAP_CONTENT));
+			legend_i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
 			// set background color of the label
 			legend_i.setBackgroundColor(Color.WHITE);
@@ -234,23 +230,20 @@ public class OutputPlotterActivity extends Activity {
 
 			// Add the current row and construct a new row
 			if ((count + 1) % n_labels_per_row == 0) {
-				legendLayout.addView(row, new TableLayout.LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+				legendLayout.addView(row, new TableLayout.LayoutParams(LayoutParams.FILL_PARENT,
+						LayoutParams.WRAP_CONTENT));
 
 				row = new TableRow(this);
-				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
-						LayoutParams.FILL_PARENT));
+				row.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			}
 		}
-		legendLayout.addView(row, new TableLayout.LayoutParams(
-				LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+		legendLayout.addView(row, new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
 		Button visButton = (Button) findViewById(R.id.unsteadyVisButton);
 		visButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
-				Intent intent = new Intent(OutputPlotterActivity.this,
-						RBVisualization.class);
+				Intent intent = new Intent(OutputPlotterActivity.this, RBVisualization.class);
 				intent.putExtras(OutputPlotterActivity.this.getIntent().getExtras());
 				OutputPlotterActivity.this.startActivity(intent);
 			}
@@ -261,15 +254,14 @@ public class OutputPlotterActivity extends Activity {
 	 * Builds an XY multiple dataset using the provided values.
 	 * 
 	 * @param titles
-	 *            the series titles
+	 * the series titles
 	 * @param xValues
-	 *            the values for the X axis
+	 * the values for the X axis
 	 * @param yValues
-	 *            the values for the Y axis
+	 * the values for the Y axis
 	 * @return the XY multiple dataset
 	 */
-	protected XYMultipleSeriesDataset buildDataset(String[] titles,
-			List<double[]> xValues, List<double[]> yValues) {
+	protected XYMultipleSeriesDataset buildDataset(String[] titles, List<double[]> xValues, List<double[]> yValues) {
 		XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
 		int num_series = 3 * n_outputs;
 
@@ -311,9 +303,9 @@ public class OutputPlotterActivity extends Activity {
 	 * Builds an XY multiple series renderer.
 	 * 
 	 * @param colors
-	 *            the series rendering colors
+	 * the series rendering colors
 	 * @param styles
-	 *            the series point styles
+	 * the series point styles
 	 * @return the XY multiple series renderers
 	 */
 	protected XYMultipleSeriesRenderer buildRenderer() {
@@ -377,8 +369,7 @@ public class OutputPlotterActivity extends Activity {
 				break;
 			default:
 				Random numGen = new Random();
-				mColors[i] = Color.argb(255, numGen.nextInt(256),
-						numGen.nextInt(256), numGen.nextInt(256));
+				mColors[i] = Color.argb(255, numGen.nextInt(256), numGen.nextInt(256), numGen.nextInt(256));
 				r_out.setColor(mColors[i]);
 				r_LB.setColor(mColors[i]);
 				r_UB.setColor(mColors[i]);
@@ -406,28 +397,28 @@ public class OutputPlotterActivity extends Activity {
 	 * Sets a few of the series renderer settings.
 	 * 
 	 * @param renderer
-	 *            the renderer to set the properties to
+	 * the renderer to set the properties to
 	 * @param title
-	 *            the chart title
+	 * the chart title
 	 * @param xTitle
-	 *            the title for the X axis
+	 * the title for the X axis
 	 * @param yTitle
-	 *            the title for the Y axis
+	 * the title for the Y axis
 	 * @param xMin
-	 *            the minimum value on the X axis
+	 * the minimum value on the X axis
 	 * @param xMax
-	 *            the maximum value on the X axis
+	 * the maximum value on the X axis
 	 * @param yMin
-	 *            the minimum value on the Y axis
+	 * the minimum value on the Y axis
 	 * @param yMax
-	 *            the maximum value on the Y axis
+	 * the maximum value on the Y axis
 	 * @param axesColor
-	 *            the axes color
+	 * the axes color
 	 * @param labelsColor
-	 *            the labels color
+	 * the labels color
 	 */
-	protected void setChartSettings(XYMultipleSeriesRenderer renderer,
-			String title, String xLabel, double xMin, double xMax) {
+	protected void setChartSettings(XYMultipleSeriesRenderer renderer, String title, String xLabel, double xMin,
+			double xMax) {
 		renderer.setChartTitle(title);
 		renderer.setXTitle(xLabel);
 		renderer.setXAxisMin(xMin);
@@ -455,7 +446,7 @@ public class OutputPlotterActivity extends Activity {
 	 * Executes the chart demo.
 	 * 
 	 * @param context
-	 *            the context
+	 * the context
 	 * @return the built intent
 	 */
 	public GraphicalView execute(Context context) {
@@ -490,16 +481,15 @@ public class OutputPlotterActivity extends Activity {
 		boolean sweepInProgress = !(progressYVal == yMin);
 		labeled_series = sweepInProgress ? n_outputs * 3 : labeled_series;
 
-		SingleLabelChart theChart = new SingleLabelChart(buildDataset(labels,
-				t, output_values), renderer, labeled_series,
-				labeled_time_point, sweepInProgress);
+		SingleLabelChart theChart = new SingleLabelChart(buildDataset(labels, t, output_values), renderer,
+				labeled_series, labeled_time_point, sweepInProgress);
 		return new GraphicalView(context, theChart);
 	}
 
 	public boolean onTouchEvent(final MotionEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			float X = event.getX();
-			//float Y = event.getY();
+			// float Y = event.getY();
 			if (add_sweep_pts_toggle == 0)
 				add_sweep_point(X / mChartView.getWidth());
 			else if (add_sweep_pts_toggle == 1)
@@ -512,8 +502,7 @@ public class OutputPlotterActivity extends Activity {
 	}
 
 	/**
-	 * Adds a new point in non-time-dependent problems on where a touch event
-	 * has occurred
+	 * Adds a new point in non-time-dependent problems on where a touch event has occurred
 	 */
 	public void add_sweep_point(float xpos) {
 		if (sweepIndex > -1) {
@@ -525,13 +514,10 @@ public class OutputPlotterActivity extends Activity {
 			// by xMin and xMax)
 			// xcurrent is the x-value of the touch point
 			double xrange = (time_step_array[n_time_steps - 1] - time_step_array[0])
-					* ((xMax - xMin) / (extras.getDouble("xMax") - extras
-							.getDouble("xMin")));
+					* ((xMax - xMin) / (extras.getDouble("xMax") - extras.getDouble("xMin")));
 
-			double xcurrent = time_step_array[0]
-					+ (time_step_array[n_time_steps - 1] - time_step_array[0])
-					* (xMin - extras.getDouble("xMin"))
-					/ (extras.getDouble("xMax") - extras.getDouble("xMin"))
+			double xcurrent = time_step_array[0] + (time_step_array[n_time_steps - 1] - time_step_array[0])
+					* (xMin - extras.getDouble("xMin")) / (extras.getDouble("xMax") - extras.getDouble("xMin"))
 					+ xrange * (xpos);
 
 			// find time step value closest to y-axis
@@ -570,8 +556,7 @@ public class OutputPlotterActivity extends Activity {
 				LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 				mChartView = execute(this);
 				layout.removeAllViews();
-				layout.addView(mChartView, new LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 				// start separate thread to actually solve for sweep point and
 				// graph it
@@ -608,10 +593,8 @@ public class OutputPlotterActivity extends Activity {
 		// again adjusting for the current leftmost point, take either the
 		// previous time step or the one before it
 		if (closestTimestep > 0)
-			closestTimestep = time_step_array[closestTimestep + leftmostStep]
-					- xAxisValue > xAxisValue
-					- time_step_array[closestTimestep + leftmostStep - 1] ? closestTimestep - 1
-					: closestTimestep;
+			closestTimestep = time_step_array[closestTimestep + leftmostStep] - xAxisValue > xAxisValue
+					- time_step_array[closestTimestep + leftmostStep - 1] ? closestTimestep - 1 : closestTimestep;
 
 		// labeled_time_point is given to the constructor of SingleLabelChart to
 		// determine
@@ -624,8 +607,7 @@ public class OutputPlotterActivity extends Activity {
 		LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 		mChartView = execute(this);
 		layout.removeAllViews();
-		layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT));
+		layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 	}
 
@@ -644,27 +626,22 @@ public class OutputPlotterActivity extends Activity {
 			dialog.setCancelable(false);
 
 			// initialize text fields
-			TextView xMinLabel = (TextView) dialog
-					.findViewById(R.id.x_min_label);
+			TextView xMinLabel = (TextView) dialog.findViewById(R.id.x_min_label);
 			xMinLabel.setText("Minimum x-value");
 			xMinView = (EditText) dialog.findViewById(R.id.x_min_entry);
 			xMinView.setText(String.valueOf(xMin));
-			xMinView.setInputType(InputType.TYPE_CLASS_NUMBER
-					| InputType.TYPE_NUMBER_FLAG_DECIMAL
+			xMinView.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL
 					| InputType.TYPE_NUMBER_FLAG_SIGNED);
 
-			TextView xMaxLabel = (TextView) dialog
-					.findViewById(R.id.x_max_label);
+			TextView xMaxLabel = (TextView) dialog.findViewById(R.id.x_max_label);
 			xMaxLabel.setText("Maximum x-value");
 			xMaxView = (EditText) dialog.findViewById(R.id.x_max_entry);
 			xMaxView.setText(String.valueOf(xMax));
-			xMaxView.setInputType(InputType.TYPE_CLASS_NUMBER
-					| InputType.TYPE_NUMBER_FLAG_DECIMAL
+			xMaxView.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL
 					| InputType.TYPE_NUMBER_FLAG_SIGNED);
 
 			// button for resetting back to default xMin and xMax
-			Button resetButton = (Button) dialog
-					.findViewById(R.id.reset_default);
+			Button resetButton = (Button) dialog.findViewById(R.id.reset_default);
 			resetButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
@@ -674,8 +651,7 @@ public class OutputPlotterActivity extends Activity {
 					LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 					mChartView = execute(getApplicationContext());
 					layout.removeAllViews();
-					layout.addView(mChartView, new LayoutParams(
-							LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+					layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 					dismissDialog(AXES_DIALOG_ID);
 					removeDialog(AXES_DIALOG_ID);
@@ -713,8 +689,7 @@ public class OutputPlotterActivity extends Activity {
 					// make sure the given max value is greater than the given
 					// min, and that they are both
 					// within original values
-					if ((userMax > userMin)
-							&& (userMax <= extras.getDouble("xMax"))
+					if ((userMax > userMin) && (userMax <= extras.getDouble("xMax"))
 							&& (userMin >= extras.getDouble("xMin"))) {
 						// change local values
 						xMin = userMin;
@@ -726,13 +701,9 @@ public class OutputPlotterActivity extends Activity {
 						LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 						mChartView = execute(getApplicationContext());
 						layout.removeAllViews();
-						layout.addView(mChartView, new LayoutParams(
-								LayoutParams.FILL_PARENT,
-								LayoutParams.FILL_PARENT));
+						layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 					} else {
-						Toast.makeText(getApplicationContext(),
-								"Value out of bounds", Toast.LENGTH_SHORT)
-								.show();
+						Toast.makeText(getApplicationContext(), "Value out of bounds", Toast.LENGTH_SHORT).show();
 					}
 					dismissDialog(AXES_DIALOG_ID);
 					removeDialog(AXES_DIALOG_ID);
@@ -755,38 +726,31 @@ public class OutputPlotterActivity extends Activity {
 					plotBooleans[i] = true;
 			}
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(
-					OutputPlotterActivity.this);
+			AlertDialog.Builder builder = new AlertDialog.Builder(OutputPlotterActivity.this);
 			builder.setTitle("Enable/Disable Plots");
-			builder.setMultiChoiceItems(plotStrings, plotBooleans,
-					new DialogInterface.OnMultiChoiceClickListener() {
-						public void onClick(DialogInterface dialog, int item,
-								boolean checked) {
-							// reset colors appropriately
-							if (checked) {
-								plotRemoved[item] = false;
-							} else {
-								plotRemoved[item] = true;
-							}
-						}
-					});
-			builder.setNeutralButton("OK",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							// re-plot the graph
-							LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
-							mChartView = execute(getApplicationContext());
-							layout.removeAllViews();
-							layout.addView(mChartView, new LayoutParams(
-									LayoutParams.FILL_PARENT,
-									LayoutParams.FILL_PARENT));
-						}
-					});
+			builder.setMultiChoiceItems(plotStrings, plotBooleans, new DialogInterface.OnMultiChoiceClickListener() {
+				public void onClick(DialogInterface dialog, int item, boolean checked) {
+					// reset colors appropriately
+					if (checked) {
+						plotRemoved[item] = false;
+					} else {
+						plotRemoved[item] = true;
+					}
+				}
+			});
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
+					// re-plot the graph
+					LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
+					mChartView = execute(getApplicationContext());
+					layout.removeAllViews();
+					layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				}
+			});
 			dialog = builder.create();
 			break;
 		case LABEL_DIALOG_ID:
-			AlertDialog.Builder builder2 = new AlertDialog.Builder(
-					OutputPlotterActivity.this);
+			AlertDialog.Builder builder2 = new AlertDialog.Builder(OutputPlotterActivity.this);
 			if (sweepIndex > -1) {
 				String[] labelStrings = new String[3];
 				labelStrings[0] = "Add sweep points";
@@ -799,8 +763,7 @@ public class OutputPlotterActivity extends Activity {
 				builder2.setTitle("Set on touch behavior");
 				builder2.setMultiChoiceItems(labelStrings, labelBooleans,
 						new DialogInterface.OnMultiChoiceClickListener() {
-							public void onClick(DialogInterface dialog,
-									int item, boolean checked) {
+							public void onClick(DialogInterface dialog, int item, boolean checked) {
 								if (item == 0) {
 									add_sweep_pts_toggle = 0; // now on touch,
 																// sweep points
@@ -833,8 +796,7 @@ public class OutputPlotterActivity extends Activity {
 								LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 								mChartView = execute(getApplicationContext());
 								layout.removeAllViews();
-								layout.addView(mChartView, new LayoutParams(
-										LayoutParams.FILL_PARENT,
+								layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT,
 										LayoutParams.FILL_PARENT));
 								// have to remove dialog because this is not
 								// automatic for a multi-choice dialog
@@ -856,8 +818,7 @@ public class OutputPlotterActivity extends Activity {
 				builder2.setTitle("Set on touch behavior");
 				builder2.setMultiChoiceItems(labelStrings, labelBooleans,
 						new DialogInterface.OnMultiChoiceClickListener() {
-							public void onClick(DialogInterface dialog,
-									int item, boolean checked) {
+							public void onClick(DialogInterface dialog, int item, boolean checked) {
 								if (item == 1) {
 									add_sweep_pts_toggle = 2; // now on touch,
 																// sweep points
@@ -887,8 +848,7 @@ public class OutputPlotterActivity extends Activity {
 								LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 								mChartView = execute(getApplicationContext());
 								layout.removeAllViews();
-								layout.addView(mChartView, new LayoutParams(
-										LayoutParams.FILL_PARENT,
+								layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT,
 										LayoutParams.FILL_PARENT));
 								// have to remove dialog because this is not
 								// automatic for a multi-choice dialog
@@ -907,49 +867,41 @@ public class OutputPlotterActivity extends Activity {
 				plotStrings2[i] = "output " + (i + 1);
 			}
 
-			AlertDialog.Builder builder3 = new AlertDialog.Builder(
-					OutputPlotterActivity.this);
+			AlertDialog.Builder builder3 = new AlertDialog.Builder(OutputPlotterActivity.this);
 			builder3.setTitle("Show labels for which output?");
-			builder3.setItems(plotStrings2,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
+			builder3.setItems(plotStrings2, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
 
-							labeled_series = item;
+					labeled_series = item;
 
-							// re-plot the graph
-							LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
-							mChartView = execute(getApplicationContext());
-							layout.removeAllViews();
-							layout.addView(mChartView, new LayoutParams(
-									LayoutParams.FILL_PARENT,
-									LayoutParams.FILL_PARENT));
-						}
-					});
+					// re-plot the graph
+					LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
+					mChartView = execute(getApplicationContext());
+					layout.removeAllViews();
+					layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				}
+			});
 			dialog = builder3.create();
 			break;
 		case INFO_DIALOG_ID:
-			AlertDialog.Builder infoBuilder = new AlertDialog.Builder(
-					OutputPlotterActivity.this);
+			AlertDialog.Builder infoBuilder = new AlertDialog.Builder(OutputPlotterActivity.this);
 			infoBuilder.setTitle("Current Parameters");
 
-			String message = "Online N = " + RBActivity.mOnlineNForGui + "\n\n"
-					+ "Parameters: \n\n";
+			String message = "Online N = " + RBActivity.mOnlineNForGui + "\n\n" + "Parameters: \n\n";
 			double[] param = RBActivity.rb.mRbSystem.getParams().getCurrent();
 			for (int i = 0; i < param.length; i++) {
 				if (sweepIndex > -1 && Integer.parseInt(xLabel) == (i + 1))
 					message = message + (i + 1) + ": " + "Sweep\n";
 				else
-					message = message + (i + 1) + ": "
-							+ param[i] + "\n";
+					message = message + (i + 1) + ": " + param[i] + "\n";
 			}
 			message = message + "\nChange values?";
 			infoBuilder.setMessage(message);
-			infoBuilder.setPositiveButton("Yes",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							onBackPressed();
-						}
-					});
+			infoBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					onBackPressed();
+				}
+			});
 			infoBuilder.setNegativeButton("No", null);
 			dialog = infoBuilder.create();
 			break;
@@ -996,8 +948,7 @@ public class OutputPlotterActivity extends Activity {
 		public void run() {
 			int icount = 0;
 			double xcurrent = progressXVal;
-			while ((icount < n_time_steps)
-					&& (xcurrent > time_step_array[icount])) {
+			while ((icount < n_time_steps) && (xcurrent > time_step_array[icount])) {
 				icount++;
 			}
 			// xleft and xright are the numbers of the time steps immediately to
@@ -1011,8 +962,7 @@ public class OutputPlotterActivity extends Activity {
 			double max_time_step = 0;
 			int i_max_step = xleft + 1;
 			for (int i = xleft; i < xright; i++) {
-				double current_time_step = time_step_array[i + 1]
-						- time_step_array[i];
+				double current_time_step = time_step_array[i + 1] - time_step_array[i];
 				if (max_time_step < current_time_step) {
 					max_time_step = current_time_step;
 					i_max_step = i + 1;
@@ -1044,31 +994,21 @@ public class OutputPlotterActivity extends Activity {
 				for (int n = 0; n < n_outputs; n++) {
 					new_RB_outputs_all_k[n][i_max_step] = rb.mRbSystem.RB_outputs[n];
 					double OutputBound = rb.mRbSystem.RB_output_error_bounds[n];
-					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
-							- OutputBound;
-					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
-							+ OutputBound;
+					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step] - OutputBound;
+					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step] + OutputBound;
 				}
 			else
 				for (int n = 0; n < n_outputs / 2; n++) {
-					new_RB_outputs_all_k[n][i_max_step] = rb.mRbSystem
-							.get_RB_output(n, true);
-					double OutputBound = rb.mRbSystem
-							.get_RB_output_error_bound(n, true);
-					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
-							- OutputBound;
-					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step]
-							+ OutputBound;
+					new_RB_outputs_all_k[n][i_max_step] = rb.mRbSystem.get_RB_output(n, true);
+					double OutputBound = rb.mRbSystem.get_RB_output_error_bound(n, true);
+					new_RB_outputs_LB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step] - OutputBound;
+					new_RB_outputs_UB[n][i_max_step] = new_RB_outputs_all_k[n][i_max_step] + OutputBound;
 
-					new_RB_outputs_all_k[n + n_outputs / 2][i_max_step] = rb.mRbSystem
-							.get_RB_output(n, false);
-					OutputBound = rb.mRbSystem
-							.get_RB_output_error_bound(n, false);
-					new_RB_outputs_LB[n + n_outputs / 2][i_max_step] = new_RB_outputs_all_k[n
-							+ n_outputs / 2][i_max_step]
+					new_RB_outputs_all_k[n + n_outputs / 2][i_max_step] = rb.mRbSystem.get_RB_output(n, false);
+					OutputBound = rb.mRbSystem.get_RB_output_error_bound(n, false);
+					new_RB_outputs_LB[n + n_outputs / 2][i_max_step] = new_RB_outputs_all_k[n + n_outputs / 2][i_max_step]
 							- OutputBound;
-					new_RB_outputs_UB[n + n_outputs / 2][i_max_step] = new_RB_outputs_all_k[n
-							+ n_outputs / 2][i_max_step]
+					new_RB_outputs_UB[n + n_outputs / 2][i_max_step] = new_RB_outputs_all_k[n + n_outputs / 2][i_max_step]
 							+ OutputBound;
 				}
 
@@ -1095,8 +1035,7 @@ public class OutputPlotterActivity extends Activity {
 				LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 				mChartView = execute(getApplicationContext());
 				layout.removeAllViews();
-				layout.addView(mChartView, new LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			}
 		};
 	}
@@ -1117,8 +1056,7 @@ public class OutputPlotterActivity extends Activity {
 				LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 				mChartView = execute(getApplicationContext());
 				layout.removeAllViews();
-				layout.addView(mChartView, new LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 				return true;
 			}
@@ -1135,8 +1073,7 @@ public class OutputPlotterActivity extends Activity {
 				LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
 				mChartView = execute(getApplicationContext());
 				layout.removeAllViews();
-				layout.addView(mChartView, new LayoutParams(
-						LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+				layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 				return true;
 			}
 			default:
