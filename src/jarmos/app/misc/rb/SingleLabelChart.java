@@ -3,12 +3,12 @@
 //
 //    This file is part of rbAPPmit
 //
-//    rbAPPmit is free software: you can redistribute it and/or modify
+//    @ref rbappmit is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    rbAPPmit is distributed in the hope that it will be useful,
+//    @ref rbappmit is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -26,8 +26,15 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 
 /**
+ * A line chart implementation with a single label.
+ * 
  * SingleLabelChart is a subclass of LineChart identical to it, except it can
  * only show data label at a time.
+ * 
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework
+ * 
+ * @author Daniel Wirtz @date 2013-08-07
  */
 public class SingleLabelChart extends LineChart {
 

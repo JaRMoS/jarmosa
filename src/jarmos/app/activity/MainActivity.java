@@ -26,12 +26,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 /**
+ * This is the main activity class and entry point of the app
+ * 
  * @author Daniel Wirtz
  * @date Aug 23, 2011
  * 
- *       TODO: Check out-of-memory errors TODO: New orientation causes model to
- *       be re-loaded in RBActivity TODO: model list as single list with
- *       descriptions TODO: fix visualization black moments for rb models
+ * @TODO: Check out-of-memory errors
+ * @TODO: New orientation causes model to be re-loaded in RBActivity
+ * @TODO: model list as single list with descriptions
+ * @TODO: fix visualization black moments for rb models
  */
 public class MainActivity extends Activity {
 
@@ -71,10 +74,8 @@ public class MainActivity extends Activity {
 		Button btn = (Button) findViewById(R.id.btnAssets);
 		btn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				Intent intent = new Intent(MainActivity.this,
-						ModelListActivity.class);
-				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
-						"AssetModelManager");
+				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "AssetModelManager");
 				// intent.putExtras(getIntent().getExtras());
 				startActivityForResult(intent, 0);
 			}
@@ -88,10 +89,8 @@ public class MainActivity extends Activity {
 					return;
 				}
 
-				Intent intent = new Intent(MainActivity.this,
-						ModelListActivity.class);
-				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
-						"SDModelManager");
+				Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
+				intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "SDModelManager");
 				startActivityForResult(intent, 0);
 			}
 		});
@@ -116,15 +115,13 @@ public class MainActivity extends Activity {
 
 			// When the download button is pressed, we read the offline_data
 			// files from the specified URL
-			Button downloadButton = (Button) downloadDialog
-					.findViewById(R.id.downloadButton);
+			Button downloadButton = (Button) downloadDialog.findViewById(R.id.downloadButton);
 			downloadButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
 
 					// Get the directory_name from the EditText object
-					EditText urlEntry = (EditText) downloadDialog
-							.findViewById(R.id.urlEntry);
+					EditText urlEntry = (EditText) downloadDialog.findViewById(R.id.urlEntry);
 
 					URL u = null;
 					try {
@@ -132,18 +129,15 @@ public class MainActivity extends Activity {
 						// if (!url.endsWith("/")) url += "/";
 						u = new URL(urlEntry.getText().toString().trim());
 					} catch (MalformedURLException e) {
-						Toast.makeText(MainActivity.this, R.string.invalidURL,
-								Toast.LENGTH_SHORT);
+						Toast.makeText(MainActivity.this, R.string.invalidURL, Toast.LENGTH_SHORT);
 						return;
 					}
 
 					// Dismiss the URL specification dialog
 					dismissDialog(DOWNLOAD_DIALOG_ID);
 
-					Intent intent = new Intent(MainActivity.this,
-							ModelListActivity.class);
-					intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME,
-							"WebModelManager");
+					Intent intent = new Intent(MainActivity.this, ModelListActivity.class);
+					intent.putExtra(Const.EXTRA_MODELMANAGER_CLASSNAME, "WebModelManager");
 					intent.putExtra("URL", u);
 					intent.putExtra("modelCaching", true);
 
@@ -152,8 +146,7 @@ public class MainActivity extends Activity {
 			});
 
 			// Add listener to cancel download
-			Button quitDownloadButton = (Button) downloadDialog
-					.findViewById(R.id.quitDownloadButton);
+			Button quitDownloadButton = (Button) downloadDialog.findViewById(R.id.quitDownloadButton);
 			quitDownloadButton.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View view) {
@@ -165,49 +158,36 @@ public class MainActivity extends Activity {
 			dialog = downloadDialog;
 			break;
 		case NO_SD_ID:
-			builder.setMessage("Could not ensure rbappmit-SDcard folder.")
-					.setCancelable(false)
-					.setNeutralButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.dismiss();
-								}
-							});
+			builder.setMessage("Could not ensure rbappmit-SDcard folder.").setCancelable(false)
+					.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.dismiss();
+						}
+					});
 			dialog = builder.create();
 			break;
 		case OPTIONS_ID:
-			final SharedPreferences p = getSharedPreferences(
-					Const.PREFERENCES_FILENAME, 0);
-			boolean[] bools = new boolean[] {
-					p.getBoolean(Const.PREF_MODELCACHING, false),
+			final SharedPreferences p = getSharedPreferences(Const.PREFERENCES_FILENAME, 0);
+			boolean[] bools = new boolean[] { p.getBoolean(Const.PREF_MODELCACHING, false),
 					p.getBoolean(Const.PREF_MODELCACHING_OVERWRITE, false) };
 
 			builder = new AlertDialog.Builder(MainActivity.this);
 			builder.setTitle("JaRMoSA options");
-			builder.setMultiChoiceItems(new String[] { "Enable model caching",
-					"Overwrite existing models" }, bools,
+			builder.setMultiChoiceItems(new String[] { "Enable model caching", "Overwrite existing models" }, bools,
 					new DialogInterface.OnMultiChoiceClickListener() {
-						public void onClick(DialogInterface dialog, int item,
-								boolean checked) {
+						public void onClick(DialogInterface dialog, int item, boolean checked) {
 							if (item == 0) {
-								p.edit()
-										.putBoolean(Const.PREF_MODELCACHING,
-												checked).commit();
+								p.edit().putBoolean(Const.PREF_MODELCACHING, checked).commit();
 							} else {
-								p.edit()
-										.putBoolean(
-												Const.PREF_MODELCACHING_OVERWRITE,
-												checked).commit();
+								p.edit().putBoolean(Const.PREF_MODELCACHING_OVERWRITE, checked).commit();
 							}
 						}
 					});
-			builder.setNeutralButton("OK",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							dialog.dismiss();
-						}
-					});
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
+					dialog.dismiss();
+				}
+			});
 			dialog = builder.create();
 			break;
 		default:

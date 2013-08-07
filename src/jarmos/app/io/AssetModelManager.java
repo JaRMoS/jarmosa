@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package jarmos.app.io;
 
 import jarmos.app.Const;
@@ -14,12 +12,12 @@ import android.content.Context;
 import android.util.Log;
 
 /**
- * Central new class in the extended Version of the rbAppMIT. It wraps access to
- * any model's data and configuration files.
+ * Class to load models from application assets
  * 
- * Therefore, a Source (see the SRC_* constants)
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework.
  * 
- * @author dwirtz
+ * @author Daniel Wirtz @date 2013-08-07
  * 
  */
 public class AssetModelManager extends AModelManager {

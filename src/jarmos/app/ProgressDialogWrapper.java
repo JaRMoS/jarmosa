@@ -1,6 +1,3 @@
-/**
- * 
- */
 package jarmos.app;
 
 import jarmos.util.IProgressReporter;
@@ -10,7 +7,9 @@ import android.os.Handler;
 import android.os.Message;
 
 /**
- * @author CreaByte
+ * Helper class for progress dialogs on android platforms
+ * 
+ * @author Daniel Wirtz
  * 
  */
 public class ProgressDialogWrapper extends Handler implements IProgressReporter {

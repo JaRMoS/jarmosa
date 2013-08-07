@@ -1,26 +1,17 @@
-//    rbAPPmit: An Android front-end for the Certified Reduced Basis Method
-//    Copyright (C) 2010 David J. Knezevic and Phuong Huynh
-//
-//    This file is part of rbAPPmit
-//
-//    rbAPPmit is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    rbAPPmit is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
-
 package jarmos.app.misc.rb;
 
 import android.content.Context;
 import android.widget.Button;
 
+/**
+ * Utility class for a button that has an index attached
+ * 
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework
+ * 
+ * @author Daniel Wirtz @date 07.08.2013
+ *
+ */
 public class IndexedButton extends Button {
 
 	private int index;

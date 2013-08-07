@@ -15,6 +15,11 @@ import android.util.Log;
 import dalvik.system.DexClassLoader;
 
 /**
+ * Utility class for providing class loaders that load from dex-jarfiles
+ * 
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework
+ * 
  * @author Daniel Wirtz
  * @date Aug 24, 2011
  * 

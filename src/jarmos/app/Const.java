@@ -18,9 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 /**
- * Class that contains miscellaneous JaRMoS specific constants.
- * 
- * TODO: create a menu in the main activity that allows to set the preferences (e.g. model caching)
+ * Class that contains miscellaneous JaRMoS specific constants and static functions
  * 
  * @author Daniel Wirtz
  * @date Aug 24, 2011

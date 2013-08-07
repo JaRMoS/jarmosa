@@ -1,21 +1,3 @@
-//    rbAPPmit: An Android front-end for the Certified Reduced Basis Method
-//    Copyright (C) 2010 David J. Knezevic and Phuong Huynh
-//
-//    This file is part of rbAPPmit
-//
-//    rbAPPmit is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    rbAPPmit is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
-
 package jarmos.app.visual;
 
 import jarmos.visual.OpenGLBase.Orientation;
@@ -26,19 +8,20 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 
 /**
- * Changes made by:
+ * Open GL view implementation for display of and interaction with reduced model visualizations 
  * 
- * @author Daniel Wirtz
- * @date Aug 23, 2011
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework
  * 
  * Current settings for interacting with the view:
  * - Volume up/down: Switch visual feature
  * - Tap on graphic: toggle pause (if there is an animation)
  * - Search key: draw wireframe for 3D objects
  * - Press trackball: reset view
+ * 
+ * @author Daniel Wirtz @date Aug 23, 2011
  * 
  */
 public class GLView extends GLSurfaceView {

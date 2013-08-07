@@ -5,3 +5,4 @@
 *.log
 *.properties
 !project.properties
+lint.xml

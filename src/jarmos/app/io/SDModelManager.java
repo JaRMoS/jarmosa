@@ -1,6 +1,3 @@
-/**
- * 
- */
 package jarmos.app.io;
 
 import jarmos.app.Const;
@@ -14,7 +11,9 @@ import android.os.Environment;
 import android.util.Log;
 
 /**
- * @author Ernst
+ * Class for model loading from the local SD card of the mobile device running android
+ * 
+ * @author Daniel Wirtz @date 2013-08-07
  * 
  */
 public class SDModelManager extends FileModelManager {

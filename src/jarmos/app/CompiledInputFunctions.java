@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package jarmos.app;
 
 import java.io.File;
@@ -10,7 +8,11 @@ import kermor.dscomp.IInputFunctions;
 import dalvik.system.DexClassLoader;
 
 /**
- * @author Ernst
+ * Input functions implementation for loading inputs from compiled dex jarfiles.
+ * 
+ * @author Daniel Wirtz @date 2013-08-07
+ * 
+ * @todo Implement!
  *
  */
 public class CompiledInputFunctions implements IInputFunctions {

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package jarmos.app;
 
 import jarmos.Parameters;
@@ -29,7 +26,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * @author CreaByte
+ * A helper class for a collection of UI elements regarding model parameter display.
+ * 
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework
+ * 
+ * @author Daniel Wirtz
  * 
  */
 public class ParamBars {

@@ -1,21 +1,3 @@
-//    rbAPPmit: An Android front-end for the Certified Reduced Basis Method
-//    Copyright (C) 2010 David J. Knezevic and Phuong Huynh
-//
-//    This file is part of rbAPPmit
-//
-//    rbAPPmit is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    rbAPPmit is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with rbAPPmit.  If not, see <http://www.gnu.org/licenses/>. 
-
 package jarmos.app.activity;
 
 import jarmos.app.Const;
@@ -34,12 +16,13 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 /**
- * Changes by:
+ * An activity which displays URLs in a simple browser
+ * 
+ * This class has been taken from the original @ref rbappmit package and modified to fit into the current JaRMoS
+ * framework, this was the former SimpleBrowserActivity class in @ref rbappmit.
  * 
  * @author Daniel Wirtz
  * @date Aug 23, 2011
- * 
- *       This was the former SimpleBrowserActivity class in rbappmit.
  * 
  */
 public class BrowseActivity extends Activity {

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package jarmos.app.io;
 
 import jarmos.app.Const;
@@ -12,7 +9,9 @@ import android.content.Context;
 import android.util.Log;
 
 /**
- * @author dwirtz
+ * A model manager implementation that allows to load models from web locations
+ * 
+ * @author Daniel Wirtz @date 2013-08-07
  *
  */
 public class WebModelManager extends jarmos.io.WebModelManager {
