@@ -2,6 +2,7 @@
 /gen
 /bin
 .classpath
+.settings
 *.log
 *.properties
 !project.properties
