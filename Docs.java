@@ -1,7 +1,11 @@
 /**
  * @defgroup jarmosa JaRMoS App
- * @ingroup jkermor jrb jarmosbase
  * @short Classes and source files for the android app
+ * 
+ * \note This module depends on \ref jarmosbase, \ref jkermor and \ref jrb.
+ * 
+ * @section Developer info
+ * One part of the 
  * 
  * @{
  * @package jarmos.app

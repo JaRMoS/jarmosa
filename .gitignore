@@ -1,6 +1,7 @@
 /assets
 /gen
 /bin
+/libs
 .classpath
 *.log
 *.properties
