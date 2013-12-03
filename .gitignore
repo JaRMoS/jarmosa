@@ -3,6 +3,7 @@
 /bin
 /libs
 .classpath
+.settings
 *.log
 *.properties
 !project.properties
