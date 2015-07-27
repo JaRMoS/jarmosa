@@ -54,7 +54,7 @@
             unless="sdk.dir"
     />
 	
-	<loadproperties srcFile="build.properties" />
+	<!-- <loadproperties srcFile="build.properties" />-->
 
     <!--
         Import per project custom build rules if present at the root of the project.

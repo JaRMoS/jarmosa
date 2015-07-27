@@ -4,7 +4,7 @@
     <string name="welcome_str">Welcome to the JaRMoS App!</string>
     <string name="enterURLLabel">Enter the URL where the JaRMoS models reside:</string>
     <string name="downloadString">Retrieve list</string>
-    <string name="stgtURL">http://www.agh.ians.uni-stuttgart.de/jarmosa</string>
+    <string name="stgtURL">https://raw.githubusercontent.com/JaRMoS/models/master</string>
     
     <!-- old strings from rbappmit -->
     <string name="chooseNLabel">Set RB dimension</string>
